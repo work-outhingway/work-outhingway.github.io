@@ -5,7 +5,7 @@
 <meta name="description" content="骨144種・筋239種の3D解剖アトラス。骨と筋肉をタップで名前表示、層をはがして深層筋まで見られ、関節を動かすと縮む筋・伸びる筋が色でわかります。ブラウザで無料で試せます。">
 <link rel="canonical" href="https://work-outhingway.github.io/atlas.html">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="筋肉ラボ">
+<meta property="og:site_name" content="筋骨格アトラス">
 <meta property="og:title" content="筋骨格アトラス|骨と筋肉を3Dで動かして学ぶ解剖図鑑">
 <meta property="og:description" content="骨144種・筋239種の3D解剖アトラス。骨と筋肉をタップで名前表示、層をはがして深層筋まで見られ、関節を動かすと縮む筋・伸びる筋が色でわかります。ブラウザで無料で試せます。">
 <meta property="og:url" content="https://work-outhingway.github.io/atlas.html">
@@ -28,7 +28,7 @@
   .adbox:has(ins[data-ad-status="unfilled"]) { display: none; }
 </style>
 <script>var KINLAB_BUY = {"atlas":"https://buy.stripe.com/6oUaEXdhv2a60da3rT73G02","training":"https://buy.stripe.com/aFa4gz5P32a63pm3rT73G03"};</script>
-<title>筋骨格アトラス|骨と筋肉を3Dで動かして学ぶ解剖図鑑 | 筋肉ラボ</title>
+<title>筋骨格アトラス|骨と筋肉を3Dで動かして学ぶ解剖図鑑</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
@@ -219,6 +219,8 @@
   .exload { margin: 6px 0 0; font-size: 12.5px; }
   .kgrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; font-size: 12.5px; font-weight: 700; color: var(--ink-2); }
   .kgrow .seg button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+  #ex-vars .kgrow span { flex: 1; min-width: 0; }
+  .varnote { margin: 6px 0 0; font-size: 12px; color: var(--ink-2); line-height: 1.5; }
   .phase { margin-top: 10px; }
   .phase .ptext { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; }
   .phase .ptext b { font-weight: 700; }
@@ -250,6 +252,10 @@
   .legend .scale { display: flex; justify-content: space-between; font-size: 11.5px; font-weight: 700; margin-top: 3px; }
   .legend .scale span:first-child { color: var(--stretch); }
   .legend .scale span:last-child { color: var(--contract); }
+  .legend .colorsw { pointer-events: auto; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 6px; border: 1px solid var(--line); background: var(--panel); border-radius: 99px; padding: 4px 10px; font: inherit; font-size: 12px; font-weight: 700; color: var(--ink); cursor: pointer; }
+  .legend .colorsw i { width: 10px; height: 10px; border-radius: 50%; background: linear-gradient(90deg, var(--stretch), var(--contract)); }
+  .legend .colorsw[aria-pressed="false"] i { background: var(--line); }
+  .legend.nocolor .bar, .legend.nocolor .scale, .legend.nocolor .why { display: none; }
   .legend p { margin: 3px 0 0; font-size: 10.5px; color: var(--ink-2); line-height: 1.4; }
   .gl-fail { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; padding: 16px; text-align: center; color: var(--ink-2); }
 
@@ -275,8 +281,7 @@
   .sheet.collapsed .panels { display: none; }
 
   .chips { display: flex; gap: 6px; flex-wrap: wrap; }
-  .presets { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 8px; margin: 0 -16px; padding-inline: 16px; scrollbar-width: none; }
-  .presets::-webkit-scrollbar { display: none; }
+  .presets { flex-wrap: wrap; padding-bottom: 8px; } /* 横スクロールはマウスでは動かせず、端のボタンが押せなかったので折り返す */
   .chip { flex: none; border: 1px solid var(--line); background: var(--chip); border-radius: 99px; padding: 6px 12px; font-size: 13px; font-weight: 500; white-space: nowrap; }
   .chip:hover { border-color: var(--ink-2); }
 
@@ -368,7 +373,7 @@
   <main class="stage" id="stage">
     <canvas id="gl" role="img" aria-label="3Dの人体モデル。ドラッグで回転、ピンチで拡大、骨や筋をタップすると名前が表示されます"></canvas>
     <header class="top">
-      <div class="brand"><a class="homelink" href="./">← 筋肉ラボ</a>
+      <div class="brand"><a class="homelink" href="./">← トップ</a>
         <strong>筋骨格アトラス</strong>
         <span id="count">骨と筋</span>
       </div>
@@ -416,6 +421,7 @@
       <p class="note" id="i-note" hidden></p>
     </section>
     <div class="legend" aria-hidden="false">
+      <button type="button" class="colorsw" id="colorsw" aria-pressed="true"><i></i><span>色で表示 オン</span></button>
       <div class="bar"></div>
       <div class="scale"><span>最大伸長</span><span class="mid">0</span><span>最大収縮</span></div>
       <p class="why">色の濃さは、その筋が関節の動きで縮む(伸びる)最大を100とした割合です。</p>
@@ -475,6 +481,7 @@
           <p class="exaim" id="ex-aim"></p>
           <p class="exload" id="ex-load"></p>
           <div class="kgrow" id="ex-kgrow"><span>重りの重さ</span><div class="seg" id="ex-kgs" role="group" aria-label="重りの重さ"></div></div>
+          <div id="ex-vars" hidden></div>
           <div class="phase">
             <div class="ptext"><b id="ex-phase"></b><span id="ex-phase-sub"></span></div>
             <input type="range" id="ex-pos" min="0" max="100" step="1" value="0" aria-label="動きの位置">
@@ -492,7 +499,7 @@
           <p class="exnote">重りと体の重さが、手(握る)→手首→肘→肩→体幹→股関節→膝→足首→床と、体全体を順に伝わるようにつり合いを計算し、その力を各関節をまたぐ筋に、筋の強さ(文献の最大筋力。脚の筋は腕の数倍強い)とてこの長さに応じて分けた推定です。筋は縮みきるほど力を出しにくくなる(力-長さ関係)ので、縮んだ位置では同じ重さでも色が濃くなります。体重60kg、ゆっくり動かすとき(勢いを使わない)の値で、実際の筋電図とは異なることがあります。</p>
         </div>
       </section>
-      <p class="credit">3Dモデル: <a href="https://www.z-anatomy.com/" target="_blank" rel="noopener">Z-Anatomy</a>(Gauthier Kervyn ほか)。元データは <a href="https://lifesciencedb.jp/bp3d/" target="_blank" rel="noopener">BodyParts3D</a>(© ライフサイエンス統合データベースセンター, CC BY-SA 2.1 JP)。<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a> のもとで、メッシュの削減・圧縮、部位の選別、層の分類、関節に合わせた変形を加えて使用しています。このページに含まれる改変済みの3Dデータも CC BY-SA 4.0 で提供します。 <a href="./">筋肉ラボ トップ</a> · <a href="privacy.html">プライバシーポリシー</a></p>
+      <p class="credit">3Dモデル: <a href="https://www.z-anatomy.com/" target="_blank" rel="noopener">Z-Anatomy</a>(Gauthier Kervyn ほか)。元データは <a href="https://lifesciencedb.jp/bp3d/" target="_blank" rel="noopener">BodyParts3D</a>(© ライフサイエンス統合データベースセンター, CC BY-SA 2.1 JP)。<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a> のもとで、メッシュの削減・圧縮、部位の選別、層の分類、関節に合わせた変形を加えて使用しています。このページに含まれる改変済みの3Dデータも CC BY-SA 4.0 で提供します。 <a href="./">トップ</a> · <a href="privacy.html">プライバシーポリシー</a></p>
     </div>
   <div class="adbox" aria-label="広告"><span>広告</span><ins class="adsbygoogle adslot" data-ad-client="ca-pub-4133981960298039" data-ad-slot="4847092361"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></div>
 </aside>
@@ -7410,6 +7417,16 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   let boundsDirty = false;
   const BULGE = 1.3; // 縮んだときの膨らみの強さ(体積が変わらないとした太さの変化に掛ける)
   const _inv = new THREE.Matrix4();
+  // 色で表示のオン・オフ(オフでは筋をふだんの色のまま動かす)
+  let colorOn = true;
+  $('#colorsw').addEventListener('click', () => {
+    colorOn = !colorOn;
+    const b = $('#colorsw');
+    b.setAttribute('aria-pressed', String(colorOn));
+    b.querySelector('span').textContent = '色で表示 ' + (colorOn ? 'オン' : 'オフ');
+    document.querySelector('.legend').classList.toggle('nocolor', !colorOn);
+    poseDirty = true;
+  });
   function deform() {
     const E = segMats.map((m) => m.elements);
     const IE = segMats.map((m) => _inv.copy(m).invert().elements.slice());
@@ -7508,7 +7525,8 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       }
       P.needsUpdate = true;
       if (N) N.needsUpdate = true;
-      if (MODE === 'training') actColor(m.material.color, u.layerColor, (u.act || 0) / ACT_FULL);
+      if (!colorOn) m.material.color.copy(u.layerColor);
+      else if (MODE === 'training') actColor(m.material.color, u.layerColor, (u.act || 0) / ACT_FULL);
       else rampColor(m.material.color, u.layerColor, s, u.pot);
     }
     boundsDirty = true;
@@ -7750,7 +7768,9 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   const BAR_BACK = { shoulder: 35, shoulderAbd: 21, shoulderRot: 78, elbow: 129 };
   const PALMS = ['palm.l', 'palm.r'];
   const TRAININGS = [
-    { name: 'スクワット', hand: { grip: 1, pron: 90 }, aim: 'おもに大腿四頭筋・大殿筋・内転筋群', g: 'leg', prop: 'barbell', load: 'バーベル{kg}を肩の後ろに担ぐ。重さは真下にかかり、足の裏で床が支える',
+    { name: 'スクワット', vars: [
+        { label: 'しゃがみ方', opts: [['膝を前に', { start: { b: { hip: 95, knee: 125, ankle: 34 } } }, '膝を前に出して上体を立てると、太もも前(大腿四頭筋)の割合が増えます。'], ['ふつう', {}], ['お尻を後ろに', { start: { b: { hip: 118, knee: 100, ankle: 18 } } }, 'お尻を後ろに引いて上体を倒すと、お尻(大殿筋)・もも裏・背中の割合が増えます。']], def: 1 },
+        { label: '足幅', opts: [['ふつう', {}], ['広く', { add: { b: { hipAbd: 18, hipRot: 25 } } }, '足幅を広げてつま先を外に向けると、内もも(内転筋群)とお尻の割合が増えます。']] }], hand: { grip: 1, pron: 90 }, aim: 'おもに大腿四頭筋・大殿筋・内転筋群', g: 'leg', prop: 'barbell', load: 'バーベル{kg}を肩の後ろに担ぐ。重さは真下にかかり、足の裏で床が支える',
       loads: [{ pts: ['bar'] }], kg: 40, kgs: [0, 20, 40, 60], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['arm'],
       start: { b: { hip: 105, knee: 115, ankle: 28, ...BAR_BACK }, a: { trunk: 12 } }, end: { b: { ...BAR_BACK } },
       ends: ['しゃがんだ位置', '立った位置'], verbs: ['立ち上がる', 'しゃがむ'] },
@@ -7761,7 +7781,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { name: 'ルーマニアンデッドリフト', hand: { grip: 1, pron: 180 }, aim: 'おもにハムストリングス・大殿筋・脊柱起立筋', g: 'leg', prop: 'barbell', load: 'バーベル{kg}を手に下げる。腕は真下に垂れ、重さは手にかかる',
       loads: [{ pts: GRIPS }], kg: 40, kgs: [0, 20, 40, 60], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'], soft: ['knee'],
       start: { b: { hip: 80, knee: 15, shoulder: 65 } }, end: {}, ends: ['前に倒した位置', '立った位置'], verbs: ['体を起こす', '前に倒す'] },
-    { name: 'ヒップリフト', hand: { grip: 0, pron: 180 }, aim: 'おもに大殿筋・ハムストリングス', g: 'leg', prop: 'plate', load: 'あお向けで膝を立て、お尻を持ち上げる。床が背中と足の裏を支える(重り{kg}は骨盤の上)',
+    { name: 'ヒップリフト', vars: [{ label: '足の位置', opts: [['お尻に近く', { start: { b: { knee: 130 } }, end: { b: { knee: 110 } } }, '足をお尻に近づけると、もも裏(ハムストリングス)がゆるんで働きが減ります。'], ['ふつう', {}], ['遠く', { start: { b: { knee: 80 } }, end: { b: { knee: 45 } } }, '足を遠くに置くと、もも裏(ハムストリングス)の割合が増えます。']], def: 1 }], hand: { grip: 0, pron: 180 }, aim: 'おもに大殿筋・ハムストリングス', g: 'leg', prop: 'plate', load: 'あお向けで膝を立て、お尻を持ち上げる。床が背中と足の裏を支える(重り{kg}は骨盤の上)',
       loads: [{ pts: ['hips'] }], kg: 0, kgs: [0, 20, 40], orient: { level: ['back', 'heel.r'], range: [-150, -20] }, rhythm: false, rest: ['arm'],
       supports: [{ pts: ['back'], floor: true }, { pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }],
       start: { b: { hip: 60, knee: 110 } }, end: { b: { hip: 0, knee: 85 } }, ends: ['お尻を下ろした位置', '上げた位置'], verbs: ['お尻を上げる', '下ろす'] },
@@ -7771,7 +7791,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { name: 'レッグレイズ', hand: { grip: 0, pron: 180 }, aim: 'おもに腸腰筋・大腿直筋・腹直筋', g: 'leg', load: 'あお向けで脚を上げる。脚の重さが股関節を伸ばす向きにかかり、床が背中とお尻を支える',
       orient: { pitch: -90 }, supports: [{ pts: ['back'], floor: true }, { pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }], rhythm: false, rest: ['arm'],
       start: { b: { hip: 8 } }, end: { b: { hip: 90 } }, ends: ['脚を下ろした位置', '上げた位置'], verbs: ['脚を上げる', '下ろす'] },
-    { name: '腕立て伏せ', hand: { grip: 0, pron: 180 }, aim: 'おもに大胸筋・三角筋前部・上腕三頭筋', g: 'arm', load: '体を板のように伸ばし、手のひらを床につけ(指先は前)、手とつま先で支える。体重が下向きにかかる',
+    { name: '腕立て伏せ', vars: [{ label: '手幅', opts: [['狭く', { start: { b: { shoulderAbd: 12 } } }, '脇をしめると大胸筋の割合が減り、三角筋と上腕三頭筋が中心になります。'], ['ふつう', {}], ['広く', { start: { b: { shoulderAbd: 70 } } }, '肘を横に張ると、大胸筋(とくに上部)の割合が増えます。']], def: 1 }], hand: { grip: 0, pron: 180 }, aim: 'おもに大胸筋・三角筋前部・上腕三頭筋', g: 'arm', load: '体を板のように伸ばし、手のひらを床につけ(指先は前)、手とつま先で支える。体重が下向きにかかる',
       orient: { level: ['palm.r', 'toe.r'], range: [20, 90] }, supports: [{ pts: PALMS, floor: true }, { pts: ['toe.l', 'toe.r'], floor: true }],
       start: { b: { shoulder: -25, shoulderAbd: 40, elbow: 115, wrist: 90, ankle: -30 } }, end: { b: { shoulder: 80, shoulderAbd: 10, elbow: 0, wrist: 90, ankle: -30 } },
       ends: ['胸を下ろした位置', '押し上げた位置'], verbs: ['押し上げる', '下ろす'] },
@@ -7782,16 +7802,18 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       loads: [{ pts: GRIPS, dir: [0, 1, 0] }], kg: 35, kgs: [20, 35, 50], orient: { pitch: 0 }, place: { pt: 'butt', y: 0.5 },
       supports: [{ pts: ['butt'] }, { pts: ['thigh.l', 'thigh.r'], down: true }, { pts: ['heel.l', 'heel.r'], floor: true }],
       start: { b: { hip: 90, knee: 90, shoulder: 165, shoulderAbd: 20, elbow: 10 } }, end: { b: { hip: 90, knee: 90, shoulder: 40, shoulderAbd: 20, elbow: 140 } }, ends: ['腕を上げた位置', '引き下ろした位置'], verbs: ['引き下ろす', '戻す'] },
-    { name: 'ベントオーバーロウ', hand: { grip: 1, pron: 180 }, aim: 'おもに広背筋・菱形筋・僧帽筋中部・三角筋後部', g: 'arm', prop: 'barbell', load: '前に倒した姿勢でバーベル{kg}を引き上げる。重さは真下にかかる',
+    { name: 'ベントオーバーロウ', vars: [{ label: '肩甲骨', opts: [['寄せる', {}, '引き切ったときに肩甲骨を寄せると、大円筋と三角筋後部が強く働きます。'], ['寄せない', { end: { b: { scapPro: 6 } } }, '肩甲骨を寄せずに腕だけで引くと、大円筋と三角筋後部の働きが小さくなります。']] }], hand: { grip: 1, pron: 180 }, aim: 'おもに広背筋・菱形筋・僧帽筋中部・三角筋後部', g: 'arm', prop: 'barbell', load: '前に倒した姿勢でバーベル{kg}を引き上げる。重さは真下にかかる',
       loads: [{ pts: GRIPS }], kg: 30, kgs: [0, 20, 30, 40], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, soft: ['shoulderAbd'],
       start: { b: { hip: 80, knee: 20, shoulder: 60, scapPro: 15, scapUp: 10 } }, end: { b: { hip: 80, knee: 20, shoulder: -20, elbow: 100, scapPro: -14 } },
       ends: ['腕を下げた位置', '引いた位置'], verbs: ['引き上げる', '下ろす'] },
-    { name: 'ベンチプレス', hand: { grip: 1, pron: 180 }, aim: 'おもに大胸筋・三角筋前部・上腕三頭筋', g: 'arm', prop: 'bench', load: 'ベンチにあお向けでバーベル{kg}を押し上げる。重さは真下(胸の方向)にかかる',
+    { name: 'ベンチプレス', vars: [
+        { label: '肩甲骨', opts: [['寄せる', { keep: true, add: { b: { scapPro: -12, scapElev: -5 } } }, '肩甲骨を寄せて下げると、上腕三頭筋の負担が減り、大胸筋(とくに上部)の割合が増えます。土台として菱形筋も働きます。'], ['ふつう', {}], ['開く', { keep: true, add: { b: { scapPro: 12 } } }, '肩甲骨を開いたままだと、肩甲骨を支える肩甲挙筋や、上腕三頭筋の負担が増えます。']], def: 1 },
+        { label: '手幅', opts: [['狭く', { start: { b: { shoulderAbd: 25 } } }, '手幅を狭く(脇をしめる)と、上腕三頭筋と三角筋前部が中心になります。'], ['ふつう', {}], ['広く', { start: { b: { shoulderAbd: 85 } } }, '手幅を広くすると、大胸筋の割合が増えます。']], def: 1 }], hand: { grip: 1, pron: 180 }, aim: 'おもに大胸筋・三角筋前部・上腕三頭筋', g: 'arm', prop: 'bench', load: 'ベンチにあお向けでバーベル{kg}を押し上げる。重さは真下(胸の方向)にかかる',
       loads: [{ pts: GRIPS }], kg: 40, kgs: [0, 20, 40, 60], orient: { pitch: -90 }, place: { pt: 'back', y: 0.45 },
       supports: [{ pts: ['back'] }, { pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }],
       start: { b: { shoulderAbd: 70, elbow: 95, hip: 10, knee: 85 } }, end: { b: { shoulder: 90, shoulderAbd: 10, elbow: 0, hip: 10, knee: 85 } },
       ends: ['胸に下ろした位置', '押し上げた位置'], verbs: ['押し上げる', '下ろす'] },
-    { name: 'ショルダープレス', hand: { grip: 1, pron: 90 }, aim: 'おもに三角筋・上腕三頭筋・僧帽筋', g: 'arm', prop: 'dumbbell', load: 'ダンベル{kg}を頭の上へ押し上げる。重さは真下にかかる',
+    { name: 'ショルダープレス', vars: [{ label: '肩', opts: [['すくめる', { keep: true, add: { b: { scapElev: 8 } } }, '肩をすくめて押すと、僧帽筋上部と肩甲挙筋も一緒に働きます。'], ['ふつう', {}]], def: 1 }], hand: { grip: 1, pron: 90 }, aim: 'おもに三角筋・上腕三頭筋・僧帽筋', g: 'arm', prop: 'dumbbell', load: 'ダンベル{kg}を頭の上へ押し上げる。重さは真下にかかる',
       loads: [{ pts: GRIPS, each: true }], kg: 8, kgs: [0, 4, 8, 12], orient: { pitch: 0 }, supports: [FEET],
       start: { b: { shoulderAbd: 80, shoulderRot: 80, elbow: 100 } }, end: { b: { shoulderAbd: 165, shoulderRot: 80, elbow: 10 } }, ends: ['肩の高さ', '押し上げた位置'], verbs: ['押し上げる', '下ろす'] },
     { name: 'サイドレイズ', hand: { grip: 1, pron: 90 }, aim: 'おもに三角筋中部・棘上筋', g: 'arm', prop: 'dumbbell', load: 'ダンベル{kg}を横へ上げる。重さは真下にかかるので、腕が水平のとき一番重い',
@@ -7809,7 +7831,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { name: 'シュラッグ', hand: { grip: 1, pron: 90 }, aim: 'おもに僧帽筋上部・肩甲挙筋', g: 'scap', prop: 'dumbbell', load: 'ダンベル{kg}を下げたまま肩をすくめる。重さは肩甲骨を下へ引く',
       loads: [{ pts: GRIPS, each: true }], kg: 16, kgs: [0, 8, 16, 24], orient: { pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'],
       start: {}, end: { b: { scapElev: 22 } }, ends: ['下げた位置', 'すくめた位置'], verbs: ['すくめる', '下ろす'] },
-    { name: 'クランチ', hand: { grip: 0, pron: 90 }, aim: 'おもに腹直筋・腹斜筋', g: 'body', load: 'あお向けで上体を丸める。上体の重さが体幹を反らす向きにかかり、床がお尻と足を支える',
+    { name: 'クランチ', vars: [{ label: '膝', opts: [['立てる', {}], ['伸ばす', { start: { b: { hip: 0, knee: 0 } }, end: { b: { hip: 0, knee: 0 } } }, '脚を伸ばすと、腸腰筋が骨盤を引っぱる形になります。']] }], hand: { grip: 0, pron: 90 }, aim: 'おもに腹直筋・腹斜筋', g: 'body', load: 'あお向けで上体を丸める。上体の重さが体幹を反らす向きにかかり、床がお尻と足を支える',
       orient: { pitch: -90 }, supports: [{ pts: ['back'], floor: true }, { pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }], rhythm: false, rest: ['arm'],
       start: { b: { hip: 60, knee: 100 } }, end: { a: { trunk: 40 }, b: { hip: 60, knee: 100 } }, ends: ['寝た位置', '丸めた位置'], verbs: ['丸める', '戻す'] },
     { name: 'バックエクステンション', hand: { grip: 0, pron: 90 }, aim: 'おもに脊柱起立筋・大殿筋・ハムストリングス', g: 'body', prop: 'pad', load: '45度の台で太ももを支え、足首をパッドで押さえて上体を起こす',
@@ -7823,17 +7845,90 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     Object.assign(to.r, p.b || {}, p.r || {});
     return to;
   }
+  // bake: 肩甲上腕リズムをここで入れてから add(やり方の違いの差分)を足す(rhythm: false にして、あとで上書きされないようにする)
   const trInterp = (def) => {
-    const A = exAngles(def.start), B = exAngles(def.end);
+    const A = exAngles(def.start), B = exAngles(def.end), add = def.add || {};
     return (k) => {
       const o = zeroAngles();
       JOINTS.forEach((j) => {
         if (j.side) for (const s of ['l', 'r']) o[s][j.id] = A[s][j.id] + (B[s][j.id] - A[s][j.id]) * k;
         else o[j.id] = A[j.id] + (B[j.id] - A[j.id]) * k;
       });
+      if (def.bake) for (const s of ['l', 'r']) Object.assign(o[s], RIG.rhythm(o[s]));
+      for (const [id, v] of Object.entries(add.a || {})) o[id] += v;
+      for (const s of ['l', 'r']) for (const [id, v] of Object.entries(add.b || {})) o[s][id] += v;
       return o;
     };
   };
+  // やり方の違い(def.vars)。選んだ組み合わせごとに運動の定義を作って使い回す
+  // opts: [名前, { add: 全体に足す角度, start/end: 端の姿勢に上書きする角度 }]
+  function varDef(base) {
+    if (!base.vars) return base;
+    const sel = base.sel || (base.sel = base.vars.map((v) => v.def || 0));
+    const key = sel.join(',');
+    base.vc = base.vc || {};
+    if (base.vc[key]) return base.vc[key];
+    if (sel.every((x, i) => !Object.keys(base.vars[i].opts[x][1]).length)) return (base.vc[key] = base);
+    const d = Object.assign({}, base, { base, add: { a: {}, b: {} }, start: JSON.parse(JSON.stringify(base.start)), end: JSON.parse(JSON.stringify(base.end)) });
+    if (base.rhythm !== false) { d.rhythm = false; d.bake = true; }
+    sel.forEach((x, i) => {
+      const p = base.vars[i].opts[x][1];
+      for (const g of ['a', 'b']) Object.assign(d.add[g], p.add && p.add[g]);
+      for (const e of ['start', 'end']) if (p[e]) for (const g of ['a', 'b']) if (p[e][g]) d[e][g] = Object.assign({}, d[e][g], p[e][g]);
+    });
+    if (sel.some((x, i) => base.vars[i].opts[x][1].keep)) d.interp = keepGrip(d);
+    return (base.vc[key] = d);
+  }
+  // keep: 肩甲骨だけを変えたとき、手(握り)の位置は元のやり方と同じ所に保つ(肩・肘の角度を合わせ直す)。
+  // 毎フレーム解くと重いので、NF 等分した点で解いておき、その間は直線でつなぐ
+  function keepGrip(d) {
+    const A0 = trInterp(d.base), A1 = trInterp(d);
+    const IDS = ['shoulder', 'shoulderAbd', 'elbow'];
+    const LIM = IDS.map((id) => JOINTS.find((j) => j.id === id));
+    const M = RIG.pose(JC, zeroAngles()), E = M.map((m) => m.elements);
+    const grips = (a) => {
+      const b = JSON.parse(JSON.stringify(a));
+      if (d.base.rhythm !== false && !d.bake) for (const s of ['l', 'r']) Object.assign(b[s], RIG.rhythm(b[s]));
+      RIG.pose(JC, b, M);
+      return { l: LOAD.at(E, LCTX.L.pt['grip.l']), r: LOAD.at(E, LCTX.L.pt['grip.r']) };
+    };
+    const NK = 16, samples = [];
+    for (let n = 0; n <= NK; n++) {
+      const k = n / NK, goal = grips(A0(k)), o = A1(k);
+      for (let it = 0; it < 8; it++) {
+        const g = grips(o), J = [];
+        IDS.forEach((id) => {
+          const p = JSON.parse(JSON.stringify(o));
+          for (const s of ['l', 'r']) p[s][id] += 1;
+          J.push(grips(p));
+        });
+        let err = 0;
+        for (const s of ['l', 'r']) {
+          // 3x3 の連立方程式(ずれ = Σ 角度の変化 × 1度あたりの動き)を最小二乗で解く
+          const r = [0, 1, 2].map((c) => goal[s][c] - g[s][c]);
+          err = Math.max(err, Math.hypot(...r));
+          const Jm = [0, 1, 2].map((c) => IDS.map((_, q) => J[q][s][c] - g[s][c]));
+          const JtJ = IDS.map((_, a) => IDS.map((_, b) => Jm.reduce((t, row) => t + row[a] * row[b], 0) + (a === b ? 1e-6 : 0)));
+          const Jtr = IDS.map((_, a) => Jm.reduce((t, row, c) => t + row[a] * r[c], 0));
+          const dx = solve3(JtJ, Jtr);
+          IDS.forEach((id, q) => { o[s][id] = Math.min(LIM[q].max, Math.max(LIM[q].min, o[s][id] + Math.max(-20, Math.min(20, dx[q])))); });
+        }
+        if (err < 1e-4) break;
+      }
+      samples.push(o);
+    }
+    return (k) => {
+      const x = Math.min(NK, Math.max(0, k * NK)), n = Math.min(NK - 1, Math.floor(x)), t = x - n, a = samples[n], b = samples[n + 1];
+      const o = JSON.parse(JSON.stringify(a));
+      for (const s of ['l', 'r']) for (const id of IDS) o[s][id] = a[s][id] + (b[s][id] - a[s][id]) * t;
+      return o;
+    };
+  }
+  function solve3(A, y) {
+    const det = (m) => m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+    const D = det(A) || 1e-12;
+    return [0, 1, 2].map((c) => det(A.map((row, i) => row.map((v, j) => (j === c ? y[i] : v)))) / D);
+  }
   const NF = 16; // 1回の動きを何等分して解くか
   let LCTX = null;
   let tr = null; // { def, kg, frames, interp, t, k, playing, top }
@@ -8256,17 +8351,18 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     showLock('lock-joint', 'atlas', '');
   }
 
-  function startTraining(def, btn, kg) {
+  function startTraining(base, btn, kg) {
     if (!JC || !LCTX) return;
     exBtns.forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
-    if (kg === undefined) kg = def.kg || 0;
-    const interp = trInterp(def);
+    if (kg === undefined) kg = base.kg || 0;
+    const def = varDef(base);
+    const interp = def.interp || trInterp(def);
     const frames = LOAD.solveExercise(LCTX, def, kg, NF, interp);
     placeFrames(def, frames);
     const peak = new Float64Array(muscleMeshes.length);
     for (const f of frames) f.act.forEach((v, i) => { if (v > peak[i]) peak[i] = v; });
     muscleMeshes.forEach((m, i) => { m.userData.actPeak = peak[i]; });
-    const keep = tr && tr.def === def ? tr.t : 0;
+    const keep = tr && (tr.def.base || tr.def) === base ? tr.t : 0;
     tr = { def, btn, kg, frames, interp, t: keep, k: 0, playing: true };
     setRhythmState(def.rhythm !== false);
     setHandState(def.hand || { grip: 0, pron: 90 });
@@ -8299,9 +8395,39 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       b.type = 'button';
       b.textContent = w ? kgLabel(def, w) : 'なし';
       b.setAttribute('aria-pressed', w === kg ? 'true' : 'false');
-      b.addEventListener('click', () => startTraining(def, btn, w));
+      b.addEventListener('click', () => startTraining(base, btn, w));
       ks.appendChild(b);
     });
+    const vr = $('#ex-vars');
+    vr.textContent = '';
+    (base.vars || []).forEach((v, i) => {
+      const row = document.createElement('div');
+      row.className = 'kgrow';
+      const lab = document.createElement('span');
+      lab.textContent = v.label;
+      const seg = document.createElement('div');
+      seg.className = 'seg';
+      seg.setAttribute('role', 'group');
+      seg.setAttribute('aria-label', v.label);
+      v.opts.forEach((o, j) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = o[0];
+        b.setAttribute('aria-pressed', base.sel[i] === j ? 'true' : 'false');
+        b.addEventListener('click', () => { base.sel[i] = j; startTraining(base, btn, kg); });
+        seg.appendChild(b);
+      });
+      row.append(lab, seg);
+      vr.appendChild(row);
+    });
+    const notes = (base.vars || []).map((v, i) => v.opts[base.sel[i]][2]).filter(Boolean);
+    if (notes.length) {
+      const p = document.createElement('p');
+      p.className = 'varnote';
+      p.textContent = notes.join(' ');
+      vr.appendChild(p);
+    }
+    vr.hidden = !base.vars;
     $('#ex-pos-a').textContent = def.ends[0];
     $('#ex-pos-b').textContent = def.ends[1];
     exPlay.textContent = '一時停止';
