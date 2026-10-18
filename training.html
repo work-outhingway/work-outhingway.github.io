@@ -350,7 +350,33 @@
   @media (prefers-reduced-motion: reduce) {
     .switch, .switch i { transition: none; }
   }
-  .loading { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; color: var(--ink-2); font-size: 13px; pointer-events: none; }
+  .loading { position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-2); font-size: 13px; pointer-events: none; text-align: center; padding: 16px; }
+  .loading[hidden] { display: none; }
+  .kun { overflow: visible; }
+  .kun-shadow { fill: var(--ink); opacity: 0.12; transform-origin: 100px 184px; animation: kunShadow 1.4s ease-in-out infinite; }
+  .kun-legs rect { fill: #f3e6dc; stroke: #c9b3a5; stroke-width: 1.5; }
+  .kun-tendon { fill: #f3e6dc; stroke: #c9b3a5; stroke-width: 1.5; }
+  .kun-belly { fill: #d8404c; stroke: #a92834; stroke-width: 2; }
+  .kun-fiber { fill: none; stroke: #ff8b93; stroke-width: 2; stroke-linecap: round; opacity: 0.55; }
+  .kun-cheek { fill: #ff9aa5; opacity: 0.8; }
+  .kun-eye, .kun-mouth { fill: none; stroke: #2a1416; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .kun-arm { stroke: #c23440; stroke-width: 9; stroke-linecap: round; }
+  .kun-bar { stroke: #34414b; stroke-width: 5; stroke-linecap: round; }
+  .kun-plate { fill: #34414b; }
+  .kun-sweat { fill: #6fb7ff; opacity: 0; animation: kunSweat 1.4s ease-in infinite; }
+  .kun-sweat.s2 { animation-delay: 0.7s; }
+  .kun-body { transform-origin: 100px 162px; animation: kunSquash 1.4s ease-in-out infinite; }
+  .kun-lift { animation: kunLift 1.4s ease-in-out infinite; }
+  @keyframes kunLift { 0%, 100% { transform: translateY(16px); } 50% { transform: translateY(-14px); } }
+  @keyframes kunSquash { 0%, 100% { transform: scale(1.06, 0.92); } 50% { transform: scale(0.97, 1.04); } }
+  @keyframes kunShadow { 0%, 100% { transform: scaleX(1.08); } 50% { transform: scaleX(0.9); } }
+  @keyframes kunSweat { 0% { opacity: 0; transform: translateY(-6px); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(26px); } }
+  .kun-title { margin: 6px 0 0; font-size: 15px; font-weight: 700; color: var(--ink); }
+  .kun-tip { margin: 0; min-height: 1.5em; }
+  .kun-track { position: relative; width: 160px; height: 4px; border-radius: 2px; background: var(--chip); overflow: hidden; margin-top: 8px; }
+  .kun-track i { position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: 2px; background: linear-gradient(90deg, var(--stretch), var(--contract)); animation: kunTrack 1.3s ease-in-out infinite; }
+  @keyframes kunTrack { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+  @media (prefers-reduced-motion: reduce) { .kun *, .kun-track i { animation: none !important; } }
   .credit { margin: 16px 0 0; font-size: 11px; line-height: 1.5; color: var(--ink-2); }
   .credit a { color: inherit; }
   .search { display: block; margin-top: 12px; }
@@ -427,7 +453,38 @@
       <p class="why">色の濃さは、その筋が関節の動きで縮む(伸びる)最大を100とした割合です。</p>
       <p>学習用のモデルです。長さの変化は概算で、医療行為には使えません。</p>
     </div>
-    <p class="loading" id="loading">3Dモデルを読み込んでいます…</p>
+    <div class="loading" id="loading" role="status">
+      <svg class="kun" viewBox="0 0 200 200" width="168" height="168" aria-hidden="true">
+        <ellipse class="kun-shadow" cx="100" cy="184" rx="42" ry="6"/>
+        <g class="kun-legs"><rect x="80" y="150" width="11" height="30" rx="5.5"/><rect x="109" y="150" width="11" height="30" rx="5.5"/></g>
+        <g class="kun-lift">
+          <path class="kun-arm" d="M70 112 L52 70"/><path class="kun-arm" d="M130 112 L148 70"/>
+          <path class="kun-bar" d="M26 66 H174"/>
+          <rect class="kun-plate" x="22" y="48" width="12" height="36" rx="3"/><rect class="kun-plate" x="166" y="48" width="12" height="36" rx="3"/>
+          <rect class="kun-plate" x="34" y="54" width="7" height="24" rx="2"/><rect class="kun-plate" x="159" y="54" width="7" height="24" rx="2"/>
+        </g>
+        <g class="kun-body">
+          <rect class="kun-tendon" x="93" y="42" width="14" height="16" rx="6"/>
+          <path class="kun-belly" d="M100 52 C142 60 150 128 100 160 C50 128 58 60 100 52 Z"/>
+          <path class="kun-fiber" d="M86 66 C76 92 78 122 92 146"/><path class="kun-fiber" d="M114 66 C124 92 122 122 108 146"/><path class="kun-fiber" d="M100 60 V152"/>
+          <circle class="kun-cheek" cx="80" cy="112" r="6"/><circle class="kun-cheek" cx="120" cy="112" r="6"/>
+          <path class="kun-eye" d="M82 98 L90 102 L82 106"/><path class="kun-eye" d="M118 98 L110 102 L118 106"/>
+          <path class="kun-mouth" d="M93 118 Q100 112 107 118"/>
+        </g>
+        <path class="kun-sweat" d="M146 90 C150 97 152 101 149 104 C146 107 141 104 142 100 C143 97 145 94 146 90 Z"/>
+        <path class="kun-sweat s2" d="M56 96 C59 101 61 104 59 106 C57 108 53 106 54 103 C55 101 56 99 56 96 Z"/>
+      </svg>
+      <p class="kun-title">筋肉くんが準備運動中…</p>
+      <p class="kun-tip" id="kunTip">骨144本を並べています</p>
+      <span class="kun-track" aria-hidden="true"><i></i></span>
+    </div>
+    <script>
+      (function () {
+        var tips = ['骨144本を並べています', '筋239本を骨に貼りつけています', '関節に油をさしています', 'ダンベルを用意しています', 'ストレッチをしています', 'もうすぐ動けます'];
+        var i = 0, el = document.getElementById('kunTip');
+        var t = setInterval(function () { if (!el.isConnected || document.getElementById('loading').hidden) return clearInterval(t); i = (i + 1) % tips.length; el.textContent = tips[i]; }, 1800);
+      })();
+    </script>
     <p class="gl-fail" id="glFail" hidden>この環境では3D表示が使えません。別のブラウザで開いてください。</p>
   </main>
 

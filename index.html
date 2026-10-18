@@ -27,11 +27,30 @@
 
 </head>
 <body>
+<div class="intro" id="intro" aria-hidden="true">
+  <script>try{if(sessionStorage.getItem('kinlab-intro')||matchMedia('(prefers-reduced-motion: reduce)').matches)document.getElementById('intro').remove();else sessionStorage.setItem('kinlab-intro','1')}catch(e){}</script>
+  <svg class="intro-fig" viewBox="0 0 240 240">
+    <defs><linearGradient id="ig" x1="0" x2="1"><stop offset="0" stop-color="#5e9eff"/><stop offset="1" stop-color="#ff5c66"/></linearGradient></defs>
+    <circle class="intro-ring" cx="120" cy="120" r="104"/>
+    <path class="intro-line" d="M120 30 C176 52 182 168 120 210 C58 168 64 52 120 30 Z"/>
+    <path class="intro-line l2" d="M104 46 C86 92 86 150 108 196"/>
+    <path class="intro-line l2" d="M136 46 C154 92 154 150 132 196"/>
+    <path class="intro-line l3" d="M120 34 V206"/>
+  </svg>
+  <p class="intro-title"><span>筋</span><span>骨</span><span>格</span><span>ア</span><span>ト</span><span>ラ</span><span>ス</span></p>
+  <p class="intro-sub">3D ANATOMY</p>
+</div>
 <header class="site-head"><div class="wrap"><a class="logo" href="./"><i aria-hidden="true"></i>筋骨格アトラス</a><nav class="nav" aria-label="サイト"><a href="./" aria-current="page" class="hide-sm">ホーム</a><a href="atlas.html">筋骨格アトラス</a><a href="training.html">トレーニング図鑑</a><a href="exercises.html">種目一覧</a><a href="pricing.html">料金</a></nav></div></header>
 <main>
-  <section class="hero">
+  <section class="hero" id="hero">
+    <svg class="hero-fibers" viewBox="0 0 1200 600" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M-50 520 C 250 380 420 600 700 420 S 1100 260 1260 330"/>
+      <path d="M-50 460 C 220 300 480 520 760 340 S 1080 180 1260 250"/>
+      <path d="M-50 120 C 260 220 520 40 800 160 S 1100 360 1260 280"/>
+      <path d="M-50 60 C 300 160 560 -20 820 100 S 1120 300 1260 210"/>
+    </svg>
     <div class="wrap">
-      <div>
+      <div class="hero-text">
         <p class="eyebrow">筋骨格アトラス / 3D Anatomy</p>
         <h1>関節を動かすと、<br>筋肉が<span class="c">縮む</span>のも<span class="s">伸びる</span>のも見える。</h1>
         <p class="lead">筋骨格アトラスは、実際の人体データから作った3Dモデルで骨と筋肉を学べる解剖アトラスです。タップで名前、層ごとにはがして深部へ、関節を動かせば筋の伸び縮みが色でわかります。インストール不要、ブラウザだけで使えます。</p>
@@ -46,9 +65,12 @@
           <li><b>28</b>種目の図鑑</li>
         </ul>
       </div>
-      <figure>
-        <picture><source srcset="img/hero-squat.webp" type="image/webp"><img src="img/hero-squat.jpg" width="720" height="840" alt="立った姿勢からしゃがむ3Dモデルの動く画像。しゃがむにつれて、伸びる筋が青、縮む筋が赤に変わっていく"></picture>
-        <figcaption>しゃがむ動き。赤は縮んでいる筋、青は伸びている筋。</figcaption>
+      <figure class="hero-media">
+        <video autoplay muted loop playsinline preload="auto" poster="img/hero-squat.jpg" width="720" height="840" aria-label="立った姿勢からしゃがむ3Dモデルの動画。体を回しながら、縮む筋が赤、伸びる筋が青に変わっていく">
+          <source src="img/hero.mp4" type="video/mp4">
+          <source src="img/hero.webm" type="video/webm">
+        </video>
+        <figcaption><i class="dot c"></i>縮む筋 <i class="dot s"></i>伸びる筋</figcaption>
       </figure>
     </div>
   </section>
@@ -59,7 +81,7 @@
       <h2>筋骨格アトラスでできること</h2>
       <p class="lead">教科書の図では分かりにくい「立体の位置関係」と「動いたときにどの筋が働くか」を、自分の手で動かして確かめられます。</p>
       <div class="features">
-        <div class="feature">
+        <div class="feature reveal">
           <div class="shot"><picture><source srcset="img/tap.webp" type="image/webp"><img src="img/tap.jpg" width="960" height="600" loading="lazy" alt="三角筋前部を選んだ画面。体を回しながら、名前・起始・停止・働きの説明が表示されている"></picture></div>
           <div>
             <span class="num">01</span>
@@ -67,7 +89,7 @@
             <p>骨や筋をタップすると和名と英名、左右、起始・停止・働きが表示されます。名前で検索してその部位へ移動したり、選んだ筋と骨格だけを表示したりもできます。</p>
           </div>
         </div>
-        <div class="feature">
+        <div class="feature reveal">
           <div class="shot"><picture><source srcset="img/joints.webp" type="image/webp"><img src="img/joints.jpg" width="960" height="600" loading="lazy" alt="腕を前に上げて肘を曲げていく画面。縮む筋が赤、伸びる筋が青に変わっていく"></picture></div>
           <div>
             <span class="num">02</span>
@@ -75,7 +97,7 @@
             <p>体幹・首・肩甲骨・肩・肘・手首・股関節・膝・足首の20項目を左右別に動かせます。縮む筋は赤、伸びる筋は青。肩甲上腕リズムも再現しています。</p>
           </div>
         </div>
-        <div class="feature">
+        <div class="feature reveal">
           <div class="shot"><picture><source srcset="img/max.webp" type="image/webp"><img src="img/max.jpg" width="960" height="600" loading="lazy" alt="上腕二頭筋を選んで「最大まで縮める」を押し、肘と肩が自動で動いていく画面"></picture></div>
           <div>
             <span class="num">03</span>
@@ -83,7 +105,7 @@
             <p>選んだ筋が最も縮む姿勢・最も伸びる姿勢を自動で探して再現します。ストレッチの向きや、筋がどの動きで働くかを確かめるのに便利です。</p>
           </div>
         </div>
-        <div class="feature">
+        <div class="feature reveal">
           <div class="shot"><a href="training.html"><picture><source srcset="img/training.webp" type="image/webp"><img src="img/training.jpg" width="960" height="600" loading="lazy" alt="バーベルを担いだスクワットを再生している画面。立ち上がるにつれて太ももとお尻の筋の赤の濃さが変わり、右の一覧のバーも動く"></picture></a></div>
           <div>
             <span class="num">04</span>
@@ -91,7 +113,7 @@
             <p>スクワット、懸垂、ベンチプレスなど28種目の動きを再生し、重りや体重がどの向きにかかるかから、どの筋がどれだけ働くかを赤の濃さで表示します。重さを変えたり、動きの途中で止めたりもできます。<a href="training.html">トレーニング図鑑を開く →</a> <a href="exercises.html">種目ごとの解説 →</a></p>
           </div>
         </div>
-        <div class="feature">
+        <div class="feature reveal">
           <div class="shot"><picture><source srcset="img/layers.webp" type="image/webp"><img src="img/layers.jpg" width="960" height="600" loading="lazy" alt="層のタブで「1枚はがす」を3回押していく画面。表層筋、中層筋、深層筋の順に消えて、最後に骨格だけになる"></picture></div>
           <div>
             <span class="num">05</span>
@@ -100,7 +122,7 @@
           </div>
         </div>
       </div>
-      <div class="peel" aria-label="層のはがし方の図">
+      <div class="peel reveal" aria-label="層のはがし方の図">
         <h3>はがす順番</h3>
         <ol>
           <li><img src="img/peel0.jpg" width="300" height="450" loading="lazy" alt="全部の筋を表示した3Dモデル"><b>1. 表層筋</b><span>皮膚のすぐ下。大胸筋・三角筋・広背筋・大殿筋 など</span></li>
@@ -138,15 +160,36 @@
           <div class="thumb"><img src="img/training.jpg" width="960" height="600" loading="lazy" alt=""></div>
           <div class="body"><span class="tag live">公開中</span><h3>トレーニング図鑑</h3><p>28種目の動きで、重りの向きから働く筋とその強さを見る。</p></div>
         </a>
-        <div class="card soon">
-          <div class="thumb">準備中</div>
-          <div class="body"><span class="tag">準備中</span><h3>筋肉クイズ</h3><p>3Dモデルで筋の名前や起始・停止を答える練習問題の予定です。</p></div>
-        </div>
+        <a class="card" href="exercises.html">
+          <div class="thumb"><img src="img/ex/bench-press.jpg" width="640" height="480" loading="lazy" alt=""></div>
+          <div class="body"><span class="tag live">公開中</span><h3>トレーニング種目一覧</h3><p>28種目のやり方と、3Dで計算した働く筋を、動く画像つきで解説。</p></div>
+        </a>
       </div>
       <p style="margin-top:24px"><a href="pricing.html">料金を見る →</a></p>
     </div>
   </section>
 </main>
 <footer class="site-foot"><div class="wrap"><nav aria-label="フッター"><a href="./">ホーム</a><a href="atlas.html">筋骨格アトラス</a><a href="training.html">トレーニング図鑑</a><a href="exercises.html">種目一覧</a><a href="pricing.html">料金</a><a href="privacy.html">プライバシーポリシー</a><a href="terms.html">利用規約</a><a href="tokushoho.html">特定商取引法に基づく表記</a></nav><p>学習用の教材です。筋の長さの変化などは概算で、診断・治療などの医療行為には使えません。</p><p>3Dモデル: <a href="https://www.z-anatomy.com/" target="_blank" rel="noopener">Z-Anatomy</a>(Gauthier Kervyn ほか)、元データ <a href="https://lifesciencedb.jp/bp3d/" target="_blank" rel="noopener">BodyParts3D</a>(© ライフサイエンス統合データベースセンター, CC BY-SA 2.1 JP)。<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a> のもとで改変して使用しています。画面写真の3Dモデル部分も CC BY-SA 4.0 です。</p><p>© 筋骨格アトラス</p></div></footer>
+<script>
+(function () {
+  var intro = document.getElementById('intro');
+  if (intro) {
+    var end = function () { intro.classList.add('out'); setTimeout(function () { intro.remove(); }, 900); };
+    var t = setTimeout(end, 2300);
+    intro.addEventListener('click', function () { clearTimeout(t); end(); });
+  }
+  var hero = document.getElementById('hero');
+  if (hero && matchMedia('(hover: hover)').matches) hero.addEventListener('pointermove', function (e) {
+    var r = hero.getBoundingClientRect();
+    hero.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100).toFixed(1) + '%');
+    hero.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100).toFixed(1) + '%');
+  });
+  var els = document.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) { els.forEach(function (x) { x.classList.add('in'); }); return; }
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -10% 0px' });
+  els.forEach(function (x) { io.observe(x); });
+  document.documentElement.classList.add('js-reveal');
+})();
+</script>
 </body>
 </html>

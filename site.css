@@ -195,3 +195,80 @@ a.card:hover { border-color: var(--ink-2); }
 .peel b { font-size: 15px; margin-top: 6px; }
 .peel span { font-size: 12.5px; color: var(--ink-2); line-height: 1.55; }
 @media (max-width: 760px) { .peel ol { grid-template-columns: repeat(2, 1fr); } .peel li:nth-child(3)::before { display: none; } }
+
+/* ---- 演出(トップ) ---- */
+/* 開いた瞬間: 筋の輪郭が光りながら描かれ、題字が浮かぶ(1回のセッションで1度だけ・動きを減らす設定ではなし) */
+.intro { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background: radial-gradient(ellipse at 50% 45%, #182633 0%, #070b0f 70%); color: #e8eef1; cursor: pointer;
+  transition: opacity 0.8s ease, clip-path 0.9s cubic-bezier(.7,0,.2,1); clip-path: circle(150% at 50% 45%); }
+.intro.out { opacity: 0; clip-path: circle(0% at 50% 45%); pointer-events: none; }
+.intro-fig { width: min(46vw, 220px); height: auto; overflow: visible; filter: drop-shadow(0 0 12px rgba(255, 92, 102, 0.45)); }
+.intro-ring { fill: none; stroke: rgba(232, 238, 241, 0.12); stroke-width: 1; stroke-dasharray: 3 7; transform-origin: 120px 120px; animation: introSpin 6s linear infinite; }
+.intro-line { fill: none; stroke: url(#ig); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 600; stroke-dashoffset: 600; animation: introDraw 1.5s cubic-bezier(.6,0,.2,1) forwards; }
+.intro-line.l2 { stroke-width: 1.4; opacity: 0.7; animation-delay: 0.35s; }
+.intro-line.l3 { stroke-width: 1; opacity: 0.5; animation-delay: 0.55s; }
+.intro-title { margin: 8px 0 0; font-size: clamp(24px, 6vw, 34px); font-weight: 700; letter-spacing: 0.2em; }
+.intro-title span { display: inline-block; opacity: 0; transform: translateY(10px); filter: blur(6px); animation: introChar 0.7s ease forwards; }
+.intro-title span:nth-child(1) { animation-delay: 0.6s; } .intro-title span:nth-child(2) { animation-delay: 0.68s; } .intro-title span:nth-child(3) { animation-delay: 0.76s; }
+.intro-title span:nth-child(4) { animation-delay: 0.84s; } .intro-title span:nth-child(5) { animation-delay: 0.92s; } .intro-title span:nth-child(6) { animation-delay: 1s; } .intro-title span:nth-child(7) { animation-delay: 1.08s; }
+.intro-sub { margin: 0; font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.5em; color: #94a6b1; opacity: 0; animation: introFade 0.8s 1.2s ease forwards; }
+@keyframes introDraw { to { stroke-dashoffset: 0; } }
+@keyframes introChar { to { opacity: 1; transform: none; filter: none; } }
+@keyframes introFade { to { opacity: 1; } }
+@keyframes introSpin { to { transform: rotate(360deg); } }
+
+/* ヒーロー: 暗い背景に動画、マウスの位置に光、筋線維のような線がゆっくり流れる */
+.hero { position: relative; overflow: hidden; background: radial-gradient(circle at var(--mx, 70%) var(--my, 40%), rgba(94, 158, 255, 0.16), transparent 38%), radial-gradient(ellipse at 75% 45%, #172532 0%, #0a1015 65%); color: #e8eef1; border-bottom: 0; }
+.hero .lead { color: #a9b8c2; }
+.hero .eyebrow { color: #ff8b93; }
+.hero h1 .c { color: #ff5c66; }
+.hero h1 .s { color: #5e9eff; }
+.hero .stats { color: #94a6b1; }
+.hero .stats b { color: #f5f7f8; }
+.hero .btn.primary { background: #f5f7f8; color: #0d1317; border-color: #f5f7f8; }
+.hero .btn.ghost { color: #e8eef1; border-color: rgba(232, 238, 241, 0.5); }
+.hero-fibers { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0.5; }
+.hero-fibers path { fill: none; stroke-width: 1.2; stroke-dasharray: 6 14; animation: fiberFlow 14s linear infinite; }
+.hero-fibers path:nth-child(odd) { stroke: rgba(255, 92, 102, 0.35); }
+.hero-fibers path:nth-child(even) { stroke: rgba(94, 158, 255, 0.35); animation-direction: reverse; animation-duration: 18s; }
+@keyframes fiberFlow { to { stroke-dashoffset: -400; } }
+.hero .wrap { position: relative; }
+.hero figure.hero-media { mix-blend-mode: lighten; border: 0; background: transparent; border-radius: 0; overflow: visible; position: relative; }
+.hero-media video { position: relative; display: block; width: 100%; height: auto; -webkit-mask-image: radial-gradient(ellipse 70% 72% at 50% 48%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 70% 72% at 50% 48%, #000 55%, transparent 100%); }
+.hero-media::before { content: ""; position: absolute; inset: 12% 14%; border-radius: 50%; background: radial-gradient(circle, rgba(255, 92, 102, 0.22), transparent 70%); filter: blur(30px); animation: pulse 4s ease-in-out infinite; }
+.hero figure.hero-media figcaption { position: absolute; left: 0; right: 0; bottom: 6px; text-align: center; background: transparent; border: 0; color: #a9b8c2; display: flex; gap: 6px; justify-content: center; align-items: center; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; }
+.dot.c { background: #ff5c66; box-shadow: 0 0 8px #ff5c66; } .dot.s { background: #5e9eff; box-shadow: 0 0 8px #5e9eff; margin-left: 10px; }
+@keyframes pulse { 0%, 100% { opacity: 0.6; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.05); } }
+.hero-text > * { opacity: 0; transform: translateY(16px); animation: rise 0.9s cubic-bezier(.2,.7,.2,1) forwards; }
+.hero-text > :nth-child(1) { animation-delay: 0.15s; } .hero-text > :nth-child(2) { animation-delay: 0.3s; } .hero-text > :nth-child(3) { animation-delay: 0.45s; }
+.hero-text > :nth-child(4) { animation-delay: 0.6s; } .hero-text > :nth-child(5) { animation-delay: 0.75s; }
+.hero-media { opacity: 0; animation: mediaIn 1.4s 0.3s ease forwards; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+@keyframes mediaIn { from { opacity: 0; filter: blur(14px); transform: scale(0.96); } to { opacity: 1; filter: none; transform: none; } }
+
+/* ボタン: 浮き上がり、光が横切る */
+.btn { position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease; }
+.btn::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 40%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent); transform: skewX(-20deg); transition: left 0.6s ease; pointer-events: none; }
+.btn:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(13, 19, 23, 0.22), 0 0 0 3px color-mix(in srgb, var(--contract) 22%, transparent); }
+.btn:hover::after { left: 120%; }
+.btn:active { transform: translateY(0); }
+.hero .btn.primary:hover { box-shadow: 0 0 26px rgba(255, 92, 102, 0.45), 0 0 0 3px rgba(94, 158, 255, 0.35); }
+.nav a { transition: background-color 0.2s ease, color 0.2s ease; }
+.card, .ex-card { transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease; }
+a.card:hover, .ex-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(13, 19, 23, 0.14); }
+.card .thumb img, .ex-card img { transition: transform 0.5s ease; }
+a.card:hover .thumb img, .ex-card:hover img { transform: scale(1.05); }
+.shot { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+.feature:hover .shot { transform: translateY(-3px); box-shadow: 0 16px 34px rgba(13, 19, 23, 0.16); }
+
+/* スクロールで浮かび上がる */
+html.js-reveal .reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.8s ease, transform 0.8s cubic-bezier(.2,.7,.2,1); }
+html.js-reveal .reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-text > *, .hero-media { animation: none; opacity: 1; transform: none; }
+  .hero-fibers path, .hero-media::before { animation: none; }
+  .btn, .card, .ex-card, .shot, .card .thumb img, .ex-card img { transition: none; }
+  html.js-reveal .reveal { opacity: 1; transform: none; transition: none; }
+}
