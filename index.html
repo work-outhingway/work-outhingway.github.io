@@ -27,7 +27,7 @@
 
 </head>
 <body>
-<header class="site-head"><div class="wrap"><a class="logo" href="./"><i aria-hidden="true"></i>筋骨格アトラス</a><nav class="nav" aria-label="サイト"><a href="./" aria-current="page" class="hide-sm">ホーム</a><a href="atlas.html">筋骨格アトラス</a><a href="training.html">トレーニング図鑑</a><a href="pricing.html">料金</a></nav></div></header>
+<header class="site-head"><div class="wrap"><a class="logo" href="./"><i aria-hidden="true"></i>筋骨格アトラス</a><nav class="nav" aria-label="サイト"><a href="./" aria-current="page" class="hide-sm">ホーム</a><a href="atlas.html">筋骨格アトラス</a><a href="training.html">トレーニング図鑑</a><a href="exercises.html">種目一覧</a><a href="pricing.html">料金</a></nav></div></header>
 <main>
   <section class="hero">
     <div class="wrap">
@@ -43,12 +43,12 @@
           <li><b>239</b>筋</li>
           <li><b>144</b>骨</li>
           <li><b>20</b>関節の動き</li>
-          <li><b>19</b>種目の図鑑</li>
+          <li><b>28</b>種目の図鑑</li>
         </ul>
       </div>
       <figure>
-        <img src="img/hero-squat.jpg" width="720" height="840" alt="しゃがんだ姿勢の3Dモデル。太ももの前側は青(伸びている)、お尻と太もも裏の一部は赤(縮んでいる)で表示されている">
-        <figcaption>しゃがむ姿勢。赤は縮んでいる筋、青は伸びている筋。</figcaption>
+        <picture><source srcset="img/hero-squat.webp" type="image/webp"><img src="img/hero-squat.jpg" width="720" height="840" alt="立った姿勢からしゃがむ3Dモデルの動く画像。しゃがむにつれて、伸びる筋が青、縮む筋が赤に変わっていく"></picture>
+        <figcaption>しゃがむ動き。赤は縮んでいる筋、青は伸びている筋。</figcaption>
       </figure>
     </div>
   </section>
@@ -60,7 +60,7 @@
       <p class="lead">教科書の図では分かりにくい「立体の位置関係」と「動いたときにどの筋が働くか」を、自分の手で動かして確かめられます。</p>
       <div class="features">
         <div class="feature">
-          <div class="shot"><img src="img/tap.jpg" width="760" height="681" loading="lazy" alt="三角筋前部を選んだ画面。名前・起始・停止・働きの説明が表示されている"></div>
+          <div class="shot"><picture><source srcset="img/tap.webp" type="image/webp"><img src="img/tap.jpg" width="960" height="600" loading="lazy" alt="三角筋前部を選んだ画面。体を回しながら、名前・起始・停止・働きの説明が表示されている"></picture></div>
           <div>
             <span class="num">01</span>
             <h3>タップで名前と起始・停止</h3>
@@ -68,7 +68,7 @@
           </div>
         </div>
         <div class="feature">
-          <div class="shot"><img src="img/joints.jpg" width="960" height="600" loading="lazy" alt="股関節と膝を曲げた姿勢で、伸びている筋が青、縮んでいる筋が赤になっている画面"></div>
+          <div class="shot"><picture><source srcset="img/joints.webp" type="image/webp"><img src="img/joints.jpg" width="960" height="600" loading="lazy" alt="腕を前に上げて肘を曲げていく画面。縮む筋が赤、伸びる筋が青に変わっていく"></picture></div>
           <div>
             <span class="num">02</span>
             <h3>関節を動かすと、伸び縮みが色でわかる</h3>
@@ -76,7 +76,7 @@
           </div>
         </div>
         <div class="feature">
-          <div class="shot"><img src="img/max.jpg" width="960" height="600" loading="lazy" alt="ある筋を最大まで縮めた姿勢を表示している画面"></div>
+          <div class="shot"><picture><source srcset="img/max.webp" type="image/webp"><img src="img/max.jpg" width="960" height="600" loading="lazy" alt="上腕二頭筋を選んで「最大まで縮める」を押し、肘と肩が自動で動いていく画面"></picture></div>
           <div>
             <span class="num">03</span>
             <h3>「最大まで縮める」で、その筋の役割がわかる</h3>
@@ -84,21 +84,30 @@
           </div>
         </div>
         <div class="feature">
-          <div class="shot"><a href="training.html"><img src="img/training.jpg" width="960" height="600" loading="lazy" alt="バーベルを担いでしゃがむスクワットの画面。太ももとお尻の筋が赤く表示され、足の裏に床が支える力の青い矢印が出ている"></a></div>
+          <div class="shot"><a href="training.html"><picture><source srcset="img/training.webp" type="image/webp"><img src="img/training.jpg" width="960" height="600" loading="lazy" alt="バーベルを担いだスクワットを再生している画面。立ち上がるにつれて太ももとお尻の筋の赤の濃さが変わり、右の一覧のバーも動く"></picture></a></div>
           <div>
             <span class="num">04</span>
             <h3>トレーニング図鑑: 重りの向きまで考えて、働く筋を表示</h3>
-            <p>スクワット、懸垂、ベンチプレスなど19種目の動きを再生し、重りや体重がどの向きにかかるかから、どの筋がどれだけ働くかを赤の濃さで表示します。重さを変えたり、動きの途中で止めたりもできます。<a href="training.html">トレーニング図鑑を開く →</a></p>
+            <p>スクワット、懸垂、ベンチプレスなど28種目の動きを再生し、重りや体重がどの向きにかかるかから、どの筋がどれだけ働くかを赤の濃さで表示します。重さを変えたり、動きの途中で止めたりもできます。<a href="training.html">トレーニング図鑑を開く →</a> <a href="exercises.html">種目ごとの解説 →</a></p>
           </div>
         </div>
         <div class="feature">
-          <div class="shot"><img src="img/models.jpg" width="1200" height="450" loading="lazy" alt="骨格、筋肉の正面・背面・側面を並べた図"></div>
+          <div class="shot"><picture><source srcset="img/layers.webp" type="image/webp"><img src="img/layers.jpg" width="960" height="600" loading="lazy" alt="層のタブで「1枚はがす」を3回押していく画面。表層筋、中層筋、深層筋の順に消えて、最後に骨格だけになる"></picture></div>
           <div>
             <span class="num">05</span>
-            <h3>浅層から深層へ、1枚ずつはがす</h3>
-            <p>筋肉は浅層・中層・深層に分かれていて、外側から1層ずつはがして奥の筋を見られます。骨の表示も切り替えられます。</p>
+            <h3>表層から深層へ、1枚ずつはがす</h3>
+            <p>筋肉は、皮膚に近い順に「表層筋」「中層筋」「深層筋」の3つの層に分けてあります。「1枚はがす」を押すたびに外側の層が消えて、その下に隠れていた筋が見えてきます。最後は骨格だけになります。</p>
           </div>
         </div>
+      </div>
+      <div class="peel" aria-label="層のはがし方の図">
+        <h3>はがす順番</h3>
+        <ol>
+          <li><img src="img/peel0.jpg" width="300" height="450" loading="lazy" alt="全部の筋を表示した3Dモデル"><b>1. 表層筋</b><span>皮膚のすぐ下。大胸筋・三角筋・広背筋・大殿筋 など</span></li>
+          <li><img src="img/peel1.jpg" width="300" height="450" loading="lazy" alt="表層筋をはがした3Dモデル"><b>2. 中層筋</b><span>表層をはがすと見える。上腕筋・菱形筋・前鋸筋・中殿筋 など</span></li>
+          <li><img src="img/peel2.jpg" width="300" height="450" loading="lazy" alt="中層筋もはがした3Dモデル"><b>3. 深層筋</b><span>骨にいちばん近い。腸骨筋・小殿筋・多裂筋・肋間筋 など</span></li>
+          <li><img src="img/peel3.jpg" width="300" height="450" loading="lazy" alt="筋をすべてはがして骨格だけにした3Dモデル"><b>4. 骨格</b><span>筋をすべてはがすと骨だけになる</span></li>
+        </ol>
       </div>
     </div>
   </section>
@@ -127,7 +136,7 @@
         </a>
         <a class="card" href="training.html">
           <div class="thumb"><img src="img/training.jpg" width="960" height="600" loading="lazy" alt=""></div>
-          <div class="body"><span class="tag live">公開中</span><h3>トレーニング図鑑</h3><p>19種目の動きで、重りの向きから働く筋とその強さを見る。</p></div>
+          <div class="body"><span class="tag live">公開中</span><h3>トレーニング図鑑</h3><p>28種目の動きで、重りの向きから働く筋とその強さを見る。</p></div>
         </a>
         <div class="card soon">
           <div class="thumb">準備中</div>
@@ -138,6 +147,6 @@
     </div>
   </section>
 </main>
-<footer class="site-foot"><div class="wrap"><nav aria-label="フッター"><a href="./">ホーム</a><a href="atlas.html">筋骨格アトラス</a><a href="training.html">トレーニング図鑑</a><a href="pricing.html">料金</a><a href="privacy.html">プライバシーポリシー</a><a href="terms.html">利用規約</a><a href="tokushoho.html">特定商取引法に基づく表記</a></nav><p>学習用の教材です。筋の長さの変化などは概算で、診断・治療などの医療行為には使えません。</p><p>3Dモデル: <a href="https://www.z-anatomy.com/" target="_blank" rel="noopener">Z-Anatomy</a>(Gauthier Kervyn ほか)、元データ <a href="https://lifesciencedb.jp/bp3d/" target="_blank" rel="noopener">BodyParts3D</a>(© ライフサイエンス統合データベースセンター, CC BY-SA 2.1 JP)。<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a> のもとで改変して使用しています。画面写真の3Dモデル部分も CC BY-SA 4.0 です。</p><p>© 筋骨格アトラス</p></div></footer>
+<footer class="site-foot"><div class="wrap"><nav aria-label="フッター"><a href="./">ホーム</a><a href="atlas.html">筋骨格アトラス</a><a href="training.html">トレーニング図鑑</a><a href="exercises.html">種目一覧</a><a href="pricing.html">料金</a><a href="privacy.html">プライバシーポリシー</a><a href="terms.html">利用規約</a><a href="tokushoho.html">特定商取引法に基づく表記</a></nav><p>学習用の教材です。筋の長さの変化などは概算で、診断・治療などの医療行為には使えません。</p><p>3Dモデル: <a href="https://www.z-anatomy.com/" target="_blank" rel="noopener">Z-Anatomy</a>(Gauthier Kervyn ほか)、元データ <a href="https://lifesciencedb.jp/bp3d/" target="_blank" rel="noopener">BodyParts3D</a>(© ライフサイエンス統合データベースセンター, CC BY-SA 2.1 JP)。<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a> のもとで改変して使用しています。画面写真の3Dモデル部分も CC BY-SA 4.0 です。</p><p>© 筋骨格アトラス</p></div></footer>
 </body>
 </html>

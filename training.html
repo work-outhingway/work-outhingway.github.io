@@ -2,18 +2,18 @@
 <html lang="ja">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="スクワット・ベンチプレス・懸垂・アームカールなど筋トレ19種目で、どの筋肉にどれだけ効くかを3Dで表示。重りの重さと向きから、筋力に対する負荷を色の濃さで見られます。">
+<meta name="description" content="スクワット・ベンチプレス・懸垂・アームカールなど筋トレ28種目で、どの筋肉にどれだけ効くかを3Dで表示。重りの重さと向きから、筋力に対する負荷を色の濃さで見られます。">
 <link rel="canonical" href="https://work-outhingway.github.io/training.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="筋骨格アトラス">
-<meta property="og:title" content="トレーニング図鑑|筋トレで効く筋肉を3Dで見る(19種目)">
-<meta property="og:description" content="スクワット・ベンチプレス・懸垂・アームカールなど筋トレ19種目で、どの筋肉にどれだけ効くかを3Dで表示。重りの重さと向きから、筋力に対する負荷を色の濃さで見られます。">
+<meta property="og:title" content="トレーニング図鑑|筋トレで効く筋肉を3Dで見る(28種目)">
+<meta property="og:description" content="スクワット・ベンチプレス・懸垂・アームカールなど筋トレ28種目で、どの筋肉にどれだけ効くかを3Dで表示。重りの重さと向きから、筋力に対する負荷を色の濃さで見られます。">
 <meta property="og:url" content="https://work-outhingway.github.io/training.html">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:image" content="https://work-outhingway.github.io/img/training.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="YttDPv5ANMofoC2DyxM0FCG_CilAQm-fvV7C-GWKQ5c">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"トレーニング図鑑","url":"https://work-outhingway.github.io/training.html","description":"スクワット・ベンチプレス・懸垂・アームカールなど筋トレ19種目で、どの筋肉にどれだけ効くかを3Dで表示。重りの重さと向きから、筋力に対する負荷を色の濃さで見られます。","applicationCategory":"EducationalApplication","operatingSystem":"Web ブラウザ","inLanguage":"ja","offers":[{"@type":"Offer","price":"0","priceCurrency":"JPY","name":"無料で試す"},{"@type":"Offer","price":"1000","priceCurrency":"JPY","name":"買い切り"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"トレーニング図鑑","url":"https://work-outhingway.github.io/training.html","description":"スクワット・ベンチプレス・懸垂・アームカールなど筋トレ28種目で、どの筋肉にどれだけ効くかを3Dで表示。重りの重さと向きから、筋力に対する負荷を色の濃さで見られます。","applicationCategory":"EducationalApplication","operatingSystem":"Web ブラウザ","inLanguage":"ja","offers":[{"@type":"Offer","price":"0","priceCurrency":"JPY","name":"無料で試す"},{"@type":"Offer","price":"1000","priceCurrency":"JPY","name":"買い切り"}]}</script>
 <style>body { margin: 0; } .homelink { display: inline-block; font-size: 12px; color: var(--ink-2); text-decoration: none; margin-bottom: 2px; } .homelink:hover { color: var(--ink); }</style>
 <script>try{if(localStorage.getItem("kinlab-premium")){(window.adsbygoogle=window.adsbygoogle||[]).pauseAdRequests=1;document.documentElement.classList.add("premium")}}catch(e){}</script>
 <style>html.premium .adbox,html.premium ins.adsbygoogle{display:none!important}</style>
@@ -28,7 +28,7 @@
   .adbox:has(ins[data-ad-status="unfilled"]) { display: none; }
 </style>
 <script>var KINLAB_BUY = {"atlas":"https://buy.stripe.com/6oUaEXdhv2a60da3rT73G02","training":"https://buy.stripe.com/aFa4gz5P32a63pm3rT73G03"};</script>
-<title>トレーニング図鑑|筋トレで効く筋肉を3Dで見る(19種目) | 筋骨格アトラス</title>
+<title>トレーニング図鑑|筋トレで効く筋肉を3Dで見る(28種目) | 筋骨格アトラス</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
@@ -6227,6 +6227,7 @@ const LOAD = (function () {
     const tzmin = ext(trunk, (p, b) => p[2] < b[2])[2];
     // 背中(肩甲骨の高さの背面)、肩の後ろ(バーベルを担ぐ位置)、お尻
     L.pt.back = P([0, ts[1], tzmin - 0.03], SEG.trunk);
+    L.pt.chest = P([0, ts[1] - 0.04, ext(trunk, (p, b) => p[2] > b[2])[2] + 0.01], SEG.trunk); // 胸の前(うつ伏せで台に乗る位置)
     L.pt.bar = P([0, J.neck.y - 0.04, J.neck.z - 0.07], SEG.trunk);
     const pel = segVerts[SEG.pelvis];
     const pzmin = ext(pel, (p, b) => p[2] < b[2])[2];
@@ -6426,7 +6427,7 @@ const LOAD = (function () {
     // 手首は、握るときに曲げる筋と伸ばす筋が一緒に働いて固めるので、つり合いではなく下の「握る力」で扱う
     const SOFT = /^(trunkLat|neckLat|hipAbd)$/;
     const IGNORE = /^(wrist|wristDev|trunkRot|neckRot|shoulderRot|hipRot)$/;
-    const REST = { arm: /^(scap|shoulder|elbow)/, shoulder: /^(shoulder|elbow)/, gh: /^shoulder/ };
+    const REST = { arm: /^(scap|shoulder|elbow)/, shoulder: /^(shoulder|elbow)/, gh: /^shoulder/, hip: /^hip/ };
     const wts = dofs.map((d, k) => {
       if (IGNORE.test(d.j.id)) return 0;
       if (d.j.id === 'knee' && a[d.s].knee < 8 && Q[k] < 0) return 0;
@@ -7791,6 +7792,20 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { name: 'レッグレイズ', hand: { grip: 0, pron: 180 }, aim: 'おもに腸腰筋・大腿直筋・腹直筋', g: 'leg', load: 'あお向けで脚を上げる。脚の重さが股関節を伸ばす向きにかかり、床が背中とお尻を支える',
       orient: { pitch: -90 }, supports: [{ pts: ['back'], floor: true }, { pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }], rhythm: false, rest: ['arm'],
       start: { b: { hip: 8 } }, end: { b: { hip: 90 } }, ends: ['脚を下ろした位置', '上げた位置'], verbs: ['脚を上げる', '下ろす'] },
+    { name: 'デッドリフト', hand: { grip: 1, pron: 180 }, aim: 'おもに大殿筋・ハムストリングス・脊柱起立筋・大腿四頭筋', g: 'leg', prop: 'barbell', load: '床のバーベル{kg}を握って立ち上がる。腕は真下に垂れ、重さは手にかかる',
+      loads: [{ pts: GRIPS }], kg: 60, kgs: [0, 40, 60, 80], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'],
+      start: { b: { hip: 95, knee: 70, ankle: 20, shoulder: 45 } }, end: {}, ends: ['床から引く位置', '立った位置'], verbs: ['立ち上がる', '下ろす'] },
+    { name: 'グッドモーニング', hand: { grip: 1, pron: 90 }, aim: 'おもにハムストリングス・大殿筋・脊柱起立筋', g: 'leg', prop: 'barbell', load: 'バーベル{kg}を肩の後ろに担ぎ、膝を軽く曲げたまま上体を倒して起こす',
+      loads: [{ pts: ['bar'] }], kg: 20, kgs: [0, 20, 30, 40], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['arm'], soft: ['knee'],
+      start: { b: { hip: 80, knee: 15, ...BAR_BACK } }, end: { b: { ...BAR_BACK } }, ends: ['前に倒した位置', '起こした位置'], verbs: ['上体を起こす', '前に倒す'] },
+    { name: 'レッグエクステンション', hand: { grip: 1, pron: 90 }, aim: 'おもに大腿四頭筋', g: 'leg', prop: 'seat', load: '台に座り、すねに当てた重り{kg}(片脚あたり)を持ち上げて膝を伸ばす。重さは真下にかかるので、膝が伸びきるほど重い。太ももは座面が支える',
+      loads: [{ pts: ['ankle.l', 'ankle.r'], each: true }], kg: 10, kgs: [0, 5, 10, 20], orient: { pitch: 0 }, place: { pt: 'butt', y: 0.55 },
+      supports: [{ pts: ['butt'] }, { pts: ['thigh.l', 'thigh.r'] }], rhythm: false, rest: ['arm', 'hip'],
+      start: { b: { hip: 90, knee: 90 } }, end: { b: { hip: 90, knee: 0 } }, ends: ['膝を曲げた位置', '伸ばした位置'], verbs: ['膝を伸ばす', '曲げる'] },
+    { name: 'レッグカール', hand: { grip: 0, pron: 180 }, aim: 'おもにハムストリングス・腓腹筋', g: 'leg', prop: 'pbench', load: '台にうつ伏せになり、足首の重り{kg}を持ち上げて膝を曲げる',
+      loads: [{ pts: ['ankle.l', 'ankle.r'], each: true }], kg: 5, kgs: [0, 3, 5, 10], orient: { pitch: 90 }, place: { pt: 'hips', y: 0.6 },
+      supports: [{ pts: ['chest'] }, { pts: ['hips'] }, { pts: ['thigh.l', 'thigh.r'] }], rhythm: false, rest: ['arm'],
+      start: { b: { knee: 5 } }, end: { b: { knee: 110 } }, ends: ['膝を伸ばした位置', '曲げた位置'], verbs: ['膝を曲げる', '伸ばす'] },
     { name: '腕立て伏せ', vars: [{ label: '手幅', opts: [['狭く', { start: { b: { shoulderAbd: 12 } } }, '脇をしめると大胸筋の割合が減り、三角筋と上腕三頭筋が中心になります。'], ['ふつう', {}], ['広く', { start: { b: { shoulderAbd: 70 } } }, '肘を横に張ると、大胸筋(とくに上部)の割合が増えます。']], def: 1 }], hand: { grip: 0, pron: 180 }, aim: 'おもに大胸筋・三角筋前部・上腕三頭筋', g: 'arm', load: '体を板のように伸ばし、手のひらを床につけ(指先は前)、手とつま先で支える。体重が下向きにかかる',
       orient: { level: ['palm.r', 'toe.r'], range: [20, 90] }, supports: [{ pts: PALMS, floor: true }, { pts: ['toe.l', 'toe.r'], floor: true }],
       start: { b: { shoulder: -25, shoulderAbd: 40, elbow: 115, wrist: 90, ankle: -30 } }, end: { b: { shoulder: 80, shoulderAbd: 10, elbow: 0, wrist: 90, ankle: -30 } },
@@ -7828,6 +7843,23 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { name: 'フレンチプレス', hand: { grip: 1, pron: 90 }, aim: 'おもに上腕三頭筋', g: 'arm', prop: 'dumbbell', load: 'ダンベル{kg}を頭の後ろから上へ伸ばす。重さは肘を曲げる向きにかかる',
       loads: [{ pts: GRIPS, each: true }], kg: 5, kgs: [0, 3, 5, 8], orient: { pitch: 0 }, supports: [FEET], rhythm: false, soft: ['scapUp', 'scapElev', 'scapPro'],
       start: { b: { shoulder: 170, elbow: 140, scapUp: 50, scapElev: 14, scapPro: 10 } }, end: { b: { shoulder: 170, elbow: 10, scapUp: 50, scapElev: 14, scapPro: 10 } }, ends: ['肘を曲げた位置', '伸ばした位置'], verbs: ['伸ばす', '曲げる'] },
+    { name: 'ディップス', hand: { grip: 1, pron: 90 }, aim: 'おもに上腕三頭筋・大胸筋下部・三角筋前部', g: 'arm', prop: 'dipbar', load: '平行棒で体を支え、肘を曲げて沈んでから押し上げる。体重はすべて手にかかる',
+      orient: { pitch: 10 }, supports: [{ pts: GRIPS }], place: { pt: 'grip.r', y: 1.25 }, rhythm: false,
+      start: { b: { shoulder: -50, elbow: 100, knee: 60 } }, end: { b: { shoulder: 0, elbow: 5, knee: 60 } }, ends: ['沈んだ位置', '押し上げた位置'], verbs: ['押し上げる', '沈む'] },
+    { name: 'ダンベルフライ', hand: { grip: 1, pron: 90 }, aim: 'おもに大胸筋・三角筋前部', g: 'arm', prop: 'dumbbell', bench: true, load: 'ベンチにあお向けで、ダンベル{kg}を横に開いた位置から胸の上で合わせる。重さは真下にかかる',
+      loads: [{ pts: GRIPS, each: true }], kg: 6, kgs: [0, 4, 6, 10], orient: { pitch: -90 }, place: { pt: 'back', y: 0.45 },
+      supports: [{ pts: ['back'] }, { pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }],
+      start: { b: { shoulderAbd: 85, elbow: 20, hip: 10, knee: 85 } }, end: { b: { shoulder: 90, elbow: 20, hip: 10, knee: 85 } }, ends: ['開いた位置', '合わせた位置'], verbs: ['腕を閉じる', '開く'] },
+    { name: 'ダンベルプルオーバー', hand: { grip: 1, pron: 90 }, aim: 'おもに広背筋・大円筋・大胸筋・上腕三頭筋長頭', g: 'arm', prop: 'dumbbell', bench: true, one: true, load: 'ベンチにあお向けで、両手で持ったダンベル{kg}を頭の後ろから胸の上へ動かす',
+      loads: [{ pts: GRIPS }], kg: 10, kgs: [0, 6, 10, 16], orient: { pitch: -90 }, place: { pt: 'back', y: 0.45 },
+      supports: [{ pts: ['back'] }, { pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }],
+      start: { b: { shoulder: 165, shoulderAbd: 5, elbow: 25, hip: 10, knee: 85 } }, end: { b: { shoulder: 80, shoulderAbd: 5, elbow: 25, hip: 10, knee: 85 } }, ends: ['頭の後ろ', '胸の上'], verbs: ['引き上げる', '戻す'] },
+    { name: 'キックバック', hand: { grip: 1, pron: 90 }, aim: 'おもに上腕三頭筋', g: 'arm', prop: 'dumbbell', load: '上体を前に倒し、二の腕を脇腹につけたまま、ダンベル{kg}を後ろへ伸ばす。重さは真下にかかるので、伸ばしきったときに一番重い',
+      loads: [{ pts: GRIPS, each: true }], kg: 4, kgs: [0, 2, 4, 6], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['gh'],
+      start: { b: { hip: 90, knee: 30, shoulder: -15, elbow: 95 } }, end: { b: { hip: 90, knee: 30, shoulder: -15, elbow: 0 } }, ends: ['肘を曲げた位置', '伸ばした位置'], verbs: ['伸ばす', '曲げる'] },
+    { name: 'アップライトロウ', hand: { grip: 1, pron: 180 }, aim: 'おもに三角筋中部・僧帽筋上部', g: 'arm', prop: 'barbell', load: 'バーベル{kg}を体に沿って胸の高さまで引き上げる。肘を高く上げる',
+      loads: [{ pts: GRIPS }], kg: 20, kgs: [0, 10, 20, 30], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET],
+      start: { b: { shoulder: 10, shoulderAbd: 10 } }, end: { b: { shoulderAbd: 90, shoulderRot: -60, elbow: 120 } }, ends: ['下げた位置', '引き上げた位置'], verbs: ['引き上げる', '下ろす'] },
     { name: 'シュラッグ', hand: { grip: 1, pron: 90 }, aim: 'おもに僧帽筋上部・肩甲挙筋', g: 'scap', prop: 'dumbbell', load: 'ダンベル{kg}を下げたまま肩をすくめる。重さは肩甲骨を下へ引く',
       loads: [{ pts: GRIPS, each: true }], kg: 16, kgs: [0, 8, 16, 24], orient: { pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'],
       start: {}, end: { b: { scapElev: 22 } }, ends: ['下げた位置', 'すくめた位置'], verbs: ['すくめる', '下ろす'] },
@@ -8232,7 +8264,8 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       }
     }
     if (def.prop === 'dumbbell' && kg > 0) {
-      for (const name of GRIPS) {
+      // one: 1個のダンベルを両手で持つ(プルオーバー)
+      for (const name of def.one ? ['grip.r'] : GRIPS) {
         const g = new THREE.Group();
         g.add(cyl(0.013, 0.3));
         const r = Math.min(0.11, 0.045 + kg * 0.004);
@@ -8240,7 +8273,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
         propGroup.add(g);
         // 持ち手は手のひらを横切る向き(握った指の中を通る)
         const hs = RIG.SEG['hand.' + name.split('.')[1]];
-        items.push((E) => { const c = P(E, name); g.position.set(c[0], c[1], c[2]); g.quaternion.setFromRotationMatrix(_hm.fromArray(E[hs])); });
+        items.push((E) => { const c = def.one ? mid(E, GRIPS) : P(E, name); g.position.set(c[0], c[1], c[2]); g.quaternion.setFromRotationMatrix(_hm.fromArray(E[hs])); });
       }
     }
     if (def.prop === 'plate' && kg > 0) {
@@ -8248,13 +8281,15 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       propGroup.add(pl);
       items.push((E) => { const c = P(E, 'hips'); pl.position.set(c[0], c[1] + 0.03, c[2]); });
     }
-    if (def.prop === 'bench') {
+    if (def.prop === 'bench' || def.prop === 'pbench' || def.bench) {
       const b = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.06, 1.15), padMat);
       propGroup.add(b);
       const leg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1, 0.22), padMat); // 床までの脚
       propGroup.add(leg);
+      // あお向けは背中とお尻、うつ伏せ(pbench)は胸と骨盤の前の下に置く
+      const [na, nc] = def.prop === 'pbench' ? ['chest', 'hips'] : ['back', 'butt'];
       items.push((E) => {
-        const a = P(E, 'back'), c = P(E, 'butt');
+        const a = P(E, na), c = P(E, nc);
         b.position.set(0, Math.min(a[1], c[1]) - 0.03, (a[2] + c[2]) / 2 - 0.12);
         const h = Math.max(0.01, b.position.y - 0.03);
         leg.scale.set(1, h, 1); leg.position.set(0, h / 2, b.position.z);
@@ -8271,6 +8306,24 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
         seat.scale.set(1, h, 1); seat.position.set(0, h / 2, c[2] + 0.08);
         knee.position.set(0, t[1] + 0.12, t[2]);
       });
+    }
+    if (def.prop === 'seat') {
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1, 0.45), padMat);
+      propGroup.add(seat);
+      items.push((E) => {
+        const c = P(E, 'butt'), t = mid(E, ['thigh.l', 'thigh.r']);
+        const h = Math.max(0.01, c[1] - 0.07);
+        seat.scale.set(1, h, 1); seat.position.set(0, h / 2, (c[2] + t[2]) / 2);
+      });
+    }
+    if (def.prop === 'dipbar') {
+      // 左右の手の下に、前後にのびる平行棒
+      for (const name of GRIPS) {
+        const bar = cyl(0.02, 0.9);
+        bar.rotation.y = Math.PI / 2;
+        propGroup.add(bar);
+        items.push((E) => { const c = P(E, name); bar.position.set(c[0], c[1] - 0.02, c[2]); });
+      }
     }
     if (def.prop === 'pad') {
       for (const name of ['thigh.r', 'ankle.r']) {
@@ -8328,7 +8381,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   function owns(k) { try { return !!localStorage.getItem('kinlab-own-' + k); } catch (e) { return false; } }
   const PRODUCT = {
     atlas: { name: '筋骨格アトラス', price: '¥2,390', what: '関節を自由に動かして、筋の伸び縮みを色で見られます。' },
-    training: { name: 'トレーニング図鑑', price: '¥1,000', what: '19種目すべての動きと、筋の負荷を見られます。' }
+    training: { name: 'トレーニング図鑑', price: '¥1,000', what: '28種目すべての動きと、筋の負荷を見られます。' }
   };
   function showLock(id, k, item) {
     const el = $('#' + id), P = PRODUCT[k];
@@ -8765,11 +8818,15 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       setupTraining();
       openTab('tab-ex', false);
       startTraining(TRAININGS[0], exBtns[0]);
+      // 解説ページからのリンク(training.html?ex=種目名)はその種目のボタンを押したのと同じにする
+      const want = new URLSearchParams(location.search).get('ex');
+      const wi = TRAININGS.findIndex((t) => t.name === want);
+      if (wi > 0) exBtns[wi].click();
     }
     poseDirty = true;
     buildLayerRows();
     $('#loading').hidden = true;
-    if (location.hash === '#dev') window.__dev = { angles, setHandState, applyPose: () => applyPose(), pt: (n) => LOAD.at(segMats.map((m) => m.elements), LCTX.L.pt[n]), exAngles, muscleMeshes, JC, flyTo, structs, deform, LCTX, TRAININGS, startTraining: (i, kg) => startTraining(TRAININGS[i], exBtns[i], kg), tr: () => tr };
+    if (location.hash === '#dev') window.__dev = { angles, setHandState, applyPose: () => applyPose(), pt: (n) => LOAD.at(segMats.map((m) => m.elements), LCTX.L.pt[n]), exAngles, muscleMeshes, JC, flyTo, structs, deform, LCTX, TRAININGS, startTraining: (i, kg) => startTraining(TRAININGS[i], exBtns[i], kg), tr: () => tr, disc, ring, select, setLayer, goExtreme, goPose, zeroAngles, setTrainingK: (k) => { stopExercise(); setTrainingK(k, true); poseDirty = true; } };
     window.__ready = true;
     dirty = true;
   }).catch((err) => {
