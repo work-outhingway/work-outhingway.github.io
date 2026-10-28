@@ -8550,7 +8550,8 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   // 支払いリンクは公開時に publish.js が KINLAB_BUY として入れる(無いときはボタンを「準備中」にする)
   const FREE_EX = ['スクワット', '腕立て伏せ', 'アームカール'];
   const BUY = (typeof KINLAB_BUY !== 'undefined' && KINLAB_BUY) || {};
-  function owns(k) { try { return !!localStorage.getItem('kinlab-own-' + k); } catch (e) { return false; } }
+  // ダブルクリックで開いた手元のファイル(file://)は運営者の確認用なので、すべて開く。公開サイトでの確認は運営者用の確認ページ(CLAUDE.md)
+  function owns(k) { if (location.protocol === 'file:') return true; try { return !!localStorage.getItem('kinlab-own-' + k); } catch (e) { return false; } }
   const PRODUCT = {
     atlas: { name: '筋骨格アトラス', price: '¥2,390', what: '関節を自由に動かして、筋の伸び縮みを色で見られます。' },
     training: { name: 'トレーニング図鑑', price: '¥1,000', what: '28種目すべての動きと、筋の負荷を見られます。' },

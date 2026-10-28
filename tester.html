@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>動作テスト | 筋骨格アトラス</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<link rel="stylesheet" href="site.css">
+<script>try{if(localStorage.getItem("kinlab-premium")){(window.adsbygoogle=window.adsbygoogle||[]).pauseAdRequests=1;document.documentElement.classList.add("premium")}}catch(e){}</script>
+<style>html.premium .adbox,html.premium ins.adsbygoogle{display:none!important}</style>
+<meta name="google-adsense-account" content="ca-pub-4133981960298039">
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4133981960298039" crossorigin="anonymous"></script>
+
+<style>
+  .doc { max-width: 720px; padding-top: 32px; padding-bottom: 48px; }
+  .doc h1 { font-size: 24px; margin: 0 0 8px; }
+  .doc p, .doc li { margin: 6px 0; }
+  .doc .meta { color: var(--ink-2); font-size: 13px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .st { list-style: none; padding: 0; }
+  .st b { display: inline-block; min-width: 4.5em; }
+</style>
+<meta name="robots" content="noindex, nofollow">
+</head>
+<body>
+<header class="site-head"><div class="wrap"><a class="logo" href="./"><i aria-hidden="true"></i>筋骨格アトラス</a><nav class="nav" aria-label="サイト"><a href="./" class="hide-sm">ホーム</a><a href="atlas.html">筋骨格アトラス</a><a href="training.html">トレーニング図鑑</a><a href="stretch.html">ストレッチ図鑑</a><a href="care.html">体の不調</a><a href="exercises.html">種目一覧</a><a href="pricing.html">料金</a></nav></div></header>
+<main class="wrap doc">
+  <h1>動作テスト(運営者用)</h1>
+  <p class="meta">このブラウザだけで、購入しなくても有料の機能をすべて開けます。サイトのどこからもリンクしていません。</p>
+  <div class="row">
+    <button type="button" class="btn primary" id="all">すべて開く(広告は表示したまま)</button>
+    <button type="button" class="btn" id="noads">すべて開く+広告なし</button>
+    <button type="button" class="btn" id="reset">元に戻す(未購入の状態)</button>
+  </div>
+  <ul class="st" id="st"></ul>
+  <div class="row">
+    <a class="btn" href="atlas.html">筋骨格アトラス</a>
+    <a class="btn" href="training.html">トレーニング図鑑</a>
+    <a class="btn" href="stretch.html">ストレッチ図鑑</a>
+    <a class="btn" href="care.html">体の不調図鑑</a>
+  </div>
+  <p class="meta">「元に戻す」を押すと、未購入の人と同じ見え方(鍵のマーク・購入の案内)を確かめられます。別の端末やブラウザでは、そこでこのページを開いて押してください。</p>
+  <script>
+    (function () {
+      var ITEMS = { atlas: '筋骨格アトラス', training: 'トレーニング図鑑', stretch: 'ストレッチ図鑑', premium: '広告なし' };
+      var key = function (k) { return k === 'premium' ? 'kinlab-premium' : 'kinlab-own-' + k; };
+      function show() {
+        var ul = document.getElementById('st'); ul.textContent = '';
+        Object.keys(ITEMS).forEach(function (k) {
+          var on = false; try { on = !!localStorage.getItem(key(k)); } catch (e) {}
+          var li = document.createElement('li'); li.innerHTML = '<b></b> '; li.firstChild.textContent = on ? '開いている' : '未購入';
+          li.appendChild(document.createTextNode(ITEMS[k])); ul.appendChild(li);
+        });
+      }
+      function set(list, on) {
+        try { list.forEach(function (k) { if (on) localStorage.setItem(key(k), 'test-' + Date.now()); else localStorage.removeItem(key(k)); }); }
+        catch (e) { alert('このブラウザでは保存できませんでした(プライベートブラウズなど)。'); }
+        show();
+      }
+      document.getElementById('all').onclick = function () { set(['premium'], false); set(['atlas', 'training', 'stretch'], true); };
+      document.getElementById('noads').onclick = function () { set(['atlas', 'training', 'stretch', 'premium'], true); };
+      document.getElementById('reset').onclick = function () { set(['atlas', 'training', 'stretch', 'premium'], false); };
+      show();
+    })();
+  </script>
+</main>
+<footer class="site-foot"><div class="wrap"><nav aria-label="フッター"><a href="./">ホーム</a><a href="atlas.html">筋骨格アトラス</a><a href="training.html">トレーニング図鑑</a><a href="stretch.html">ストレッチ図鑑</a><a href="care.html">体の不調図鑑</a><a href="conditions.html">体の不調の一覧</a><a href="exercises.html">種目一覧</a><a href="pricing.html">料金</a><a href="privacy.html">プライバシーポリシー</a><a href="terms.html">利用規約</a><a href="tokushoho.html">特定商取引法に基づく表記</a></nav><p>学習用の教材です。筋の長さの変化などは概算で、診断・治療などの医療行為には使えません。</p><p>3Dモデル: <a href="https://www.z-anatomy.com/" target="_blank" rel="noopener">Z-Anatomy</a>(Gauthier Kervyn ほか)、元データ <a href="https://lifesciencedb.jp/bp3d/" target="_blank" rel="noopener">BodyParts3D</a>(© ライフサイエンス統合データベースセンター, CC BY-SA 2.1 JP)。<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.ja" target="_blank" rel="noopener">CC BY-SA 4.0</a> のもとで改変して使用しています。画面写真の3Dモデル部分も CC BY-SA 4.0 です。</p><p>© 筋骨格アトラス</p></div></footer>
+</body>
+</html>
