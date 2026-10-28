@@ -281,3 +281,10 @@ html.js-reveal .reveal.in { opacity: 1; transform: none; }
 .roles.weak h3 { color: #157a51; } .roles.weak h3::before { background: #1f9d6a; }
 .care-see { border: 1px solid #e3a3a8; border-radius: 14px; padding: 4px 18px 14px; }
 .care-see h2 { color: #c0303c; }
+.care-warn { background: #fdf0e4; border-radius: 10px; padding: 10px 14px; font-size: 14px; }
+.appr { border: 1px solid var(--line); border-left: 4px solid #999; border-radius: 12px; padding: 4px 16px 12px; margin-top: 14px; }
+.appr.use { border-left-color: #d11f2d; } .appr.loosen { border-left-color: #8e44ad; } .appr.st { border-left-color: #1f63e0; }
+.appr.use h3 { color: #c0303c; } .appr.loosen h3 { color: #8e44ad; } .appr.st h3 { color: #1d63d8; }
+.appr .main { font-size: 12px; background: #1b1f23; color: #fff; border-radius: 99px; padding: 1px 9px; vertical-align: 2px; }
+.appr .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.appr .tags a { border: 1px solid var(--line); border-radius: 99px; padding: 3px 10px; font-size: 13px; text-decoration: none; color: inherit; }
