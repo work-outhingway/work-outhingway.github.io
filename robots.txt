@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /thanks.html
-Disallow: /tester.html
 
 Sitemap: https://work-outhingway.github.io/sitemap.xml
