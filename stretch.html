@@ -333,6 +333,19 @@
   .legend.care .scale .cp::before { background: #e0262b; box-shadow: 0 0 0 2px #fff inset; }
   .legend.care .colorsw i { background: linear-gradient(90deg, #1f9d6a, #e8731a, #8e44ad); }
 
+  .excard.carepose .phase input, .excard.carepose .phase .ends, .excard.carepose #ex-load, .excard.carepose .mgroup, .excard.carepose #ex-notes { display: none; }
+  .cc-in { margin: 6px 0 0; padding-left: 1.2em; }
+  .cc-in li { margin: 3px 0; font-weight: 500; }
+  .cc-pain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+  .cc-pain .lb { font-size: 12px; font-weight: 700; color: var(--site); }
+  .cc-pain .lb::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; background: radial-gradient(circle, #ff2828 0%, rgba(240,30,40,.5) 50%, rgba(240,30,40,0) 100%); }
+  .cc-pain .chip { border-color: color-mix(in srgb, var(--site) 40%, var(--line)); background: color-mix(in srgb, var(--site) 6%, var(--panel)); }
+  .cc-mus .mchip { font-size: 14px; font-weight: 700; padding: 5px 12px; }
+  .cc-subs { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin-top: 6px; font-size: 11.5px; color: var(--ink-2); }
+  .cc-subs > span { margin-right: 2px; }
+  .mchip.sub { font-size: 11.5px; padding: 2px 8px; font-weight: 500; opacity: 0.85; }
+  .legend.care .scale .cp::before { background: radial-gradient(circle, #ff2828 0%, rgba(240,30,40,.5) 55%, rgba(240,30,40,0) 100%) !important; box-shadow: none !important; }
+
   /* 凡例 */
   .legend {
     position: absolute; left: 16px; bottom: 12px; right: 16px; max-width: 280px;
@@ -6470,6 +6483,22 @@ const LOAD = (function () {
         if (d < best) { best = d; pitch = p; }
       }
     }
+    if (o.hang) {
+      // hang: 手だけで体を支える(懸垂・ディップス)。体の重心が握りの真上か真下に来る傾きにする(そうでないと体が振れる)
+      const pts = o.hang.map((n) => at(E, L.pt[n]));
+      const g0 = [0, 1, 2].map((c) => pts.reduce((t, q) => t + q[c], 0) / pts.length);
+      const c0 = [0, 0, 0];
+      let w = 0;
+      for (const k in L.com) { const q = at(E, L.com[k].p), m = L.com[k].kg; for (let c = 0; c < 3; c++) c0[c] += m * q[c]; w += m; }
+      for (let c = 0; c < 3; c++) c0[c] /= w;
+      let best = 1e9;
+      for (let p = -45; p <= 45; p += 0.25) {
+        const R = rootMatrix(p).elements;
+        const z = (v) => R[2] * v[0] + R[6] * v[1] + R[10] * v[2];
+        const d = Math.abs(z(c0) - z(g0));
+        if (d < best) { best = d; pitch = p; }
+      }
+    }
     const R = rootMatrix(pitch);
     const Re = R.elements;
     const up = [Re[1], Re[5], Re[9]]; // 世界の上向きを骨盤座標で表したもの(R の逆 = 転置の2列目)
@@ -6489,6 +6518,17 @@ const LOAD = (function () {
         f = [d.x * G * m, d.y * G * m, d.z * G * m];
       }
       const share = ld.each ? 1 : 1 / ld.pts.length;
+      if (ld.tan) {
+        // tan: マシンのアームが肩の上下の軸で回る(ペックフライ)。力は肩関節を中心とした水平な円の接線の向きで、腕を開く向き
+        for (const name of ld.pts) {
+          const sd = name.split('.')[1], q = at(E, L.pt[name]), c = J.side[sd].gh;
+          const t = cross(up, sub(q, at(E, [c.x, c.y, c.z, SEG['arm.' + sd]])));
+          const n = (Math.hypot(t[0], t[1], t[2]) || 1) * (sd === 'r' ? -1 : 1);
+          forces.push({ p: L.pt[name], f: t.map((x) => (x / n) * G * m * share) });
+          loadPts.push(name);
+        }
+        continue;
+      }
       for (const name of ld.pts) { forces.push({ p: L.pt[name], f: f.map((x) => x * share) }); loadPts.push(name); }
     }
     const sup = (def.supports || []).map((s) => Object.assign({}, s, { pts: s.pts.map((name) => ({ name, p: L.pt[name] })) }));
@@ -6951,10 +6991,10 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     const lg = document.querySelector('.legend');
     lg.classList.add('care');
     lg.querySelector('.bar').remove();
-    lg.querySelector('.scale').innerHTML = '<span class="cw">弱い</span><span class="ct">こっている</span><span class="cv">縮んでいる</span><span class="cp">付着部・痛む場所</span>';
+    lg.querySelector('.scale').innerHTML = '<span class="cw">弱い</span><span class="ct">こっている</span><span class="cv">縮んでいる</span><span class="cp">痛む場所</span>';
     lg.querySelector('.why').textContent = '原因の種類ごとに色分けしています(緑 → 使う、オレンジ → ほぐす、紫 → ストレッチで対策)。対策の再生中は、縮んで働く筋を赤、伸ばされる筋を青で表示します。';
     lg.querySelector('p:last-child').textContent = '一般的な情報で、診断や治療の代わりにはなりません。';
-    $('#ex-hint').textContent = '不調を選ぶと、原因になっている筋と、付着部・痛む場所を3Dで表示します。その下の「原因と対策」で、原因ごとに対応する対策の動きを再生できます。';
+    $('#ex-hint').textContent = '不調を選ぶと、その姿勢と原因の筋・痛む場所を3Dで表示します。「原因と対策」の対策をタップすると、動きを再生します。';
     $('#ex-kgrow').remove();
     $('#exlist').hidden = true;
     $('#ex-focus').textContent = '原因の筋だけ表示';
@@ -7640,7 +7680,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       const p = P.array, r = u.rest, rn = u.restN, nn = N ? N.array : null;
       const n = P.count;
       // 前腕のひねり: 前腕の部分は肘(0)から手首(1)へ向かって少しずつひねる(手の体節は手首で全部ひねってある)
-      const tw = handTwistFor(u), cu = handCurlFor(u);
+      const tw = handTwistFor(u), cu = handCurlFor(u), tb = toeBendFor(u);
       for (let i = 0; i < n; i++) {
         const a = E[u.s0[i]], b = E[u.s1[i]], w = u.w[i], v = 1 - w;
         const x = r[3 * i], y = r[3 * i + 1], z = r[3 * i + 2];
@@ -7656,6 +7696,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
           const qx = F[0] * x + F[4] * y + F[8] * z + F[12], qy = F[1] * x + F[5] * y + F[9] * z + F[13], qz = F[2] * x + F[6] * y + F[10] * z + F[14];
           if (u.s0[i] === cu.hand) { xa = qx; ya = qy; za = qz; }
           if (u.s1[i] === cu.hand) { xb = qx; yb = qy; zb = qz; }
+        }
+        if (tb && tb.t[i] > 0) {
+          // 足の指の部分は、その指の骨と一緒に反らせる
+          const q = toeRot(tb.F.chains[tb.c[i]].piv, tb.F.bend * tb.t[i], x, y, z, _tq);
+          if (u.s0[i] === tb.F.seg) { xa = q[0]; ya = q[1]; za = q[2]; }
+          if (u.s1[i] === tb.F.seg) { xb = q[0]; yb = q[1]; zb = q[2]; }
         }
         p[3 * i] = w * (a[0] * xa + a[4] * ya + a[8] * za + a[12]) + v * (b[0] * xb + b[4] * yb + b[8] * zb + b[12]);
         p[3 * i + 1] = w * (a[1] * xa + a[5] * ya + a[9] * za + a[13]) + v * (b[1] * xb + b[5] * yb + b[9] * zb + b[13]);
@@ -7685,7 +7731,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
           pz += k * (w * (a[2] * dx + a[6] * dy + a[10] * dz) + v * (b[2] * dx + b[6] * dy + b[10] * dz));
         }
         const id = u.anc[i];
-        if (id >= 0) {
+        if (id >= 0 && !(tb && tb.t[i] > 0)) {
           const M = IE[BS[id]], F = E[BS[id]];
           const lx = M[0] * px + M[4] * py + M[8] * pz + M[12] - BP[3 * id];
           const ly = M[1] * px + M[5] * py + M[9] * pz + M[13] - BP[3 * id + 1];
@@ -7732,7 +7778,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       // 体の不調図鑑の「使う」: 楽な姿勢より縮んだ筋を赤く
       else if (MODE === 'care' && tr && tr.def.use) rampColor(m.material.color, u.layerColor, Math.min(0, s - (u.stBase || 0)), u.pot);
       else if (MODE === 'stretch' || (MODE === 'care' && tr && tr.def.stretch)) rampColor(m.material.color, u.layerColor, s - (u.stBase || 0) > DEAD ? Math.max(0, s) : 0, u.pot);
-      // 体の不調図鑑: 不調に関係する筋をオレンジ(硬くなりやすい)・緑(弱りやすい)で
+      // 体の不調図鑑: 原因の筋を 緑(弱い)・オレンジ(こっている)・紫(縮んでいる)で
       else if (MODE === 'care') careColor(m.material.color, u.layerColor, u.care, tr ? tr.k : 0);
       else rampColor(m.material.color, u.layerColor, s, u.pot);
     }
@@ -7880,9 +7926,121 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   });
   $('#resetpose').addEventListener('click', () => goPose(zeroAngles(), null, rhythmOn));
 
+  // ---- アトラスの接地(APP_MODE = 'atlas' のときだけ) ----
+  // 関節は骨盤を固定して動かすので、そのままでは つま先立ちで足先が床に沈み、しゃがむと足の裏が浮いてしまう。
+  // 足の裏の一番低い点を床(静止姿勢の高さ)に置き、床についている点が前後左右にずれないように体全体を動かす。
+  // つま先が下がった分だけ足の指を付け根(MTP関節)で反らせて床に沿わせる → つま先立ちは かかとが上がって体が持ち上がる
+  let GROUND = null;
+  function setupGround() {
+    const side = {}, pts = [];
+    let y0 = Infinity;
+    for (const sd of ['l', 'r']) {
+      const seg = RIG.SEG['foot.' + sd];
+      const bones = boneMeshes.filter((b) => b.userData.seg === seg && b.userData.side === sd);
+      if (!bones.length) continue;
+      // 足の指: 基節骨・中節骨・末節骨をまとめて、基節骨の付け根を中心に回す
+      const chains = [];
+      for (const b of bones) {
+        const m = b.userData.s.en.match(/^Proximal phalanx of (\w+) finger of foot$/);
+        if (!m) continue;
+        const re = new RegExp('phalanx of ' + m[1] + ' finger of foot$');
+        const cb = bones.filter((x) => re.test(x.userData.s.en));
+        const piv = proxEnd(b, new THREE.Vector3(0, 0, 1));
+        cb.forEach((x) => { x.userData.fing = new THREE.Matrix4(); x.userData.toe = chains.length; });
+        chains.push({ bones: cb, piv });
+      }
+      let ymin = Infinity;
+      for (const b of bones) { const a = b.geometry.getAttribute('position').array; for (let i = 1; i < a.length; i += 3) ymin = Math.min(ymin, a[i]); }
+      y0 = Math.min(y0, ymin);
+      // 足の裏(下から2cm)の頂点を間引いて使う
+      const cand = [];
+      for (const b of bones) {
+        const a = b.geometry.getAttribute('position').array, toe = b.userData.toe === undefined ? -1 : b.userData.toe;
+        for (let i = 0; i < a.length; i += 3) if (a[i + 1] < ymin + 0.02) cand.push([a[i], a[i + 1], a[i + 2], toe]);
+      }
+      const step = Math.max(1, Math.floor(cand.length / 160));
+      for (let i = 0; i < cand.length; i += step) pts.push({ sd, seg, p: cand[i], q: [0, 0, 0] });
+      side[sd] = { seg, chains, bend: 0 };
+    }
+    GROUND = { side, pts, y0, T: new THREE.Matrix4() };
+  }
+  // 足の指を反らせた位置(静止姿勢の座標)。軸は左右(x)、+の角度で指先が上がる
+  function toeRot(c, a, x, y, z, out) {
+    const cs = Math.cos(a), sn = Math.sin(a), dy = y - c.y, dz = z - c.z;
+    out[0] = x; out[1] = c.y + dy * cs + dz * sn; out[2] = c.z - dy * sn + dz * cs;
+    return out;
+  }
+  function groundFeet() {
+    const G = GROUND, E = segMats.map((m) => m.elements), r = [0, 0, 0];
+    // つま先が下がった角度(足の前向きの、水平からの傾き)
+    for (const sd in G.side) {
+      const F = G.side[sd], e = E[F.seg];
+      F.want = clamp(Math.atan2(-e[9], Math.hypot(e[8], e[10])), 0, 1.1);
+      F.bend = F.want;
+    }
+    let off = null;
+    // 1回目: 両足の指を反らせて置く → 床から浮いている足は指を反らせずに置き直す
+    for (let pass = 0; pass < 2; pass++) {
+      let ymin = Infinity;
+      for (const t of G.pts) {
+        const F = G.side[t.sd], p = t.p, e = E[t.seg];
+        const v = p[3] >= 0 && F.bend ? toeRot(F.chains[p[3]].piv, F.bend, p[0], p[1], p[2], r) : p;
+        t.q[0] = e[0] * v[0] + e[4] * v[1] + e[8] * v[2] + e[12];
+        t.q[1] = e[1] * v[0] + e[5] * v[1] + e[9] * v[2] + e[13];
+        t.q[2] = e[2] * v[0] + e[6] * v[1] + e[10] * v[2] + e[14];
+        ymin = Math.min(ymin, t.q[1]);
+      }
+      // 床についている点(一番低い点から数mm以内)の、静止姿勢からの前後左右のずれを打ち消す
+      let sw = 0, sx = 0, sz = 0;
+      const low = { l: Infinity, r: Infinity };
+      for (const t of G.pts) {
+        const w = Math.exp(-(t.q[1] - ymin) / 0.004);
+        sw += w; sx += w * (t.p[0] - t.q[0]); sz += w * (t.p[2] - t.q[2]);
+        low[t.sd] = Math.min(low[t.sd], t.q[1]);
+      }
+      off = [sx / sw, G.y0 - ymin, sz / sw];
+      if (pass) break;
+      for (const sd in G.side) {
+        const F = G.side[sd], h = low[sd] - ymin;
+        F.bend = F.want * clamp(1 - (h - 0.005) / 0.03, 0, 1);
+      }
+    }
+    for (const sd in G.side) {
+      const F = G.side[sd];
+      for (const c of F.chains) {
+        const M = aboutAxis(c.piv, new THREE.Vector3(-1, 0, 0), F.bend);
+        for (const b of c.bones) b.userData.fing.copy(M);
+      }
+    }
+    G.T.makeTranslation(off[0], off[1], off[2]);
+    for (const m of segMats) m.premultiply(G.T);
+  }
+  // 足の筋の指にかかる部分も、近い指の骨と一緒に反らせる。頂点ごとに「どの指か」と曲げる割合(付け根の手前0 → 先1)を一度だけ求める
+  function toeBendFor(u) {
+    if (!GROUND || !u.side) return null;
+    const F = GROUND.side[u.side];
+    if (!F || F.bend < 1e-3 || !F.chains.length) return null;
+    if (!u.s0.includes(F.seg) && !u.s1.includes(F.seg)) return null;
+    if (!u.toeT) {
+      const r = u.rest, n = r.length / 3;
+      u.toeT = new Float32Array(n);
+      u.toeC = new Int8Array(n);
+      const ys = Math.max(...F.chains.map((c) => c.piv.y)) + 0.03;
+      for (let i = 0; i < n; i++) {
+        const x = r[3 * i], y = r[3 * i + 1], z = r[3 * i + 2];
+        let best = 0, bd = Infinity;
+        F.chains.forEach((c, k) => { const d = Math.abs(x - c.piv.x); if (d < bd) { bd = d; best = k; } });
+        const c = F.chains[best];
+        u.toeC[i] = best;
+        u.toeT[i] = y < ys ? clamp((z - c.piv.z + 0.004) / 0.012, 0, 1) : 0;
+      }
+    }
+    return { F, t: u.toeT, c: u.toeC };
+  }
   function applyPose() {
     if (rhythmOn) for (const s of ['l', 'r']) Object.assign(angles[s], RIG.rhythm(angles[s]));
     RIG.pose(JC, angles, segMats);
+    if (GROUND) groundFeet();
     // トレーニング図鑑: 体全体の向き(寝る・前に倒す)と置き場所をかけ、その瞬間の筋の働きを入れる
     if (EXMODE && tr) {
       applyHandTwist();
@@ -7983,6 +8141,8 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   // バーベルを肩の後ろに担ぐときの腕: 握り(grip)がバーの線上、体の中心から左右 42cm に来る角度(数値で合わせた)
   const BAR_BACK = { shoulder: 35, shoulderAbd: 21, shoulderRot: 78, elbow: 129 };
   const PALMS = ['palm.l', 'palm.r'];
+  // 腕を胸の前で組む(クランチ)
+  const ARMS_X = { shoulder: 35, shoulderAbd: -10, shoulderRot: -60, elbow: 125 };
   const TRAININGS = [
     { name: 'スクワット', vars: [
         { label: 'しゃがみ方', opts: [['膝を前に', { start: { b: { hip: 95, knee: 125, ankle: 34 } } }, '膝を前に出して上体を立てると、太もも前(大腿四頭筋)の割合が増えます。'], ['ふつう', {}], ['お尻を後ろに', { start: { b: { hip: 118, knee: 100, ankle: 18 } } }, 'お尻を後ろに引いて上体を倒すと、お尻(大殿筋)・もも裏・背中の割合が増えます。']], def: 1 },
@@ -7994,8 +8154,22 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       loads: [{ pts: GRIPS, each: true }], kg: 8, kgs: [0, 8, 16], orient: { fix: 'foot.r', pitch: 0 }, supports: [{ pts: ['foot.r'], cop: true, floor: true }, { pts: ['ball.l'] }], rhythm: false, rest: ['shoulder'],
       start: { r: { hip: 95, knee: 95, ankle: 15, shoulder: 15 }, l: { hip: -15, knee: 95, ankle: -20, shoulder: 15 } }, end: { r: { hip: 20, knee: 15, shoulder: 5 }, l: { hip: -5, knee: 10, shoulder: 5 } },
       ends: ['しゃがんだ位置', '立った位置'], verbs: ['立ち上がる', 'しゃがむ'] },
+    { name: 'ブルガリアンスクワット(右脚前)', vars: [
+        { label: '前後の幅', opts: [['狭く', { set: { rear: 0.62 } }, '前後の幅を狭くすると、前脚の膝が前に出やすく、太もも前(大腿四頭筋)の割合が増えます。'], ['広く', { set: { rear: 0.8 } }, '前後の幅を広くすると、前脚の股関節が深く曲がり、お尻(大殿筋)の割合が増えます。後ろ脚の付け根(腸腰筋・大腿直筋)もよく伸ばされます。']], def: 0 },
+        { label: '上体', opts: [['立てる', {}, '上体を立てると、太もも前(大腿四頭筋)が中心になります。'], ['前に倒す', { start: { a: { trunk: 35 } }, end: { a: { trunk: 10 } } }, '上体を前に倒すと、お尻(大殿筋)ともも裏(ハムストリングス)の割合が増えます。']] },
+        { label: '前脚の膝', opts: [['前に出す', {}, '膝をつま先の方向へ前に出すと、膝を伸ばす大腿四頭筋の割合が増えます。'], ['すねを垂直に', { start: { r: { hip: 98, knee: 92, ankle: 2 } } }, 'すねを垂直に保つと、膝の負担が減り、股関節を伸ばすお尻(大殿筋)の割合が増えます。']] }],
+      // 後ろ足の甲は台(高さ 42cm)に乗せたまま動かさない。前の足のかかとから後ろへ rear(m)の位置
+      // すねを垂直にするとお尻が後ろへ下がるので、重心を前足の上に保つよう上体を 15° 足して前に傾ける
+      make: (d, sel) => {
+        d.fix = [{ type: 'foot', pt: 'instep.l', on: 'foot.r', h: 0.42, dz: -(d.rear || 0.62), sides: ['l'], ids: ['hip', 'knee'] }];
+        if (sel[2] === 1) d.start = Object.assign({}, d.start, { a: Object.assign({}, d.start.a, { trunk: ((d.start.a || {}).trunk || 0) + 15 }) });
+      },
+      hand: { grip: 1, pron: 90 }, aim: 'おもに前脚の大腿四頭筋・大殿筋', g: 'leg', prop: 'dumbbell', rbench: true, load: '後ろ足の甲を台に乗せ、ダンベル{kg}を両手に下げて前脚でしゃがむ。前脚の足の裏と、台に乗せた後ろ足で支える',
+      loads: [{ pts: GRIPS, each: true }], kg: 8, kgs: [0, 8, 16], orient: { fix: 'foot.r', pitch: 0 }, supports: [{ pts: ['foot.r'], cop: true, floor: true }, { pts: ['instep.l'] }], rhythm: false, rest: ['shoulder'],
+      start: { r: { hip: 88, knee: 108, ankle: 22 }, l: { hip: -10, knee: 95, ankle: -45 } }, end: { r: { hip: 12, knee: 12, ankle: 4 }, l: { hip: -20, knee: 40, ankle: -45 } },
+      ends: ['しゃがんだ位置', '立った位置'], verbs: ['立ち上がる', 'しゃがむ'] },
     { name: 'ルーマニアンデッドリフト', hand: { grip: 1, pron: 180 }, aim: 'おもにハムストリングス・大殿筋・脊柱起立筋', g: 'leg', prop: 'barbell', load: 'バーベル{kg}を手に下げる。腕は真下に垂れ、重さは手にかかる',
-      loads: [{ pts: GRIPS }], kg: 40, kgs: [0, 20, 40, 60], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'], soft: ['knee'],
+      loads: [{ pts: GRIPS }], kg: 40, kgs: [0, 20, 40, 60], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'], soft: ['knee'], fix: [{ type: 'bar' }], 
       start: { b: { hip: 80, knee: 15, shoulder: 65 } }, end: {}, ends: ['前に倒した位置', '立った位置'], verbs: ['体を起こす', '前に倒す'] },
     { name: 'ヒップリフト', vars: [{ label: '足の位置', opts: [['お尻に近く', { start: { b: { knee: 130 } }, end: { b: { knee: 110 } } }, '足をお尻に近づけると、もも裏(ハムストリングス)がゆるんで働きが減ります。'], ['ふつう', {}], ['遠く', { start: { b: { knee: 80 } }, end: { b: { knee: 45 } } }, '足を遠くに置くと、もも裏(ハムストリングス)の割合が増えます。']], def: 1 }], hand: { grip: 0, pron: 180 }, aim: 'おもに大殿筋・ハムストリングス', g: 'leg', prop: 'plate', load: 'あお向けで膝を立て、お尻を持ち上げる。床が背中と足の裏を支える(重り{kg}は骨盤の上)',
       loads: [{ pts: ['hips'] }], kg: 0, kgs: [0, 20, 40], orient: { level: ['back', 'heel.r'], range: [-150, -20] }, rhythm: false, rest: ['arm'],
@@ -8008,12 +8182,15 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       orient: { pitch: -90 }, supports: [{ pts: ['back'], floor: true }, { pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }], rhythm: false, rest: ['arm'],
       start: { b: { hip: 8 } }, end: { b: { hip: 90 } }, ends: ['脚を下ろした位置', '上げた位置'], verbs: ['脚を上げる', '下ろす'] },
     { name: 'デッドリフト', hand: { grip: 1, pron: 180 }, aim: 'おもに大殿筋・ハムストリングス・脊柱起立筋・大腿四頭筋', g: 'leg', prop: 'barbell', load: '床のバーベル{kg}を握って立ち上がる。腕は真下に垂れ、重さは手にかかる',
-      loads: [{ pts: GRIPS }], kg: 60, kgs: [0, 40, 60, 80], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'],
+      loads: [{ pts: GRIPS }], kg: 60, kgs: [0, 40, 60, 80], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'], fix: [{ type: 'bar' }], 
       start: { b: { hip: 95, knee: 70, ankle: 20, shoulder: 45 } }, end: {}, ends: ['床から引く位置', '立った位置'], verbs: ['立ち上がる', '下ろす'] },
     { name: 'グッドモーニング', hand: { grip: 1, pron: 90 }, aim: 'おもにハムストリングス・大殿筋・脊柱起立筋', g: 'leg', prop: 'barbell', load: 'バーベル{kg}を肩の後ろに担ぎ、膝を軽く曲げたまま上体を倒して起こす',
       loads: [{ pts: ['bar'] }], kg: 20, kgs: [0, 20, 30, 40], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['arm'], soft: ['knee'],
       start: { b: { hip: 80, knee: 15, ...BAR_BACK } }, end: { b: { ...BAR_BACK } }, ends: ['前に倒した位置', '起こした位置'], verbs: ['上体を起こす', '前に倒す'] },
-    { name: 'レッグエクステンション', hand: { grip: 1, pron: 90 }, aim: 'おもに大腿四頭筋', g: 'leg', prop: 'seat', load: '台に座り、すねに当てた重り{kg}(片脚あたり)を持ち上げて膝を伸ばす。重さは真下にかかるので、膝が伸びきるほど重い。太ももは座面が支える',
+    { name: 'レッグエクステンション', vars: [{ label: 'お尻', opts: [['座ったまま', {}, 'お尻を座面につけたまま膝だけを伸ばします。'],
+        ['浮かせる', { set: { orient: { fix: 'trunk', pitch: -25 }, place: { pt: 'hamk.r', y: 0.55 }, supports: [{ pts: ['hamk.l', 'hamk.r'] }, { pts: GRIPS, down: true }], liftSeat: true, rest: ['arm'] },
+          start: { b: { hip: 65 } }, end: { b: { hip: 40 } } }, '上体を後ろに倒し、膝裏に近い太もも(座面の先)とすねのパッドを支点に、お尻を浮かせながら膝を伸ばします。股関節が伸びるので、2つの関節をまたぐ大腿直筋は引き伸ばされた長さで働きます。体を持ち上げるためにお尻(大殿筋)も働きます。手は横のハンドルを握って体を支えます。']] }],
+      hand: { grip: 1, pron: 90 }, aim: 'おもに大腿四頭筋', g: 'leg', prop: 'seat', load: '台に座り、すねに当てた重り{kg}(片脚あたり)を持ち上げて膝を伸ばす。重さは真下にかかるので、膝が伸びきるほど重い。太ももは座面が支える',
       loads: [{ pts: ['ankle.l', 'ankle.r'], each: true }], kg: 10, kgs: [0, 5, 10, 20], orient: { pitch: 0 }, place: { pt: 'butt', y: 0.55 },
       supports: [{ pts: ['butt'] }, { pts: ['thigh.l', 'thigh.r'] }], rhythm: false, rest: ['arm', 'hip'],
       start: { b: { hip: 90, knee: 90 } }, end: { b: { hip: 90, knee: 0 } }, ends: ['膝を曲げた位置', '伸ばした位置'], verbs: ['膝を伸ばす', '曲げる'] },
@@ -8022,26 +8199,54 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       supports: [{ pts: ['chest'] }, { pts: ['hips'] }, { pts: ['thigh.l', 'thigh.r'] }], rhythm: false, rest: ['arm'],
       start: { b: { knee: 5 } }, end: { b: { knee: 110 } }, ends: ['膝を伸ばした位置', '曲げた位置'], verbs: ['膝を曲げる', '伸ばす'] },
     { name: '腕立て伏せ', vars: [{ label: '手幅', opts: [['狭く', { start: { b: { shoulderAbd: 12 } } }, '脇をしめると大胸筋の割合が減り、三角筋と上腕三頭筋が中心になります。'], ['ふつう', {}], ['広く', { start: { b: { shoulderAbd: 70 } } }, '肘を横に張ると、大胸筋(とくに上部)の割合が増えます。']], def: 1 }], hand: { grip: 0, pron: 180 }, aim: 'おもに大胸筋・三角筋前部・上腕三頭筋', g: 'arm', load: '体を板のように伸ばし、手のひらを床につけ(指先は前)、手とつま先で支える。体重が下向きにかかる',
-      orient: { level: ['palm.r', 'toe.r'], range: [20, 90] }, supports: [{ pts: PALMS, floor: true }, { pts: ['toe.l', 'toe.r'], floor: true }],
+      orient: { level: ['palm.r', 'toe.r'], range: [20, 90] }, supports: [{ pts: PALMS, floor: true }, { pts: ['toe.l', 'toe.r'], floor: true }], fix: [{ type: 'floor' }],
       start: { b: { shoulder: -25, shoulderAbd: 40, elbow: 115, wrist: 90, ankle: -30 } }, end: { b: { shoulder: 80, shoulderAbd: 10, elbow: 0, wrist: 90, ankle: -30 } },
       ends: ['胸を下ろした位置', '押し上げた位置'], verbs: ['押し上げる', '下ろす'] },
-    { name: '懸垂(逆手)', hand: { grip: 1, pron: 0 }, aim: 'おもに広背筋・大円筋・上腕二頭筋・上腕筋', g: 'arm', prop: 'pullbar', load: 'バーにぶら下がり、体を引き上げる。体重は手にかかり、腕を上へ引っぱる',
-      orient: { pitch: 0 }, supports: [{ pts: GRIPS }], place: { pt: 'grip.r', y: 2.2 },
+    { name: '懸垂', vars: [
+        { label: '握り', opts: [['順手', {}, '順手(手の甲が自分側)では上腕二頭筋が働きにくい向きになり、上腕筋・腕橈骨筋と背中(広背筋・大円筋)が中心になります。'], ['逆手', {}, '逆手(手のひらが自分側)では上腕二頭筋が強く働き、腕の割合が増えます。']], def: 0 },
+        { label: '手幅', opts: [['狭く', {}, '手幅を狭くすると、腕を前から引き下ろす動きになり、広背筋の下部と腕の割合が増えます。'], ['広く', { start: { b: { shoulder: 10, shoulderAbd: 150, elbow: 5 } }, end: { b: { shoulder: 15, shoulderAbd: 55, shoulderRot: 45, elbow: 110 } } }, '手幅を広くすると、腕を横から引き下ろす動きになり、腕(上腕二頭筋・上腕筋)の割合が減ります。']], def: 0 }],
+      // 手のひらの向き: 腕を前から上げる(狭い)ときは pron 180 が順手、横から上げる(広い)ときは pron 0 が順手
+      // 握りの間隔(体の中心から片手まで): 狭く 20cm(肩幅)、広く 40cm
+      make: (d, sel) => {
+        d.hand = { grip: 1, pron: (sel[0] === 0) === (sel[1] === 0) ? 180 : 0 };
+        d.fix = [{ type: 'bar', w: sel[1] ? 0.4 : 0.2, ids: ['shoulder', 'shoulderAbd', 'shoulderRot', 'elbow'] }];
+      },
+      hand: { grip: 1, pron: 0 }, aim: 'おもに広背筋・大円筋・上腕二頭筋・上腕筋', g: 'arm', prop: 'pullbar', load: '鉄棒にぶら下がり、同じ位置を握ったまま体を引き上げる。体重は手にかかり、腕を上へ引っぱる',
+      orient: { hang: GRIPS }, supports: [{ pts: GRIPS }], place: { pt: 'grip.r', y: 2.2 },
       start: { b: { shoulder: 165, shoulderAbd: 20, elbow: 10 } }, end: { b: { shoulder: 40, shoulderAbd: 20, elbow: 140 } }, ends: ['ぶら下がった位置', '引き上げた位置'], verbs: ['引き上げる', '下ろす'] },
     { name: 'ラットプルダウン', hand: { grip: 1, pron: 180 }, aim: 'おもに広背筋・大円筋・上腕二頭筋', g: 'arm', prop: 'cable', load: '座ってケーブルのバーを引き下ろす。重り{kg}の力は真上(滑車の方向)にかかる',
-      loads: [{ pts: GRIPS, dir: [0, 1, 0] }], kg: 35, kgs: [20, 35, 50], orient: { pitch: 0 }, place: { pt: 'butt', y: 0.5 },
+      loads: [{ pts: GRIPS, dir: [0, 1, 0] }], kg: 35, kgs: [20, 35, 50], orient: { pitch: 0 }, place: { pt: 'butt', y: 0.5 }, fix: [{ type: 'bar' }], 
       supports: [{ pts: ['butt'] }, { pts: ['thigh.l', 'thigh.r'], down: true }, { pts: ['heel.l', 'heel.r'], floor: true }],
       start: { b: { hip: 90, knee: 90, shoulder: 165, shoulderAbd: 20, elbow: 10 } }, end: { b: { hip: 90, knee: 90, shoulder: 40, shoulderAbd: 20, elbow: 140 } }, ends: ['腕を上げた位置', '引き下ろした位置'], verbs: ['引き下ろす', '戻す'] },
     { name: 'ベントオーバーロウ', vars: [{ label: '肩甲骨', opts: [['寄せる', {}, '引き切ったときに肩甲骨を寄せると、大円筋と三角筋後部が強く働きます。'], ['寄せない', { end: { b: { scapPro: 6 } } }, '肩甲骨を寄せずに腕だけで引くと、大円筋と三角筋後部の働きが小さくなります。']] }], hand: { grip: 1, pron: 180 }, aim: 'おもに広背筋・菱形筋・僧帽筋中部・三角筋後部', g: 'arm', prop: 'barbell', load: '前に倒した姿勢でバーベル{kg}を引き上げる。重さは真下にかかる',
-      loads: [{ pts: GRIPS }], kg: 30, kgs: [0, 20, 30, 40], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, soft: ['shoulderAbd'],
+      loads: [{ pts: GRIPS }], kg: 30, kgs: [0, 20, 30, 40], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, soft: ['shoulderAbd'], fix: [{ type: 'bar' }], 
       start: { b: { hip: 80, knee: 20, shoulder: 60, scapPro: 15, scapUp: 10 } }, end: { b: { hip: 80, knee: 20, shoulder: -20, elbow: 100, scapPro: -14 } },
+      ends: ['腕を下げた位置', '引いた位置'], verbs: ['引き上げる', '下ろす'] },
+    { name: 'シーテッドロー', vars: [{ label: '肩甲骨', opts: [['寄せる', {}, '引き切ったときに肩甲骨を寄せると、菱形筋・僧帽筋中部と三角筋後部が強く働きます。'], ['寄せない', { end: { b: { scapPro: 6 } } }, '肩甲骨を寄せずに腕だけで引くと、背中の真ん中(菱形筋・僧帽筋中部)の働きが小さくなります。']] }],
+      hand: { grip: 1, pron: 90 }, aim: 'おもに広背筋・菱形筋・僧帽筋中部・三角筋後部', g: 'arm', prop: 'rowcable', load: '台に座って足を足台に当て、前から来るケーブルのハンドル(重り{kg})をお腹へ引く。重りの力は前(滑車の方向)にかかる',
+      loads: [{ pts: GRIPS, dir: [0, 0, 1] }], kg: 30, kgs: [20, 30, 45], orient: { pitch: 0 }, place: { pt: 'butt', y: 0.45 }, rhythm: false, soft: ['shoulderAbd', 'hip', 'knee', 'ankle'],
+      supports: [{ pts: ['butt'] }, { pts: ['heel.l', 'heel.r'] }], fix: [{ type: 'bar', w: 0.06, lim: { shoulderAbd: [-45, 170] } }],
+      start: { a: { trunk: 12 }, b: { hip: 80, knee: 30, ankle: 15, shoulder: 80, elbow: 5, scapPro: 15 } }, end: { b: { hip: 80, knee: 30, ankle: 15, shoulder: -25, elbow: 100, scapPro: -14 } },
+      ends: ['腕を伸ばした位置', '引いた位置'], verbs: ['引く', '戻す'] },
+    { name: 'ワンハンドロー(右手)', hand: { grip: 1, pron: 90, l: { grip: 0, pron: 180 } }, aim: 'おもに広背筋・大円筋・菱形筋・三角筋後部', g: 'arm', prop: 'dumbbell', dbPts: ['grip.r'], kbench: true,
+      load: '左手と左膝をベンチにつき、右手のダンベル{kg}を脇腹へ引き上げる。重さは真下にかかり、右足・左膝・左手で支える',
+      loads: [{ pts: ['grip.r'] }], kg: 12, kgs: [0, 8, 12, 20], orient: { level: ['palm.l', 'knee.l'], range: [40, 110] }, rhythm: false, soft: ['shoulderAbd', 'hip', 'knee', 'ankle'],
+      supports: [{ pts: ['foot.r'], cop: true, floor: true }, { pts: ['knee.l'] }, { pts: ['palm.l'] }],
+      start: { l: { hip: 95, knee: 95, ankle: -30, shoulder: 80, wrist: 90 }, r: { hip: 70, knee: 15, ankle: 0, shoulder: 85, scapPro: 15, scapUp: 10 } },
+      end: { l: { hip: 95, knee: 95, ankle: -30, shoulder: 80, wrist: 90 }, r: { hip: 70, knee: 15, ankle: 0, shoulder: -15, elbow: 100, scapPro: -14 } },
       ends: ['腕を下げた位置', '引いた位置'], verbs: ['引き上げる', '下ろす'] },
     { name: 'ベンチプレス', vars: [
         { label: '肩甲骨', opts: [['寄せる', { keep: true, add: { b: { scapPro: -12, scapElev: -5 } } }, '肩甲骨を寄せて下げると、上腕三頭筋の負担が減り、大胸筋(とくに上部)の割合が増えます。土台として菱形筋も働きます。'], ['ふつう', {}], ['開く', { keep: true, add: { b: { scapPro: 12 } } }, '肩甲骨を開いたままだと、肩甲骨を支える肩甲挙筋や、上腕三頭筋の負担が増えます。']], def: 1 },
         { label: '手幅', opts: [['狭く', { start: { b: { shoulderAbd: 25 } } }, '手幅を狭く(脇をしめる)と、上腕三頭筋と三角筋前部が中心になります。'], ['ふつう', {}], ['広く', { start: { b: { shoulderAbd: 85 } } }, '手幅を広くすると、大胸筋の割合が増えます。']], def: 1 }], hand: { grip: 1, pron: 180 }, aim: 'おもに大胸筋・三角筋前部・上腕三頭筋', g: 'arm', prop: 'bench', load: 'ベンチにあお向けでバーベル{kg}を押し上げる。重さは真下(胸の方向)にかかる',
-      loads: [{ pts: GRIPS }], kg: 40, kgs: [0, 20, 40, 60], orient: { pitch: -90 }, place: { pt: 'back', y: 0.45 },
+      loads: [{ pts: GRIPS }], kg: 40, kgs: [0, 20, 40, 60], orient: { pitch: -90 }, place: { pt: 'back', y: 0.45 }, fix: [{ type: 'bar' }], 
       supports: [{ pts: ['back'] }, { pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }],
       start: { b: { shoulderAbd: 70, elbow: 95, hip: 10, knee: 85 } }, end: { b: { shoulder: 90, shoulderAbd: 10, elbow: 0, hip: 10, knee: 85 } },
+      ends: ['胸に下ろした位置', '押し上げた位置'], verbs: ['押し上げる', '下ろす'] },
+    { name: 'インクラインベンチプレス', vars: [{ label: '手幅', opts: [['狭く', { start: { b: { shoulderAbd: 30 } } }, '手幅を狭く(脇をしめる)と、上腕三頭筋と三角筋前部が中心になります。'], ['ふつう', {}], ['広く', { start: { b: { shoulderAbd: 80 } } }, '手幅を広くすると、大胸筋の割合が増えます。']], def: 1 }],
+      hand: { grip: 1, pron: 180 }, aim: 'おもに大胸筋(とくに鎖骨部=上部)・三角筋前部・上腕三頭筋', g: 'arm', prop: 'bench', incline: true, load: '背もたれを約35度起こしたベンチにあお向けで、バーベル{kg}を鎖骨の上へ押し上げる。重さは真下にかかる',
+      loads: [{ pts: GRIPS }], kg: 30, kgs: [0, 20, 30, 50], orient: { pitch: -55 }, place: { pt: 'butt', y: 0.5 }, fix: [{ type: 'bar' }],
+      supports: [{ pts: ['back'] }, { pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }],
+      start: { b: { shoulder: 45, shoulderAbd: 65, elbow: 100, hip: 40, knee: 85 } }, end: { b: { shoulder: 120, shoulderAbd: 10, elbow: 0, hip: 40, knee: 85 } },
       ends: ['胸に下ろした位置', '押し上げた位置'], verbs: ['押し上げる', '下ろす'] },
     { name: 'ショルダープレス', vars: [{ label: '肩', opts: [['すくめる', { keep: true, add: { b: { scapElev: 8 } } }, '肩をすくめて押すと、僧帽筋上部と肩甲挙筋も一緒に働きます。'], ['ふつう', {}]], def: 1 }], hand: { grip: 1, pron: 90 }, aim: 'おもに三角筋・上腕三頭筋・僧帽筋', g: 'arm', prop: 'dumbbell', load: 'ダンベル{kg}を頭の上へ押し上げる。重さは真下にかかる',
       loads: [{ pts: GRIPS, each: true }], kg: 8, kgs: [0, 4, 8, 12], orient: { pitch: 0 }, supports: [FEET],
@@ -8056,16 +8261,22 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       loads: [{ pts: GRIPS, each: true }], kg: 8, kgs: [0, 4, 8, 12], orient: { pitch: 0 }, supports: [FEET], rhythm: false, rest: ['gh'],
       start: {}, end: { b: { elbow: 140 } }, ends: ['肘を伸ばした位置', '曲げた位置'], verbs: ['曲げる', '伸ばす'] },
     { name: 'フレンチプレス', hand: { grip: 1, pron: 90 }, aim: 'おもに上腕三頭筋', g: 'arm', prop: 'dumbbell', load: 'ダンベル{kg}を頭の後ろから上へ伸ばす。重さは肘を曲げる向きにかかる',
-      loads: [{ pts: GRIPS, each: true }], kg: 5, kgs: [0, 3, 5, 8], orient: { pitch: 0 }, supports: [FEET], rhythm: false, soft: ['scapUp', 'scapElev', 'scapPro'],
+      loads: [{ pts: GRIPS, each: true }], kg: 5, kgs: [0, 3, 5, 8], orient: { pitch: 0 }, supports: [FEET], rhythm: false, soft: ['scapUp', 'scapElev', 'scapPro', 'shoulder', 'shoulderAbd'],
       start: { b: { shoulder: 170, elbow: 140, scapUp: 50, scapElev: 14, scapPro: 10 } }, end: { b: { shoulder: 170, elbow: 10, scapUp: 50, scapElev: 14, scapPro: 10 } }, ends: ['肘を曲げた位置', '伸ばした位置'], verbs: ['伸ばす', '曲げる'] },
     { name: 'ディップス', hand: { grip: 1, pron: 90 }, aim: 'おもに上腕三頭筋・大胸筋下部・三角筋前部', g: 'arm', prop: 'dipbar', load: '平行棒で体を支え、肘を曲げて沈んでから押し上げる。体重はすべて手にかかる',
-      orient: { pitch: 10 }, supports: [{ pts: GRIPS }], place: { pt: 'grip.r', y: 1.25 }, rhythm: false,
+      orient: { pitch: 10 }, supports: [{ pts: GRIPS }], place: { pt: 'grip.r', y: 1.25 }, rhythm: false, fix: [{ type: 'bar', ids: ['shoulderAbd', 'shoulderRot'] }],
       start: { b: { shoulder: -50, elbow: 100, knee: 60 } }, end: { b: { shoulder: 0, elbow: 5, knee: 60 } }, ends: ['沈んだ位置', '押し上げた位置'], verbs: ['押し上げる', '沈む'] },
-    { name: 'ダンベルフライ', hand: { grip: 1, pron: 90 }, aim: 'おもに大胸筋・三角筋前部', g: 'arm', prop: 'dumbbell', bench: true, load: 'ベンチにあお向けで、ダンベル{kg}を横に開いた位置から胸の上で合わせる。重さは真下にかかる',
+    { name: 'ダンベルフライ', hand: { grip: 1, pron: 90 }, dbAxis: 'spine', fix: [{ type: 'spine' }], aim: 'おもに大胸筋・三角筋前部', g: 'arm', prop: 'dumbbell', bench: true, load: 'ベンチにあお向けで、ダンベル{kg}を横に開いた位置から胸の上で合わせる。重さは真下にかかる',
       loads: [{ pts: GRIPS, each: true }], kg: 6, kgs: [0, 4, 6, 10], orient: { pitch: -90 }, place: { pt: 'back', y: 0.45 },
       supports: [{ pts: ['back'] }, { pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }],
-      start: { b: { shoulderAbd: 85, elbow: 20, hip: 10, knee: 85 } }, end: { b: { shoulder: 90, elbow: 20, hip: 10, knee: 85 } }, ends: ['開いた位置', '合わせた位置'], verbs: ['腕を閉じる', '開く'] },
-    { name: 'ダンベルプルオーバー', hand: { grip: 1, pron: 90 }, aim: 'おもに広背筋・大円筋・大胸筋・上腕三頭筋長頭', g: 'arm', prop: 'dumbbell', bench: true, one: true, load: 'ベンチにあお向けで、両手で持ったダンベル{kg}を頭の後ろから胸の上へ動かす',
+      start: { b: { shoulder: 90, shoulderAbd: 80, elbow: 20, hip: 10, knee: 85 } }, end: { b: { shoulder: 90, shoulderAbd: -10, elbow: 20, hip: 10, knee: 85 } }, ends: ['開いた位置', '合わせた位置'], verbs: ['腕を閉じる', '開く'] },
+    { name: 'ペックフライ(マシン)', hand: { grip: 1, pron: 90 }, aim: 'おもに大胸筋・三角筋前部', g: 'arm', prop: 'pecfly', fix: [{ type: 'spine' }],
+      load: 'マシンに座って背もたれに背中をつけ、左右のハンドル(重り{kg})を胸の前で合わせる。重りの力は、ハンドルが回る円の向き(腕を開く向き)にかかる',
+      loads: [{ pts: GRIPS, tan: true }], kg: 20, kgs: [10, 20, 30], orient: { pitch: 0 }, place: { pt: 'butt', y: 0.5 },
+      supports: [{ pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }],
+      start: { b: { hip: 90, knee: 90, shoulder: 90, shoulderAbd: 75, elbow: 15 } }, end: { b: { hip: 90, knee: 90, shoulder: 90, shoulderAbd: -10, elbow: 15 } },
+      ends: ['開いた位置', '合わせた位置'], verbs: ['腕を閉じる', '開く'] },
+    { name: 'ダンベルプルオーバー', hand: { grip: 1, pron: 180 }, fix: [{ type: 'bar', w: 0.045, lim: { shoulderAbd: [-45, 170] } }], soft: ['shoulderAbd'], aim: 'おもに広背筋・大円筋・大胸筋・上腕三頭筋長頭', g: 'arm', prop: 'dumbbell', bench: true, one: true, load: 'ベンチにあお向けで、ダンベル{kg}1個のシャフトを両手を重ねるように握り、頭の後ろから胸の上へ動かす',
       loads: [{ pts: GRIPS }], kg: 10, kgs: [0, 6, 10, 16], orient: { pitch: -90 }, place: { pt: 'back', y: 0.45 },
       supports: [{ pts: ['back'] }, { pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }],
       start: { b: { shoulder: 165, shoulderAbd: 5, elbow: 25, hip: 10, knee: 85 } }, end: { b: { shoulder: 80, shoulderAbd: 5, elbow: 25, hip: 10, knee: 85 } }, ends: ['頭の後ろ', '胸の上'], verbs: ['引き上げる', '戻す'] },
@@ -8073,14 +8284,14 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       loads: [{ pts: GRIPS, each: true }], kg: 4, kgs: [0, 2, 4, 6], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, rest: ['gh'],
       start: { b: { hip: 90, knee: 30, shoulder: -15, elbow: 95 } }, end: { b: { hip: 90, knee: 30, shoulder: -15, elbow: 0 } }, ends: ['肘を曲げた位置', '伸ばした位置'], verbs: ['伸ばす', '曲げる'] },
     { name: 'アップライトロウ', hand: { grip: 1, pron: 180 }, aim: 'おもに三角筋中部・僧帽筋上部', g: 'arm', prop: 'barbell', load: 'バーベル{kg}を体に沿って胸の高さまで引き上げる。肘を高く上げる',
-      loads: [{ pts: GRIPS }], kg: 20, kgs: [0, 10, 20, 30], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET],
+      loads: [{ pts: GRIPS }], kg: 20, kgs: [0, 10, 20, 30], orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], fix: [{ type: 'bar' }], 
       start: { b: { shoulder: 10, shoulderAbd: 10 } }, end: { b: { shoulderAbd: 90, shoulderRot: -60, elbow: 120 } }, ends: ['下げた位置', '引き上げた位置'], verbs: ['引き上げる', '下ろす'] },
     { name: 'シュラッグ', hand: { grip: 1, pron: 90 }, aim: 'おもに僧帽筋上部・肩甲挙筋', g: 'scap', prop: 'dumbbell', load: 'ダンベル{kg}を下げたまま肩をすくめる。重さは肩甲骨を下へ引く',
       loads: [{ pts: GRIPS, each: true }], kg: 16, kgs: [0, 8, 16, 24], orient: { pitch: 0 }, supports: [FEET], rhythm: false, rest: ['shoulder'],
       start: {}, end: { b: { scapElev: 22 } }, ends: ['下げた位置', 'すくめた位置'], verbs: ['すくめる', '下ろす'] },
-    { name: 'クランチ', vars: [{ label: '膝', opts: [['立てる', {}], ['伸ばす', { start: { b: { hip: 0, knee: 0 } }, end: { b: { hip: 0, knee: 0 } } }, '脚を伸ばすと、腸腰筋が骨盤を引っぱる形になります。']] }], hand: { grip: 0, pron: 90 }, aim: 'おもに腹直筋・腹斜筋', g: 'body', load: 'あお向けで上体を丸める。上体の重さが体幹を反らす向きにかかり、床がお尻と足を支える',
-      orient: { pitch: -90 }, supports: [{ pts: ['back'], floor: true }, { pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }], rhythm: false, rest: ['arm'],
-      start: { b: { hip: 60, knee: 100 } }, end: { a: { trunk: 40 }, b: { hip: 60, knee: 100 } }, ends: ['寝た位置', '丸めた位置'], verbs: ['丸める', '戻す'] },
+    { name: 'クランチ', vars: [{ label: '膝', opts: [['立てる', {}], ['伸ばす', { start: { b: { hip: 0, knee: 0 } }, end: { b: { hip: 0, knee: 0 } } }, '脚を伸ばすと、腸腰筋が骨盤を引っぱる形になります。']] }], hand: { grip: 0, pron: 90 }, aim: 'おもに腹直筋・腹斜筋', g: 'body', load: 'あお向けで腕を胸の前で組み、お尻と足を床につけたまま上体だけを丸める。上体の重さが体幹を反らす向きにかかり、床がお尻と足を支える',
+      orient: { pitch: -90 }, anchor: 'butt', supports: [{ pts: ['back'], floor: true }, { pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }], rhythm: false, rest: ['arm'],
+      start: { b: { hip: 60, knee: 100, ...ARMS_X } }, end: { a: { trunk: 35, neck: 15 }, b: { hip: 60, knee: 100, ...ARMS_X } }, ends: ['寝た位置', '丸めた位置'], verbs: ['丸める', '戻す'] },
     { name: 'バックエクステンション', hand: { grip: 0, pron: 90 }, aim: 'おもに脊柱起立筋・大殿筋・ハムストリングス', g: 'body', prop: 'pad', load: '45度の台で太ももを支え、足首をパッドで押さえて上体を起こす',
       orient: { fix: 'thigh.r', pitch: 45 }, place: { pt: 'thigh.r', y: 0.95 }, supports: [{ pts: ['thigh.l', 'thigh.r'] }, { pts: ['ankle.l', 'ankle.r'], down: true }], rhythm: false, rest: ['arm'],
       start: { b: { hip: 55 }, a: { trunk: 25 } }, end: { b: { hip: -5 }, a: { trunk: -10 } }, ends: ['倒した位置', '起こした位置'], verbs: ['上体を起こす', '倒す'] }
@@ -8115,14 +8326,18 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     const key = sel.join(',');
     base.vc = base.vc || {};
     if (base.vc[key]) return base.vc[key];
-    if (sel.every((x, i) => !Object.keys(base.vars[i].opts[x][1]).length)) return (base.vc[key] = base);
-    const d = Object.assign({}, base, { base, add: { a: {}, b: {} }, start: JSON.parse(JSON.stringify(base.start)), end: JSON.parse(JSON.stringify(base.end)) });
+    if (!base.make && sel.every((x, i) => !Object.keys(base.vars[i].opts[x][1]).length)) return (base.vc[key] = base);
+    const d = Object.assign({}, base, { base, fixed: null, add: { a: {}, b: {} }, start: JSON.parse(JSON.stringify(base.start)), end: JSON.parse(JSON.stringify(base.end)) });
     if (base.rhythm !== false) { d.rhythm = false; d.bake = true; }
     sel.forEach((x, i) => {
       const p = base.vars[i].opts[x][1];
       for (const g of ['a', 'b']) Object.assign(d.add[g], p.add && p.add[g]);
-      for (const e of ['start', 'end']) if (p[e]) for (const g of ['a', 'b']) if (p[e][g]) d[e][g] = Object.assign({}, d[e][g], p[e][g]);
+      for (const e of ['start', 'end']) if (p[e]) for (const g of ['a', 'b', 'r', 'l']) if (p[e][g]) d[e][g] = Object.assign({}, d[e][g], p[e][g]);
+      // set: 種目の設定そのものを置き換える(体の向き・支え・器具など)
+      if (p.set) Object.assign(d, p.set);
     });
+    // make: 選んだ組み合わせから設定を決める(懸垂の握りの向きは手幅で変わる、など)
+    if (base.make) base.make(d, sel);
     if (sel.some((x, i) => base.vars[i].opts[x][1].keep)) d.interp = keepGrip(d);
     return (base.vc[key] = d);
   }
@@ -8175,6 +8390,139 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     const det = (m) => m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
     const D = det(A) || 1e-12;
     return [0, 1, 2].map((c) => det(A.map((row, i) => row.map((v, j) => (j === c ? y[i] : v)))) / D);
+  }
+  // ---- 手足を器具や床に固定する(def.fix) ----
+  // 関節角度を start → end の直線補間で動かすだけだと、バーを握る手がバーの軸の上を滑ったり、腕立て伏せのつま先が床の上を滑ったりする。
+  // 動きの途中の NK 点で、指定した関節の角度を少しずつ動かして条件を満たす姿勢を求め(減衰つきガウス・ニュートン法)、その間は直線でつなぐ。
+  // fix: [{ type, ... }] の配列。type:
+  //   bar:   バー(両手で持つダンベル1個も)を握る手の左右の間隔を一定にする。w = 体の中心から握りまでの距離(m)。省略時は at(0 = start, 1 = end)の姿勢の間隔。
+  //          高さと前後は元の動きのまま。動かす関節は ids(既定: 肩の前後・横・肘)
+  //   floor: 手のひら(palm)とつま先(toe)の距離を一定にし、手のひらを床に平らにつける(腕立て伏せ)。肩の前後と手首を動かす
+  //   spine: 握り(ダンベルのシャフト)の向きを背骨と平行に保つ。肩のひねりを動かす
+  //   foot:  片足(pt)を、前の足(on の体節)に対して決まった位置(床からの高さ h、前の足のかかとからの前後 dz)に置く。股関節・膝を動かす(ブルガリアンスクワットの後ろ足)
+  const FIX_NK = 16;
+  function fixPoser(d) {
+    const M = RIG.pose(JC, zeroAngles()), E = M.map((m) => m.elements);
+    const hand = d.hand || { grip: 0, pron: 90 }, T = {};
+    for (const sd of ['l', 'r']) { const H = HANDS[sd], pr = (hand[sd] && hand[sd].pron != null ? hand[sd] : hand).pron || 0; T[sd] = H ? aboutAxis(H.wrist, H.along, (sd === 'r' ? -1 : 1) * pr * Math.PI / 180) : null; }
+    return (o) => {
+      const b = JSON.parse(JSON.stringify(o));
+      if (d.rhythm !== false) for (const s of ['l', 'r']) Object.assign(b[s], RIG.rhythm(b[s]));
+      RIG.pose(JC, b, M);
+      for (const sd of ['l', 'r']) if (T[sd]) M[RIG.SEG['hand.' + sd]].multiply(T[sd]);
+      return E;
+    };
+  }
+  const rotV = (E, s, v) => { const m = E[s]; return [m[0] * v[0] + m[4] * v[1] + m[8] * v[2], m[1] * v[0] + m[5] * v[1] + m[9] * v[2], m[2] * v[0] + m[6] * v[1] + m[10] * v[2]]; };
+  const vnorm = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
+  // 角度 o の vars([側, 関節id])を動かして resid(E) を0に近づける
+  // lim: { 関節id: [最小, 最大] } でその条件だけ可動域を変える(腕を前に上げたまま胸の前へ寄せる水平内転は、ふつうの内転より大きく動く)
+  function ikSolve(o, pose, vars, resid, iters, lim) {
+    const LIMS = vars.map(([, id]) => { const j = JOINTS.find((x) => x.id === id), l = lim && lim[id]; return l ? { min: l[0], max: l[1] } : j; });
+    const get = (s, id) => (s ? o[s][id] : o[id]);
+    const put = (s, id, v) => { if (s) o[s][id] = v; else o[id] = v; };
+    for (let it = 0; it < (iters || 12); it++) {
+      const r = resid(pose(o));
+      if (Math.max(...r.map(Math.abs)) < 2e-4) break;
+      const J = vars.map(([s, id]) => {
+        const v0 = get(s, id);
+        put(s, id, v0 + 0.5);
+        const r1 = resid(pose(o));
+        put(s, id, v0);
+        return r1.map((x, c) => (x - r[c]) / 0.5);
+      });
+      const n = vars.length;
+      const A = vars.map((_, a) => vars.map((_, b) => J[a].reduce((t, x, c) => t + x * J[b][c], 0) + (a === b ? 1e-5 : 0)));
+      const y = vars.map((_, a) => -J[a].reduce((t, x, c) => t + x * r[c], 0));
+      const dx = solveN(A, y);
+      vars.forEach(([s, id], q) => put(s, id, Math.min(LIMS[q].max, Math.max(LIMS[q].min, get(s, id) + Math.max(-15, Math.min(15, dx[q]))))));
+      if (n === 0) break;
+    }
+    return o;
+  }
+  function solveN(A, y) {
+    const n = y.length, M = A.map((row, i) => row.concat([y[i]]));
+    for (let c = 0; c < n; c++) {
+      let p = c;
+      for (let i = c + 1; i < n; i++) if (Math.abs(M[i][c]) > Math.abs(M[p][c])) p = i;
+      [M[c], M[p]] = [M[p], M[c]];
+      if (Math.abs(M[c][c]) < 1e-12) continue;
+      for (let i = 0; i < n; i++) if (i !== c) { const f = M[i][c] / M[c][c]; for (let k = c; k <= n; k++) M[i][k] -= f * M[c][k]; }
+    }
+    return M.map((row, i) => (Math.abs(row[i]) < 1e-12 ? 0 : row[n] / row[i]));
+  }
+  function fixInterp(d, interp) {
+    if (!d.fix) return interp;
+    const pose = fixPoser(d), L = LCTX.L, SD = ['l', 'r'];
+    const P = (E, n) => LOAD.at(E, L.pt[n]);
+    const HS = (s) => RIG.SEG['hand.' + s];
+    // 手の向き(静止姿勢で 手首 → 指の付け根)と、握りの軸(静止姿勢で左右方向)
+    const along = {}, axis = [1, 0, 0];
+    for (const s of SD) { const H = HANDS[s]; along[s] = H ? vnorm(H.mcp.clone().sub(H.wrist).toArray()) : [0, -1, 0]; }
+    // 条件ごとの準備(端の姿勢から目標を決める)
+    const prep = d.fix.map((f) => {
+      const g = Object.assign({}, f);
+      if (f.type === 'bar' && g.w == null) { const E = pose(interp(f.at || 0)); g.w = SD.map((s) => Math.abs(P(E, 'grip.' + s)[0])).reduce((a, b) => a + b) / 2; }
+      if (f.type === 'floor') {
+        // 押し上げた位置で手のひらを平らにしてから、手のひらとつま先の距離を測る
+        const o = JSON.parse(JSON.stringify(interp(1)));
+        for (const s of SD) ikSolve(o, pose, [[s, 'wrist']], (E) => [flatErr(E, s)]);
+        const E = pose(o);
+        g.dist = {};
+        for (const s of SD) { const a = P(E, 'palm.' + s), b = P(E, 'toe.' + s); g.dist[s] = Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]); }
+      }
+      return g;
+    });
+    function flatErr(E, s) {
+      const a = rotV(E, HS(s), along[s]), p = P(E, 'palm.' + s), t = P(E, 'toe.' + s);
+      const l = vnorm([0, p[1] - t[1], p[2] - t[2]]), aa = vnorm([0, a[1], a[2]]);
+      return aa[1] * l[2] - aa[2] * l[1];
+    }
+    const samples = [];
+    for (let n = 0; n <= FIX_NK; n++) {
+      const k = n / FIX_NK, o = JSON.parse(JSON.stringify(interp(k)));
+      const E0 = pose(o);
+      const goal = {};
+      for (const s of SD) goal[s] = P(E0, 'grip.' + s);
+      for (const f of prep) {
+        for (const s of f.sides || SD) {
+          if (f.type === 'bar') {
+            const tg = [(s === 'l' ? 1 : -1) * f.w, goal[s][1], goal[s][2]];
+            ikSolve(o, pose, (f.ids || ['shoulder', 'shoulderAbd', 'elbow']).map((id) => [s, id]), (E) => { const q = P(E, 'grip.' + s); return [q[0] - tg[0], q[1] - tg[1], q[2] - tg[2]]; }, 12, f.lim);
+          } else if (f.type === 'floor') {
+            ikSolve(o, pose, [[s, 'shoulder'], [s, 'wrist']], (E) => {
+              const a = P(E, 'palm.' + s), b = P(E, 'toe.' + s);
+              return [Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]) - f.dist[s], 0.05 * flatErr(E, s)];
+            });
+          } else if (f.type === 'spine') {
+            ikSolve(o, pose, [[s, 'shoulderRot']], (E) => {
+              const g = vnorm(rotV(E, HS(s), axis)), sp = vnorm(rotV(E, RIG.SEG.trunk, [0, 1, 0]));
+              const c = [g[1] * sp[2] - g[2] * sp[1], g[2] * sp[0] - g[0] * sp[2], g[0] * sp[1] - g[1] * sp[0]];
+              return c.map((x) => 0.05 * x);
+            });
+          } else if (f.type === 'foot') {
+            // 前の足の体節の座標(静止姿勢の足の位置)で、後ろ足の点を目標の位置に置く
+            const on = RIG.SEG[f.on], heel = L.pt['heel.' + f.on.split('.')[1]];
+            const tg = [heel[1] + f.h, heel[2] + f.dz];
+            ikSolve(o, pose, (f.ids || ['hip', 'knee']).map((id) => [s, id]), (E) => {
+              const q = P(E, f.pt), m = new THREE.Matrix4().fromArray(E[on]).invert();
+              const v = new THREE.Vector3(q[0], q[1], q[2]).applyMatrix4(m);
+              return [v.y - tg[0], v.z - tg[1]];
+            }, 20);
+          }
+        }
+      }
+      samples.push(o);
+    }
+    return (k) => {
+      const x = Math.min(FIX_NK, Math.max(0, k * FIX_NK)), n = Math.min(FIX_NK - 1, Math.floor(x)), t = x - n, a = samples[n], b = samples[n + 1];
+      const o = zeroAngles();
+      JOINTS.forEach((j) => {
+        if (j.side) for (const s of SD) o[s][j.id] = a[s][j.id] + (b[s][j.id] - a[s][j.id]) * t;
+        else o[j.id] = a[j.id] + (b[j.id] - a[j.id]) * t;
+      });
+      return o;
+    };
   }
   const NF = 16; // 1回の動きを何等分して解くか
   let LCTX = null;
@@ -8259,7 +8607,9 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     for (const sd of ['l', 'r']) {
       const H = HANDS[sd];
       if (!H) continue;
-      const g = st ? st.grip || 0 : 0, pr = st ? st.pron || 0 : 0;
+      // st.l / st.r: 左右で違う手の形(ワンハンドローで左手は台につく)
+      const hs = st && st[sd] ? Object.assign({}, st, st[sd]) : st;
+      const g = hs ? hs.grip || 0 : 0, pr = hs ? hs.pron || 0 : 0;
       H.angle = (sd === 'r' ? -1 : 1) * pr * Math.PI / 180;
       H.twist.copy(aboutAxis(H.wrist, H.along, H.angle));
       H.active = !!st;
@@ -8369,6 +8719,19 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       const pm = H.mcp.clone().add(H.wrist).multiplyScalar(0.5).addScaledVector(H.palm, 0.012);
       L.pt['palm.' + sd] = [pm.x, pm.y, pm.z, RIG.SEG['hand.' + sd]];
     }
+    // 足の甲(ブルガリアンスクワットで後ろ足を台に乗せる点): 足の骨の、かかと〜母指球の 55〜85% の範囲で一番高い点の少し上
+    // 膝裏に近い太ももの裏(レッグエクステンションで座面の先が当たる点)
+    for (const sd of ['l', 'r']) {
+      const fv = segVerts[RIG.SEG['foot.' + sd]], h = L.pt['heel.' + sd], b = L.pt['ball.' + sd];
+      let top = null;
+      for (let i = 0; i < fv.length; i += 3) {
+        const t = (fv[i + 2] - h[2]) / (b[2] - h[2]);
+        if (t > 0.55 && t < 0.85 && (!top || fv[i + 1] > top[1])) top = [fv[i], fv[i + 1], fv[i + 2]];
+      }
+      if (top) L.pt['instep.' + sd] = [top[0], top[1] + 0.012, top[2], RIG.SEG['foot.' + sd]];
+      const kn = JC.side[sd].knee;
+      L.pt['hamk.' + sd] = [kn.x, kn.y + 0.08, kn.z - 0.065, RIG.SEG['thigh.' + sd]];
+    }
     // 最大筋力: 主な筋は文献値(LOAD.literatureFmax)。表にない筋は 1 MPa × 断面積(体積 ÷ 線維の長さ。線維は筋の長さの6割とする)から換算する
     // 筋でないもの(腱膜・腱・腸脛靭帯・靭帯の弓など)と皮筋(広頸筋)は力を出す筋から外す。舌骨につく筋(首の前の細い筋)も外す
     // 棘下筋・小円筋・肩甲下筋は主に腕をひねる筋で、ひねりはつり合いに入れないため外す(入れると曲げ伸ばしの力を不自然に肩代わりする)
@@ -8403,7 +8766,8 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   // 世界座標での置き方: 支えの点(アンカー)が動かないように前後をそろえ、床に触れる点の一番低いところを床(y=0)に置く
   function placeFrames(def, frames) {
     const L = LCTX.L;
-    const first = def.place ? def.place.pt : def.supports[0].pts[0];
+    // anchor: 前後の位置をそろえる点(省略時は place の点か最初の支え)。クランチはお尻を床に固定する
+    const first = def.anchor || (def.place ? def.place.pt : def.supports[0].pts[0]);
     const anchor = L.pt[first] || L.pt['heel.' + first.split('.')[1]];
     const W = (f, p) => { const v = new THREE.Vector3(p[0], p[1], p[2]).applyMatrix4(f.R); return v; };
     const a0 = W(frames[0], LOAD.at(frames[0].E, anchor)), c0 = W(frames[0], comOf(frames[0].E));
@@ -8452,7 +8816,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   const propMat = new THREE.MeshStandardMaterial({ color: 0x3a444c, roughness: 0.5, metalness: 0.3 });
   const padMat = new THREE.MeshStandardMaterial({ color: 0x6b7a85, roughness: 0.8, metalness: 0 });
   const cyl = (r, len, mat) => { const g = new THREE.CylinderGeometry(r, r, len, 24); g.rotateZ(Math.PI / 2); return new THREE.Mesh(g, mat || propMat); };
-  const _hm = new THREE.Matrix4();
+  const _hm = new THREE.Matrix4(), _qz = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI / 2);
   let props = null; // { items: [{ update(E, f) }] }
   function buildProps(def, kg) {
     propGroup.clear();
@@ -8475,12 +8839,13 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
         const line = cyl(0.004, 1, padMat);
         line.rotation.z = Math.PI / 2;
         propGroup.add(line);
-        items.push((E) => { const c = mid(E, GRIPS); const top = 2.6; line.scale.set(1, Math.max(0.01, top - c[1]), 1); line.position.set(0, (top + c[1]) / 2, c[2]); });
+        items.push((E) => { const c = mid(E, GRIPS); const top = 2.6; line.scale.set(Math.max(0.01, top - c[1]), 1, 1); line.position.set(0, (top + c[1]) / 2, c[2]); });
       }
     }
     if (def.prop === 'dumbbell' && kg > 0) {
       // one: 1個のダンベルを両手で持つ(プルオーバー)
-      for (const name of def.one ? ['grip.r'] : GRIPS) {
+      // dbPts: ダンベルを持つ手(ワンハンドローは右手だけ)。dbAxis 'spine': シャフトを背骨と平行に描く(ダンベルフライ)
+      for (const name of def.one ? ['grip.r'] : def.dbPts || GRIPS) {
         const g = new THREE.Group();
         g.add(cyl(0.013, 0.3));
         const r = Math.min(0.11, 0.045 + kg * 0.004);
@@ -8488,7 +8853,14 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
         propGroup.add(g);
         // 持ち手は手のひらを横切る向き(握った指の中を通る)
         const hs = RIG.SEG['hand.' + name.split('.')[1]];
-        items.push((E) => { const c = def.one ? mid(E, GRIPS) : P(E, name); g.position.set(c[0], c[1], c[2]); g.quaternion.setFromRotationMatrix(_hm.fromArray(E[hs])); });
+        items.push((E) => {
+          const c = def.one ? mid(E, GRIPS) : P(E, name);
+          g.position.set(c[0], c[1], c[2]);
+          // 1個を両手で持つときは、シャフトが左右の手を結ぶ線(左右方向)になる
+          if (def.one) g.quaternion.setFromRotationMatrix(_hm.fromArray(E[RIG.SEG.pelvis]));
+          else if (def.dbAxis === 'spine') g.quaternion.setFromRotationMatrix(_hm.fromArray(E[RIG.SEG.trunk])).multiply(_qz);
+          else g.quaternion.setFromRotationMatrix(_hm.fromArray(E[hs]));
+        });
       }
     }
     if (def.prop === 'plate' && kg > 0) {
@@ -8496,7 +8868,23 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       propGroup.add(pl);
       items.push((E) => { const c = P(E, 'hips'); pl.position.set(c[0], c[1] + 0.03, c[2]); });
     }
-    if (def.prop === 'bench' || def.prop === 'pbench' || def.bench) {
+    if (def.incline) {
+      // インクラインベンチ: 背もたれは お尻 → 背中 の線に沿って傾け、座面は水平
+      const back = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.06, 0.9), padMat), seat = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.06, 0.4), padMat);
+      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1, 0.22), padMat);
+      propGroup.add(back, seat, leg);
+      items.push((E) => {
+        const a = P(E, 'back'), c = P(E, 'butt');
+        const dy = a[1] - c[1], dz = a[2] - c[2], ang = Math.atan2(dy, -dz);
+        back.rotation.set(ang, 0, 0);
+        // 背中の点から体の外側(背もたれの面の下)へ 3cm
+        const nx = -Math.sin(ang), ny = -Math.cos(ang);
+        back.position.set(0, (a[1] + c[1]) / 2 + dy * 0.15 + ny * 0.03 + 0.03, (a[2] + c[2]) / 2 + dz * 0.15 + nx * 0.03);
+        seat.position.set(0, c[1] - 0.03, c[2] + 0.2);
+        const h = Math.max(0.01, c[1] - 0.06);
+        leg.scale.set(1, h, 1); leg.position.set(0, h / 2, c[2] + 0.1);
+      });
+    } else if (def.prop === 'bench' || def.prop === 'pbench' || def.bench) {
       const b = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.06, 1.15), padMat);
       propGroup.add(b);
       const leg = new THREE.Mesh(new THREE.BoxGeometry(0.22, 1, 0.22), padMat); // 床までの脚
@@ -8525,11 +8913,70 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     if (def.prop === 'seat') {
       const seat = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1, 0.45), padMat);
       propGroup.add(seat);
-      items.push((E) => {
+      if (def.liftSeat) {
+        // お尻を浮かせるやり方: 座面の先が膝裏に近い太ももに当たる(その点は動かない)
+        items.push((E) => {
+          const k = mid(E, ['hamk.l', 'hamk.r']), h = Math.max(0.01, k[1]);
+          seat.scale.set(1, h, 1); seat.position.set(0, h / 2, k[2] - 0.2);
+        });
+      } else items.push((E) => {
         const c = P(E, 'butt'), t = mid(E, ['thigh.l', 'thigh.r']);
         const h = Math.max(0.01, c[1] - 0.07);
         seat.scale.set(1, h, 1); seat.position.set(0, h / 2, (c[2] + t[2]) / 2);
       });
+      // すねの前に当たるパッド(足首の少し上)
+      const shin = cyl(0.05, 0.42, padMat);
+      propGroup.add(shin);
+      const an = JC.side.r.ankle, ss = RIG.SEG['shank.r'];
+      items.push((E) => { const c = LOAD.at(E, [0, an.y + 0.07, an.z + 0.075, ss]); shin.position.set(0, c[1], c[2]); });
+    }
+    if (def.rbench) {
+      // ブルガリアンスクワットの後ろ足を乗せる台(足の甲の下)
+      const b = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1, 0.4), padMat);
+      propGroup.add(b);
+      items.push((E) => { const c = P(E, 'instep.l'), h = Math.max(0.01, c[1] - 0.01); b.scale.set(1, h, 1); b.position.set(c[0], h / 2, c[2] - 0.12); });
+    }
+    if (def.kbench) {
+      // ワンハンドロー: 左膝と左手をつくベンチ
+      const b = new THREE.Mesh(new THREE.BoxGeometry(0.32, 1, 1), padMat);
+      propGroup.add(b);
+      items.push((E) => {
+        const k = P(E, 'knee.l'), p = P(E, 'palm.l'), top = Math.min(k[1], p[1]) - 0.01;
+        const z0 = Math.min(k[2], p[2]) - 0.25, z1 = Math.max(k[2], p[2]) + 0.12;
+        b.scale.set(1, Math.max(0.01, top), z1 - z0); b.position.set((k[0] + p[0]) / 2, top / 2, (z0 + z1) / 2);
+      });
+    }
+    if (def.prop === 'rowcable') {
+      // シーテッドロー: 座面、足台、前の滑車から手へのケーブルとハンドル
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1, 0.5), padMat), plate = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.35, 0.04), padMat);
+      const line = cyl(0.004, 1, padMat), hdl = cyl(0.014, 0.16);
+      line.rotation.y = Math.PI / 2;
+      propGroup.add(seat, plate, line, hdl);
+      items.push((E) => {
+        const c = P(E, 'butt'), f = mid(E, ['ball.l', 'ball.r']), g = mid(E, GRIPS);
+        const h = Math.max(0.01, c[1] - 0.07);
+        seat.scale.set(1, h, 1); seat.position.set(0, h / 2, c[2] + 0.12);
+        plate.position.set(0, f[1] + 0.05, f[2] + 0.05);
+        const zp = f[2] + 0.1, len = Math.max(0.01, zp - g[2]);
+        line.scale.set(len, 1, 1); line.position.set(0, g[1], g[2] + len / 2);
+        hdl.position.set(g[0], g[1], g[2]);
+      });
+    }
+    if (def.prop === 'pecfly') {
+      // ペックフライのマシン: 座面と背もたれ、手で握る縦のハンドル
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1, 0.4), padMat), back = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.75, 0.06), padMat);
+      propGroup.add(seat, back);
+      items.push((E) => {
+        const c = P(E, 'butt'), b = P(E, 'back'), h = Math.max(0.01, c[1] - 0.07);
+        seat.scale.set(1, h, 1); seat.position.set(0, h / 2, c[2] + 0.18);
+        back.position.set(0, b[1] - 0.05, b[2] - 0.03);
+      });
+      for (const name of GRIPS) {
+        const g = new THREE.Group(), hd = cyl(0.016, 0.22);
+        g.add(hd);
+        propGroup.add(g);
+        items.push((E) => { const c = P(E, name); g.position.set(c[0], c[1], c[2]); g.quaternion.setFromRotationMatrix(_hm.fromArray(E[RIG.SEG.trunk])).multiply(_qz); });
+      }
     }
     if (def.prop === 'dipbar') {
       // 左右の手の下に、前後にのびる平行棒
@@ -8560,7 +9007,16 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
         const len = Math.min(0.45, 0.08 + each * 0.006);
         a.setDirection(dir);
         a.setLength(len, 0.06, 0.04);
-        items.push((E) => { const c = P(E, name); a.position.set(c[0], c[1], c[2]); });
+        const sd = name.split('.')[1], gh = ld.tan && JC.side[sd].gh;
+        items.push((E) => {
+          const c = P(E, name);
+          a.position.set(c[0], c[1], c[2]);
+          if (gh) {
+            // 肩を中心とした円の接線(腕を開く向き)
+            const o = LOAD.at(E, [gh.x, gh.y, gh.z, RIG.SEG['arm.' + sd]]), t = new THREE.Vector3(c[2] - o[2], 0, -(c[0] - o[0])).normalize();
+            a.setDirection(sd === 'r' ? t.negate() : t);
+          }
+        });
       }
     }
     // 体重(全身の重心)
@@ -8599,7 +9055,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   function owns(k) { if (location.protocol === 'file:') return true; try { return !!localStorage.getItem('kinlab-own-' + k); } catch (e) { return false; } }
   const PRODUCT = {
     atlas: { name: '筋骨格アトラス', price: '¥2,390', what: '関節を自由に動かして、筋の伸び縮みを色で見られます。' },
-    training: { name: 'トレーニング図鑑', price: '¥1,000', what: '28種目すべての動きと、筋の負荷を見られます。' },
+    training: { name: 'トレーニング図鑑', price: '¥1,000', what: TRAININGS.length + '種目すべての動きと、筋の負荷を見られます。' },
     stretch: { name: 'ストレッチ図鑑', price: '¥1,000', what: 'ストレッチ19種目すべてで、伸ばされる筋を見られます。' }
   };
   function showLock(id, k, item) {
@@ -8628,7 +9084,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     exBtns.forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
     if (kg === undefined) kg = base.kg || 0;
     const def = varDef(base);
-    const interp = def.interp || trInterp(def);
+    const interp = def.fixed || (def.fixed = fixInterp(def, def.interp || trInterp(def)));
     const frames = LOAD.solveExercise(LCTX, def, kg, NF, interp);
     placeFrames(def, frames);
     const peak = new Float64Array(muscleMeshes.length);
@@ -9094,13 +9550,16 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     });
   }
 
+// 体の不調図鑑のデータと画面。build.js が atlas.js の /*CARE*/ の位置にそのまま差し込む(atlas.js の中の変数・関数をそのまま使う)
   // ---- 体の不調図鑑(APP_MODE = 'care' のときだけ) ----
   // 代表的な不調ごとに、起こりやすい姿勢(よい姿勢 ⇄ 負担がかかる姿勢)をくり返し、
-  // 硬くなりやすい・負担がかかる筋をオレンジ、弱りやすい・働きにくい筋を緑で表示する。
-  // アプローチのストレッチは同じ画面でストレッチ図鑑と同じように再生する(ストレッチ図鑑の有料種目は購入が必要)。
+  // 原因の筋を状態ごとに色分けし(弱い = 緑、こっている = オレンジ、縮んでいる = 紫。中心の筋は濃く、関連する筋は薄く)、痛む場所を赤く光らせる。
+  // 原因と対策は1対1(弱い → 使う、こっている → ほぐす、縮んでいる → ストレッチ)。対策のストレッチは同じ画面でストレッチ図鑑と同じように再生する(ストレッチ図鑑の有料種目は購入が必要)。
   // 内容は一般的な説明で、診断や治療の代わりにはならない(画面にも明記)
-  // pose: start = よい姿勢、end = 負担がかかる姿勢(書き方は STRETCHES と同じ)。tight / weak: [表示名, 英名の正規表現]
-  // st: アプローチのストレッチ(STRETCHES か CARE_ST の名前)、tr: トレーニング図鑑の種目名、text: 3Dで再生できないアプローチの説明
+  // pose: start = よい姿勢、end = 負担がかかる姿勢(書き方は STRETCHES と同じ)。layer: 最初に見せる層(問題の筋が多い層。これより上の層ははがす)
+  // weak / tense / short: { mu: 中心の筋(MU の id。1〜2個), sub: 関連する筋, fix: 対策の狙い(短く), ex: 対策の動き(HI・CARE_USE・STRETCHES・CARE_ST・TRAININGS の名前), text: 3Dで再生できない対策 }
+  // main: 中心の原因。scene: pc = パソコン作業 / phone = 両手でスマホ / phone1 = 右手でスマホ。inside: 体の中で起きていること(何筋がどうなっているか、箇条書き)。pain: 痛む場所 { n: 名前, at: 位置, r: 光の大きさ(m) }
+  // at は付着部(ATTACH の名前。.o = 起始、.e = 停止、右側)、{ j: 関節, o: [外側, 上, 前](m), snap: 寄せる骨 }、{ mu: 筋の中心 }、{ bone: 骨 }
   const SITTING = { prop: 'seat', orient: { pitch: 0 }, place: { pt: 'butt', y: 0.46 }, supports: [{ pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }], rhythm: false };
   const STANDING = { orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false };
   const DESK = { hip: 90, knee: 90, shoulder: 30, elbow: 80 };
@@ -9249,14 +9708,13 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'katakori', g: 'neck', name: '肩こり', pose: 'デスクワークで前かがみ',
       sum: '首の付け根から肩・背中の上のあたりが張って、重く感じる状態。長い時間同じ姿勢でいることが代表的なきっかけです。',
       causes: ['デスクワークやスマホで、頭が前に出て背中が丸まった姿勢が続く', '頭(約5kg)が前に出るほど、首の後ろと肩の筋が支える負担が増える', '肩をすくめる・腕を前に出したままの姿勢で、同じ筋が休まず働き続ける', '運動不足・冷え・ストレスによる筋の緊張'],
-      mech: '頭が前に出ると、首の後ろの筋(僧帽筋上部・肩甲挙筋・板状筋)が頭を引き戻すために働き続けます。同時に胸の筋(大胸筋・小胸筋)が縮んだまま硬くなって肩甲骨を前へ引き、肩甲骨を背骨側へ寄せる菱形筋や僧帽筋の中部・下部は引き伸ばされたまま弱くなっています。筋が休まず緊張すると血の巡りが悪くなり、張りや重さとして感じやすくなります。',
+      scene: 'pc',
+      inside: ['頭が前に出て、僧帽筋 上部・肩甲挙筋が頭を支え続けて、こっている', '大胸筋・小胸筋が縮んで、肩甲骨を前に引いている', '菱形筋・僧帽筋 中部が伸ばされたまま弱くなり、肩甲骨を戻せない'],
+      pain: [{ n: '首の付け根〜肩の上', at: { mu: 'trapU' }, r: 0.07 }],
       layer: 'sup', main: ['tense', 'short'],
-      sites: [
-        { n: '肩甲挙筋の停止部(肩甲骨の上の角)', at: 'Levator scapulae.e', k: 'load', why: '頭が前に出ると、首と肩甲骨をつなぐ肩甲挙筋が引っぱられ続け、肩甲骨の上の角の付け根に張りや痛みが集まります。' },
-        { n: '僧帽筋 上部の起始部(後頭部〜首の後ろ)', at: 'Ascending part of trapezius muscle.o', k: 'load', why: '頭の重さを後ろから支え続けるため、首の付け根から後頭部にかけてこりを感じやすくなります。' }],
-      weak: { mu: ['trapML', 'rhomb', 'serr', 'dnf'], why: '肩甲骨を背骨側へ寄せる菱形筋・僧帽筋 中部・下部は、引き伸ばされたまま弱い傾向があり、肩甲骨を正しい位置に保てません。', fix: '肩甲骨を寄せる筋を使い、肩甲骨を後ろで支える力をつけると、首と肩の筋の負担が減ります。', ex: ['肩甲骨を寄せる', 'ベントオーバーロウ', 'ラットプルダウン'] },
-      tense: { mu: ['trapU', 'levScap', 'splen'], why: '頭が前に出た姿勢では、僧帽筋 上部・肩甲挙筋・板状筋が頭を引き戻すために休まず働き、緊張したまま血の巡りが悪くなっています。', fix: '押す・もむ・温めることで緊張をゆるめ、血の巡りを戻します。', ex: ['neckBack'] },
-      short: { mu: ['pecMaj', 'pecMin', 'trapU'], why: '胸の大胸筋・小胸筋が縮んだまま硬くなり、肩甲骨を前へ引いて、肩が内に入った位置から戻りにくくなっています。', fix: '胸の前と首の横をゆっくり伸ばし、肩甲骨を後ろへ戻せる長さを取り戻します。', ex: ['首の横(左側)', '首の後ろ', '胸を開く', '腕を胸の前で引く(右)'] },
+      weak: { mu: ['rhomb', 'trapML'], sub: ['serr', 'dnf'], fix: '肩甲骨を寄せる筋を使い、肩甲骨を後ろで支える', ex: ['肩甲骨を寄せる', 'ベントオーバーロウ', 'ラットプルダウン'] },
+      tense: { mu: ['trapU', 'levScap'], sub: ['splen'], fix: '首の付け根と肩の上をもんで、緊張をゆるめる', ex: ['neckBack'] },
+      short: { mu: ['pecMin', 'pecMaj'], sub: ['trapU'], fix: '胸の前と首の横を伸ばす', ex: ['首の横(左側)', '首の後ろ', '胸を開く', '腕を胸の前で引く(右)'] },
       daily: ['画面を目の高さに近づけ、頭が前に出ないようにする', '30〜60分に一度は立ち上がり、肩を回す・肩甲骨を寄せる', '肩をすくめていないか、ときどき確かめる', '湯船で温めて血の巡りをよくする'],
       see: '腕や手のしびれ・力が入りにくい、痛みがだんだん強くなる、安静にしていても痛む、胸の痛みや息苦しさをともなう場合は、早めに医療機関を受診してください。',
       cam: { theta: 2.4, phi: 1.3 },
@@ -9264,29 +9722,27 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'kubikori', g: 'neck', name: '首こり・スマホ首', pose: 'スマホをのぞきこむ',
       sum: 'うつむいた姿勢が続いて、首の後ろがこる・痛む状態。首の骨の自然なカーブ(前弯)が少なくなった状態を「ストレートネック」と呼ぶこともあります。',
       causes: ['スマホやノートパソコンをのぞきこむ、うつむいた姿勢', 'うつむく角度が深いほど、首の後ろの筋が頭を支える負担が大きくなる', '枕の高さが合っていない', '首の前の奥の筋が弱く、頭の位置を保ちにくい'],
-      mech: 'うつむくと頭の重心が首より前に出るため、首の後ろの筋(板状筋・半棘筋・後頭下筋群)が、頭が前に倒れないようにブレーキをかけ続けます。いっぽう首の前の奥にある頸長筋・頭長筋は、首のカーブを保つ役割がありますが、この姿勢ではあまり使われず、弱い傾向があります。',
+      scene: 'phone',
+      inside: ['うつむくと頭の重さが首の後ろにかかり、板状筋・後頭下筋群がブレーキをかけ続ける', '首の前の奥の頸長筋・頭長筋が使われず、弱くなっている', '首の後ろと胸の前が縮んで、頭と肩が前に出たまま固まる'],
+      pain: [{ n: '首の後ろ〜頭の付け根', at: { mu: 'splen' }, r: 0.06 }],
       layer: 'mid', main: ['weak', 'short'],
-      sites: [
-        { n: '後頭下筋群の付着部(後頭部の骨のすぐ下)', at: ['Rectus posterior major capitis muscle.o', 'Rectus posterior minor capitis muscle.o'], k: 'load', why: 'うつむいたまま目線だけ上げると、頭の付け根の小さな筋が縮み続け、ここに張りや痛みが出やすくなります。' },
-        { n: '肩甲挙筋の停止部(肩甲骨の上の角)', at: 'Levator scapulae.e', k: 'load', why: '頭が前に倒れないように首を後ろから引き続けるため、付け根に負担が集まります。' }],
-      weak: { mu: ['dnf', 'trapL'], why: '首の前の奥にある頸長筋・頭長筋は、首の自然なカーブを保つ筋ですが、うつむいた姿勢ではほとんど使われず、弱い傾向があります。', fix: 'あごを引く運動で首の奥の筋を使い、頭を首の真上に保つ力を取り戻します。', ex: ['あごを引く(チンイン)', '肩甲骨を寄せる'] },
-      tense: { mu: ['subocc', 'splen', 'levScap'], why: '頭が前に倒れないようにブレーキをかけ続けるため、首の後ろの筋が緊張したままになっています。', fix: '頭の付け根や首の付け根をほぐして、緊張をゆるめます。', ex: ['suboc', 'neckBack'] },
-      short: { mu: ['splen', 'semis', 'trapU', 'pecMin'], why: '首の後ろと胸の前の筋が縮んだまま硬くなり、頭と肩が前に出た位置で固まりやすくなっています。', fix: '首の後ろと胸を伸ばして、頭を後ろへ戻せる長さを取り戻します。', ex: ['首の後ろ', '首の横(左側)', '胸を開く'] },
+      weak: { mu: ['dnf'], sub: ['trapL'], fix: 'あごを引いて首の奥の筋を使い、頭を首の真上に戻す', ex: ['あごを引く(チンイン)', '肩甲骨を寄せる'] },
+      tense: { mu: ['subocc', 'splen'], sub: ['levScap'], fix: '頭の付け根と首の付け根をほぐす', ex: ['suboc', 'neckBack'] },
+      short: { mu: ['splen', 'semis'], sub: ['trapU', 'pecMin'], fix: '首の後ろと胸を伸ばす', ex: ['首の後ろ', '首の横(左側)', '胸を開く'] },
       daily: ['スマホは目の高さまで持ち上げて見る', 'あごを軽く引いて、耳が肩の真上に来る姿勢を意識する', '枕は、首のすき間を埋める高さにする'],
       see: '腕や手のしびれ、手に力が入りにくい、めまいや吐き気をともなう場合は、早めに受診してください。',
       cam: { theta: 2.0, phi: 1.3 },
-      def: Object.assign({}, STANDING, { hand: { grip: 0.5, pron: 90 }, start: { b: { shoulder: 30, elbow: 100 } }, end: { b: { shoulder: 30, elbow: 100, scapPro: 12 }, a: { neck: 42, trunk: 8 } } }) },
+      def: Object.assign({}, STANDING, { hand: { grip: 0.5, pron: 90 }, start: { b: { shoulder: 30, elbow: 100, shoulderRot: -40 } }, end: { b: { shoulder: 30, elbow: 100, shoulderRot: -40, scapPro: 12 }, a: { neck: 42, trunk: 8 } } }) },
     { id: 'zutsu', g: 'neck', name: '頭痛(緊張型頭痛)', pose: '首・肩に力が入った前かがみ',
       sum: '頭の両側や後頭部が、締めつけられるように重く痛むタイプの頭痛。首や肩のこりと一緒に起こりやすいとされ、頭痛の中でいちばん多いタイプです。',
       causes: ['長い時間の同じ姿勢(デスクワーク・スマホ)による、首・肩の筋の緊張', '目の疲れ', '精神的なストレスや睡眠不足', '歯の食いしばり(側頭筋・咬筋の緊張)'],
-      mech: '首の後ろの奥にある後頭下筋群や、頭をおおう筋(後頭筋・前頭筋・側頭筋)が緊張し続けると、頭が締めつけられるような痛みにつながると考えられています。首の付け根の筋(僧帽筋上部・板状筋)や胸鎖乳突筋のこりが、頭の痛みとして感じられること(関連痛)もあります。',
+      scene: 'pc',
+      inside: ['後頭下筋群・板状筋が緊張し、頭を締めつける痛みになる', '食いしばりで側頭筋・咬筋が緊張している', '首の奥の筋が弱く、頭が前に出て首の後ろに負担が集まる'],
+      pain: [{ n: '後頭部', at: { mu: 'subocc' }, r: 0.06 }, { n: 'こめかみ', at: { mu: 'temp' }, r: 0.05 }],
       layer: 'sup', main: ['tense'],
-      sites: [
-        { n: '後頭下筋群の付着部(後頭部の骨のすぐ下)', at: ['Rectus posterior major capitis muscle.o', 'Rectus posterior minor capitis muscle.o'], k: 'load', why: '頭の付け根の筋が緊張し続けると、後頭部から頭全体を締めつけるような痛みにつながると考えられています。' },
-        { n: '側頭筋の起始部(こめかみ)', at: ['Temporalis muscle.o1', 'Temporalis muscle.o2', 'Temporalis muscle.o3'], k: 'load', why: '食いしばりで側頭筋が緊張すると、こめかみのあたりが重く痛みます。' }],
-      weak: { mu: ['dnf', 'trapML'], why: '首の奥の筋と肩甲骨を寄せる筋が弱い傾向があり、頭が前に出て首の後ろの筋に負担が集まります。', fix: 'あごを引く運動で、首の奥の筋を使って頭の位置を戻します。', ex: ['あごを引く(チンイン)'] },
-      tense: { mu: ['subocc', 'splen', 'trapU', 'scm', 'temp', 'scalp', 'mass'], why: '首の奥の後頭下筋群や、頭をおおう筋・あごの筋が緊張したままで、頭を締めつける痛みの元になっています。', fix: '頭の付け根・こめかみ・首の付け根をほぐし、緊張をゆるめます。', ex: ['suboc', 'jaw', 'neckBack'] },
-      short: { mu: ['splen', 'trapU', 'scm'], why: '首の後ろと横の筋が縮んだまま硬くなり、首を動かしにくくなっています。', fix: '首の後ろ・横・胸を伸ばして、首まわりの筋の長さを戻します。', ex: ['首の後ろ', '首の横(左側)', '胸を開く'] },
+      weak: { mu: ['dnf'], sub: ['trapML'], fix: 'あごを引いて首の奥の筋を使う', ex: ['あごを引く(チンイン)'] },
+      tense: { mu: ['subocc', 'temp'], sub: ['splen', 'trapU', 'scm', 'scalp', 'mass'], fix: '頭の付け根・こめかみ・首の付け根をほぐす', ex: ['suboc', 'jaw', 'neckBack'] },
+      short: { mu: ['splen', 'scm'], sub: ['trapU'], fix: '首の後ろと横を伸ばす', ex: ['首の後ろ', '首の横(左側)', '胸を開く'] },
       daily: ['ときどき画面から目を離し、遠くを見る', '食いしばりに気づいたら、上下の歯を離して力を抜く', '首・肩を温める', '睡眠を十分にとる'],
       see: '突然の激しい頭痛、今までに経験したことのない頭痛、手足のしびれ・ろれつが回らない・ものが二重に見える、発熱や首の強いこわばりをともなう場合は、すぐに医療機関を受診してください。ズキズキと脈打つ片頭痛は、温めたり体を動かしたりすると悪化することがあり、対処が異なります。',
       cam: { theta: 1.9, phi: 1.3 },
@@ -9294,14 +9750,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'gojukata', g: 'neck', name: '五十肩(肩関節周囲炎)', pose: '腕を上げようとして肩がすくむ',
       sum: '肩の関節のまわりに炎症が起き、痛みと「腕が上がらない・後ろに回らない」動きの悪さが出る状態。40〜60代に多く、医学的には肩関節周囲炎などと呼ばれます。',
       causes: ['加齢などで、肩の関節を包む袋(関節包)や腱板(肩の奥の筋の腱)に炎症が起きる', 'はっきりしたきっかけがなく起こることが多い', '痛みの強い時期のあと、関節包が縮んで硬くなり、動く範囲が狭くなる', '痛みで動かさないでいると、さらに固まりやすい'],
-      mech: '肩の関節は、腱板(棘上筋・棘下筋・小円筋・肩甲下筋)が上腕骨の頭を包むように支えています。炎症で関節包や腱板のまわりが硬くなると、腕を上げる・ひねる動きが制限されます。腕を上げようとすると、代わりに肩をすくめる(僧帽筋上部が働く)・体を傾けるといった動きが出やすくなります。一般に「痛みが強い時期 → 固まる時期 → 回復する時期」と経過し、時期によって適した対処が異なります。3Dモデルは関節包の硬さを表せないため、筋の位置と動きの目安として見てください。',
+      inside: ['肩の関節包に炎症が起き、そのあと縮んで硬くなる', '棘上筋・肩甲下筋など腱板のまわりが縮み、腕が上がらない・後ろに回らない', 'かばって動かすため、肩をすくめる僧帽筋 上部や肩の後ろがこっている'],
+      pain: [{ n: '肩の関節(外側〜前)', at: { j: 'gh', o: [0.02, 0, 0.01] }, r: 0.06 }],
       layer: 'mid', main: ['short'],
-      sites: [
-        { n: '肩の関節を包む袋(関節包)', at: { j: 'gh', o: [0.005, 0, 0] }, k: 'pain', why: '関節包に炎症が起き、その後に縮んで硬くなるのが五十肩の中心です。腕を上げる・ひねる動きが制限されます。' },
-        { n: '棘上筋・棘下筋の停止部(上腕骨の大結節)', at: ['Supraspinatus muscle.e', 'Infraspinatus muscle.e'], k: 'pain', why: '腱板の腱が付く所で、炎症や小さな傷が起きやすく、腕を横に上げると痛みます(似た症状の腱板断裂もこの場所です)。' }],
-      weak: { mu: ['supra', 'infra', 'subsc', 'serr', 'trapL'], why: '痛みで動かさない期間が続き、腱板と肩甲骨を支える前鋸筋・僧帽筋 下部が弱い傾向があります。', fix: '回復期に、肘を脇につけたまま腕を外・内にひねる軽い運動で腱板を使い、上腕骨の頭を支える力を取り戻します。', ex: ['cuff'] },
-      tense: { mu: ['infra', 'trapU', 'pecMaj'], why: '肩をかばって動かすため、肩の後ろや首の付け根の筋が緊張したままになっています。腕を上げようとすると、代わりに肩をすくめる動きが出ます。', fix: '肩の後ろと胸の前をほぐし、かばう動きでたまった緊張をゆるめます。', ex: ['cuffL', 'pec'] },
-      short: { mu: ['supra', 'infra', 'subsc', 'teres', 'pecMaj'], why: '炎症のあと、関節包と肩の奥の腱板(棘上筋・棘下筋・肩甲下筋)のまわりが縮んで硬くなり、腕が上がらない・後ろに回らない状態になっています。', fix: '痛みが落ち着いた時期に、振り子運動などで力を抜いたまま少しずつ動かし、縮んだ関節のまわりを伸ばして動く範囲を広げます。', ex: ['振り子運動(右)', '壁で腕を上げる(右)', '腕を胸の前で引く(右)'] },
+      weak: { mu: ['supra', 'infra'], sub: ['subsc', 'serr', 'trapL'], fix: '回復期に、腕を外・内にひねる軽い運動で腱板を使う', ex: ['cuff'] },
+      tense: { mu: ['infra', 'trapU'], sub: ['pecMaj'], fix: '肩の後ろと胸の前をほぐす', ex: ['cuffL', 'pec'] },
+      short: { mu: ['supra', 'subsc'], sub: ['infra', 'teres', 'pecMaj'], fix: '痛みが落ち着いたら、力を抜いて少しずつ動かし、動く範囲を広げる', ex: ['振り子運動(右)', '壁で腕を上げる(右)', '腕を胸の前で引く(右)'] },
       daily: ['痛みの強い時期は無理に動かさず、痛みの出ない範囲で動かす', '寝るときは腕の下にクッションを入れ、肩が後ろに落ちないようにする', '温めると楽になることが多い(熱っぽく腫れているときは医師に相談)'],
       see: '転んだ・ぶつけた後の痛み、腕がまったく上がらない、夜も眠れないほど痛む、しびれがある場合は、整形外科を受診してください。腱板断裂など、五十肩と似た症状の別の病気もあります。運動は医師や理学療法士の指示に合わせて行いましょう。',
       cam: { theta: 2.3, phi: 1.35, r: 1.5, ty: 1.25 },
@@ -9309,14 +9763,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'nekoze', g: 'neck', name: '猫背・巻き肩', pose: '背中が丸まり、肩が前に入る',
       sum: '背中が丸まり、肩が前に入りこんだ姿勢。見た目だけでなく、肩こり・首こり・呼吸の浅さにもつながりやすいとされます。',
       causes: ['デスクワーク・スマホで前かがみの時間が長い', '胸の筋が縮んだまま硬くなる', '背中(肩甲骨のまわり・背骨を起こす筋)の筋力が足りない', 'ソファなどで背中を丸めて座る習慣'],
-      mech: '大胸筋・小胸筋が硬くなると肩甲骨が前へ引かれ、肩が内側に巻きこまれます(巻き肩)。背骨を起こす脊柱起立筋や、肩甲骨を寄せる菱形筋・僧帽筋中部は引き伸ばされたまま弱くなり、丸まった姿勢をさらに戻しにくくなります。お腹の前の腹直筋が縮んだままになることも、背中が丸まる一因です。',
+      inside: ['小胸筋・大胸筋が縮んで、肩を前に引きこんでいる', '菱形筋・僧帽筋 中部が伸ばされたまま弱くなっている', '脊柱起立筋が弱く、背中を起こせない'],
+      pain: [{ n: '肩甲骨の間', at: { mu: 'rhomb' }, r: 0.07 }],
       layer: 'sup', main: ['short', 'weak'],
-      sites: [
-        { n: '小胸筋の停止部(烏口突起)', at: 'Pectoralis minor muscle.e', k: 'load', why: '縮んだ小胸筋がここで肩甲骨を前下へ引き、肩が内に巻きこまれます。' },
-        { n: '菱形筋の停止部(肩甲骨の内側の縁)', at: ['Rhomboid major muscle.e', 'Rhomboid minor muscle.e'], k: 'load', why: '肩甲骨が外へ開くと、菱形筋が引き伸ばされたまま働き続け、肩甲骨の内側の縁が張ります。' }],
-      weak: { mu: ['rhomb', 'trapML', 'esT'], why: '肩甲骨を寄せる菱形筋・僧帽筋 中部と、背骨を起こす脊柱起立筋は、引き伸ばされたまま弱い傾向があり、丸まった姿勢を戻せません。', fix: '肩甲骨を寄せる・背中を起こす運動で後ろ側の筋を使い、胸を張った姿勢を支える力をつけます。', ex: ['肩甲骨を寄せる', 'ベントオーバーロウ', 'バックエクステンション'] },
-      tense: { mu: ['pecMaj', 'pecMin'], why: '胸の筋が縮んだまま緊張し、肩甲骨を前へ引き続けています。', fix: '胸の前をほぐして緊張をゆるめると、ストレッチで伸ばしやすくなります。', ex: ['pec'] },
-      short: { mu: ['pecMaj', 'pecMin', 'deltA', 'rectA'], why: '胸の大胸筋・小胸筋とお腹の腹直筋が縮んだまま硬くなり、肩と上体を前へ引いています。', fix: '胸を開いて上体を反らすストレッチで、前側の縮んだ筋を伸ばします。', ex: ['胸を開く', '上体を反らす(コブラ)'] },
+      weak: { mu: ['rhomb', 'trapML'], sub: ['esT'], fix: '肩甲骨を寄せ、背中を起こす筋を使う', ex: ['肩甲骨を寄せる', 'ベントオーバーロウ', 'バックエクステンション'] },
+      tense: { mu: ['pecMin'], sub: ['pecMaj'], fix: '胸の前をほぐす', ex: ['pec'] },
+      short: { mu: ['pecMin', 'pecMaj'], sub: ['deltA', 'rectA'], fix: '胸を開いて、前側の縮んだ筋を伸ばす', ex: ['胸を開く', '上体を反らす(コブラ)'] },
       daily: ['座るときは骨盤を立て、背もたれに背中をつける', '胸を軽く開き、肩甲骨を少し下げて寄せる', 'こまめに背伸びをする'],
       see: '背中の痛みが強い、背中が急に曲がってきた(とくに高齢の方は背骨の圧迫骨折のこともあります)、しびれをともなう場合は受診してください。',
       cam: { theta: 1.5, phi: 1.4 },
@@ -9324,14 +9776,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'yotsu', g: 'back', name: '腰痛', pose: '前かがみで物を持つ',
       sum: '腰まわりの痛み。骨や神経にはっきりした異常が見つからないものが多く(非特異的腰痛)、筋肉や筋膜、関節への負担が関わると考えられています。',
       causes: ['前かがみで物を持ち上げる・中腰の作業', '長い時間の座りっぱなし・立ちっぱなし', 'もも裏(ハムストリングス)やお尻が硬く、骨盤が動きにくいぶん腰が曲がる', 'お腹の奥の筋(腹横筋)や多裂筋が弱く、腰が安定しない'],
-      mech: '前かがみになると、上体の重さを支えるために腰の脊柱起立筋・多裂筋がブレーキをかけ続けます。もも裏やお尻の筋が硬いと股関節が曲がりにくく、そのぶん腰の背骨が丸くなって負担が集中します。お腹の奥の腹横筋は、コルセットのように腰を安定させる筋で、これが弱くなっていると腰の筋への負担が増えます。',
+      inside: ['腹横筋・多裂筋が弱く、腰が安定しない', 'もも裏(ハムストリングス)が縮んで股関節が曲がらず、腰の背骨が丸まる', '腰の脊柱起立筋・腰方形筋が上体を支え続けて、こっている'],
+      pain: [{ n: '腰(背骨の両わき)', at: { mu: 'esL' }, r: 0.08 }],
       layer: 'sup', main: ['weak', 'short'],
-      sites: [
-        { n: '脊柱起立筋の起始部(骨盤の後ろ・腰の背骨)', at: 'Erector spinae.o', k: 'pain', why: '前かがみで上体を支え続けると、腰の筋と筋膜が骨盤に付く所に負担が集中し、痛みが出やすくなります。' },
-        { n: '腰の背骨の関節(椎間関節)', at: { j: 'lumbar', o: [0.022, -0.015, -0.045], snap: 'Vertebra L4' }, k: 'pain', why: '腰が反ったり丸まったりする負担が続くと、背骨の後ろの小さな関節にも痛みが出ることがあります。' }],
-      weak: { mu: ['ta', 'multi', 'gMax', 'gMed'], why: 'お腹の奥の腹横筋と背骨のすぐ横の多裂筋は、腰をコルセットのように安定させる筋ですが、働きが弱い傾向があり、腰の大きな筋だけで体を支えています。', fix: 'ドローインやヒップリフトで腹横筋・多裂筋・お尻の筋を使い、腰を安定させる力を取り戻します。', ex: ['drawin', 'ヒップリフト'] },
-      tense: { mu: ['esL', 'ql'], why: '腰の脊柱起立筋・腰方形筋が、上体を支えるためにブレーキをかけ続け、緊張して硬くなっています。', fix: '腰の両わきとお尻・もも裏をほぐし、張りつめた筋をゆるめます。', ex: ['lowBack', 'glute', 'hamsL'] },
-      short: { mu: ['hams', 'ilio', 'gMax'], why: 'もも裏(ハムストリングス)や股関節の前の腸腰筋が縮んで硬くなり、股関節が曲がりにくいぶん、腰の背骨が丸まって負担が集中しています。', fix: 'もも裏・お尻・股関節の前を伸ばし、股関節で体を曲げられるようにして腰の負担を減らします。', ex: ['膝を抱える(右)', '長座前屈', '4の字(右のお尻)', '腸腰筋(右脚を後ろ)'] },
+      weak: { mu: ['ta', 'multi'], sub: ['gMax', 'gMed'], fix: 'お腹の奥とお尻の筋を使い、腰を安定させる', ex: ['drawin', 'ヒップリフト'] },
+      tense: { mu: ['esL', 'ql'], sub: [], fix: '腰の両わきとお尻・もも裏をほぐす', ex: ['lowBack', 'glute', 'hamsL'] },
+      short: { mu: ['hams'], sub: ['ilio', 'gMax'], fix: 'もも裏・お尻・股関節の前を伸ばす', ex: ['膝を抱える(右)', '長座前屈', '4の字(右のお尻)', '腸腰筋(右脚を後ろ)'] },
       daily: ['物を持ち上げるときは、膝を曲げて腰を落とし、物を体に近づける', '座りっぱなしを避け、30〜60分に一度は立つ', '痛みが落ち着いてきたら、安静にしすぎず、できる範囲でふだんの生活を続ける'],
       see: '足のしびれや力が入りにくい、尿や便が出にくい・もれる、発熱がある、転倒や事故の後、安静にしていても痛む・夜間に痛む、体重が減ってきた場合は、すぐに医療機関を受診してください。急に強く痛む「ぎっくり腰」の直後は、無理にストレッチをせず、楽な姿勢で休みましょう。',
       cam: { theta: 2.0, phi: 1.35 },
@@ -9339,14 +9789,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'sorigoshi', g: 'back', name: '反り腰', pose: '骨盤が前に傾き、腰が反る',
       sum: '骨盤が前に傾き、腰の反りが強くなった姿勢。腰の後ろに負担が集中し、腰痛の原因の一つになります。',
       causes: ['座りっぱなしで、股関節の前の筋(腸腰筋)が縮んだまま硬くなる', 'お腹の筋とお尻の筋が弱く、骨盤を支えられない', 'かかとの高い靴', '妊娠や体重の増加で、お腹が前に出る'],
-      mech: '腸腰筋や大腿直筋は骨盤を前に引くため、硬くなると骨盤が前に傾きます。腰の脊柱起立筋も縮んだまま働き続けます。いっぽう骨盤を後ろへ傾けて支える腹直筋・大殿筋・ハムストリングスは弱く、引き伸ばされやすくなります。この「前と後ろの綱引き」のバランスが崩れた状態です。',
+      inside: ['腸腰筋・大腿直筋が縮んで、骨盤を前に引き倒している', '腹筋・お尻の筋が弱く、骨盤を後ろから支えられない', '腰の筋が縮んで反りを強めている'],
+      pain: [{ n: '腰の下', at: { j: 'lumbar', o: [0, -0.02, -0.05], snap: 'Vertebra L4' }, r: 0.07 }],
       layer: 'sup', main: ['short', 'weak'],
-      sites: [
-        { n: '腸腰筋の停止部(太ももの骨の内側・小転子)', at: 'Iliopsoas muscle.e', k: 'load', why: '縮んだ腸腰筋が、腰の背骨と太ももの骨をつなぎ、骨盤を前に引き倒しています。' },
-        { n: '腰の背骨の関節(椎間関節)', at: { j: 'lumbar', o: [0.022, -0.015, -0.045], snap: 'Vertebra L4' }, k: 'pain', why: '腰が強く反ると、背骨の後ろの関節どうしが押しつけられ、痛みの原因になります。' }],
-      weak: { mu: ['rectA', 'ta', 'gMax', 'hams'], why: '骨盤を後ろへ傾けて支える腹直筋・腹横筋・大殿筋は、引き伸ばされたまま弱い傾向があり、前に傾く骨盤を引き戻せません。', fix: 'お腹とお尻の筋を使い、骨盤を後ろから支える力をつけます。', ex: ['drawin', 'ヒップリフト', 'クランチ'] },
-      tense: { mu: ['esL', 'ql'], why: '反った腰を支えるため、腰の筋が縮んだまま緊張し続けています。', fix: '腰の両わきと太ももの前をほぐして緊張をゆるめます。', ex: ['lowBack', 'quadL'] },
-      short: { mu: ['ilio', 'recF', 'esL'], why: '座りっぱなしで股関節の前の腸腰筋・大腿直筋が縮んで硬くなり、骨盤を前へ引き倒しています。', fix: '股関節の前と前ももを伸ばし、骨盤を起こせる長さを取り戻します。', ex: ['腸腰筋(右脚を後ろ)', '前もも(右)', '膝を抱える(右)'] },
+      weak: { mu: ['rectA', 'gMax'], sub: ['ta', 'hams'], fix: 'お腹とお尻の筋を使い、骨盤を支える', ex: ['drawin', 'ヒップリフト', 'クランチ'] },
+      tense: { mu: ['esL', 'ql'], sub: [], fix: '腰の両わきと太ももの前をほぐす', ex: ['lowBack', 'quadL'] },
+      short: { mu: ['ilio', 'recF'], sub: ['esL'], fix: '股関節の前と前ももを伸ばす', ex: ['腸腰筋(右脚を後ろ)', '前もも(右)', '膝を抱える(右)'] },
       daily: ['立つときは、お腹を軽く引きしめ、お尻を軽く締める', '長く座ったあとは、立って股関節の前を伸ばす', 'かかとの高い靴は長時間はかない'],
       see: '足のしびれ、強い腰痛が続く場合は受診してください(腰椎分離症・すべり症など、反ると悪化する病気もあります)。',
       cam: { theta: 1.57, phi: 1.4 },
@@ -9354,14 +9802,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'zakotsu', g: 'back', name: 'お尻から脚のしびれ(梨状筋症候群)', pose: '脚を組んで長く座る',
       sum: 'お尻の奥にある梨状筋が硬くなり、その下を通る坐骨神経を圧迫して、お尻から太ももの裏にかけて痛みやしびれが出る状態。坐骨神経痛の原因の一つです。',
       causes: ['長い時間座る(硬い椅子、後ろのポケットに財布を入れたままなど)', '脚を組むくせ', 'ランニングなどによる、お尻の筋の使いすぎ', 'お尻の筋のバランスの崩れ'],
-      mech: '梨状筋は骨盤(仙骨)から太ももの骨の外側について、股関節を外にひねる筋です。坐骨神経はふつう梨状筋のすぐ下を通るため、梨状筋が硬く厚くなると神経が圧迫されることがあります。近くにある上下の双子筋・内閉鎖筋など、股関節を外にひねる小さな筋も、一緒に硬くなっていることが多くあります。ただし坐骨神経痛は、腰椎椎間板ヘルニアや脊柱管狭窄症など、腰の骨や神経が原因のことも多く、見分けが大切です。',
+      inside: ['梨状筋が硬く厚くなり、すぐ下を通る坐骨神経を圧迫している', '近くの双子筋・内閉鎖筋も縮んでいる', '中殿筋が弱く、梨状筋が骨盤を支える役を代わりに負っている'],
+      pain: [{ n: 'お尻の奥〜太ももの裏(しびれ)', at: { mu: 'piri' }, r: 0.07 }],
       layer: 'deep', main: ['tense', 'short'],
-      sites: [
-        { n: '梨状筋の下(坐骨神経の通り道)', at: { mu: 'piri' }, k: 'pain', why: '坐骨神経はふつう梨状筋のすぐ下を通ります。梨状筋が硬く厚くなると、ここで神経が圧迫され、お尻から脚にしびれが出ます。' },
-        { n: '梨状筋の起始部(仙骨の前)', at: 'Piriformis muscle.o', k: 'load', why: '長く座ると、梨状筋が骨盤の奥の付け根から引っぱられ続けます。' }],
-      weak: { mu: ['gMed', 'ta'], why: 'お尻の外側の中殿筋やお腹の奥の筋が弱い傾向があり、そのぶん梨状筋が骨盤を支える役を代わりに負っています。', fix: '中殿筋とお尻の筋を使い、梨状筋の負担を分担させます。', ex: ['ヒップリフト', 'あお向けで膝を開く(右)'] },
-      tense: { mu: ['piri', 'rotators', 'gMax'], why: '長く座る・脚を組むくせで、梨状筋と近くの小さな外旋筋(双子筋・内閉鎖筋)が緊張したまま硬くなり、神経を圧迫しています。', fix: 'お尻の奥をボールでほぐし、神経を圧迫している筋の緊張をゆるめます。', ex: ['glute'] },
-      short: { mu: ['piri', 'rotators'], why: '股関節を外にひねる筋が縮んだまま短くなっています。', fix: '4の字のストレッチなどで、お尻の奥の筋をゆっくり伸ばします。', ex: ['4の字(右のお尻)', '膝を抱える(右)'] },
+      weak: { mu: ['gMed'], sub: ['ta'], fix: '中殿筋を使い、梨状筋の負担を分ける', ex: ['ヒップリフト', 'あお向けで膝を開く(右)'] },
+      tense: { mu: ['piri'], sub: ['rotators', 'gMax'], fix: 'お尻の奥をボールでほぐす', ex: ['glute'] },
+      short: { mu: ['piri'], sub: ['rotators'], fix: 'お尻の奥の筋を伸ばす', ex: ['4の字(右のお尻)', '膝を抱える(右)'] },
       daily: ['長く座るときは、こまめに立ち上がる', '脚を組むくせを減らす', 'ズボンの後ろのポケットに財布を入れたまま座らない'],
       see: 'しびれが広がる・強くなる、足に力が入らない、尿や便の異常がある場合は、すぐに受診してください。',
       cam: { theta: 2.6, phi: 1.5 },
@@ -9369,14 +9815,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'hiza', g: 'leg', name: '膝の痛み(お皿のまわり)', pose: 'しゃがむときに膝が内に入る',
       sum: '階段の上り下り・しゃがむ・走るときに、膝のお皿(膝蓋骨)のまわりや前側が痛む状態。膝蓋大腿関節痛やジャンパー膝など、使いすぎで起こるものが多くあります。',
       causes: ['しゃがむ・着地のときに膝が内側に入る(ニーイン)', '太ももの前の筋が硬く、お皿が強く押しつけられる', 'お尻の筋(中殿筋・大殿筋)が弱く、膝の向きを保てない', '運動の量を急に増やした'],
-      mech: 'お皿は大腿四頭筋の腱の中にあり、膝を曲げるほど太ももの骨に強く押しつけられます。大腿四頭筋(とくに大腿直筋・外側広筋)や腸脛靭帯が硬いと、お皿が外へ引かれたり、押しつける力が強くなったりします。お尻の中殿筋・大殿筋が弱いと、太ももが内にひねられて膝が内側に入りやすく、お皿の動きがずれる原因になります。',
+      inside: ['中殿筋が弱く、膝が内に入る', '大腿直筋・外側広筋が縮んで、お皿を強く押しつけている', '内側広筋が弱く、お皿が外へずれやすい'],
+      pain: [{ n: 'お皿のまわり', at: 'Patellar ligament.o', r: 0.06 }],
       layer: 'sup', main: ['weak'],
-      sites: [
-        { n: '膝蓋腱の付着部(お皿の下)', at: 'Patellar ligament.o', k: 'pain', why: '着地やしゃがむ動作で太ももの前の筋が強く引くと、お皿の下の腱の付け根に炎症が起きやすくなります(ジャンパー膝)。' },
-        { n: '大腿四頭筋の停止部(お皿の上)', at: 'Quadriceps femoris muscle.e', k: 'load', why: '太ももの前の筋が硬いと、お皿が太ももの骨に強く押しつけられ、お皿のまわりが痛みます。' }],
-      weak: { mu: ['gMed', 'gMax', 'vasM'], why: 'お尻の中殿筋・大殿筋が弱い傾向があり、太ももが内にひねられて膝が内側に入ります。内側広筋が弱いと、お皿が外へずれやすくなります。', fix: 'お尻と太ももの内側の筋を使い、膝とつま先の向きをそろえて保つ力をつけます。', ex: ['あお向けで膝を開く(右)', '座って膝を伸ばす(右)', 'ヒップリフト', 'スクワット', 'レッグエクステンション'] },
-      tense: { mu: ['vasL', 'itb'], why: '太ももの外側が張りつめ、お皿を外へ引いています。', fix: '太ももの前と外側をフォームローラーでほぐします。', ex: ['quadL'] },
-      short: { mu: ['recF', 'vasL', 'hams', 'gast'], why: '太ももの前(大腿直筋・外側広筋)やもも裏・ふくらはぎが縮んで硬くなり、お皿を強く押しつけたり外へ引いたりしています。', fix: '前もも・もも裏・ふくらはぎを伸ばし、お皿にかかる力を減らします。', ex: ['前もも(右)', '長座前屈', 'ふくらはぎ(右・膝を伸ばす)', '4の字(右のお尻)'] },
+      weak: { mu: ['gMed', 'vasM'], sub: ['gMax'], fix: 'お尻と太ももの内側を使い、膝の向きをそろえる', ex: ['あお向けで膝を開く(右)', '座って膝を伸ばす(右)', 'ヒップリフト', 'スクワット', 'レッグエクステンション'] },
+      tense: { mu: ['vasL', 'itb'], sub: [], fix: '太ももの前と外側をほぐす', ex: ['quadL'] },
+      short: { mu: ['recF', 'vasL'], sub: ['hams', 'gast'], fix: '前もも・もも裏・ふくらはぎを伸ばす', ex: ['前もも(右)', '長座前屈', 'ふくらはぎ(右・膝を伸ばす)', '4の字(右のお尻)'] },
       daily: ['しゃがむ・着地では、膝とつま先を同じ向きにそろえる', '痛みが出るほどの運動量は、一時的に減らす', 'クッション性のある靴を選ぶ'],
       see: '膝が腫れている・熱を持っている、膝が伸びきらない・引っかかる、ガクッと膝が抜ける感じがある、けがの後の痛みは、整形外科を受診してください。',
       cam: { theta: 0.5, phi: 1.45 },
@@ -9384,13 +9828,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'henkei', g: 'leg', name: '膝の痛み(中高年の膝)', pose: '膝が伸びきらない立ち方',
       sum: '年齢とともに膝の軟骨がすり減り、立ち上がり・歩き始め・階段で膝が痛む状態。変形性膝関節症と呼ばれ、中高年の膝の痛みでいちばん多い原因です。O脚の人に多い傾向があります。',
       causes: ['加齢による軟骨のすり減り', '体重の増加(膝には歩くだけで体重の数倍の力がかかるといわれます)', '太ももの前の筋力の低下', 'O脚で、膝の内側に負担が集中する'],
-      mech: '大腿四頭筋(とくに内側広筋)は膝を伸ばして安定させ、着地の衝撃を受け止める筋です。これが弱ると、関節そのものへの衝撃が増えます。膝が伸びきらない状態が続くと、もも裏(ハムストリングス)やふくらはぎ・膝の裏の膝窩筋が硬くなり、さらに膝が曲がったままになる悪循環に陥ります。',
+      inside: ['大腿四頭筋(とくに内側広筋)が弱く、衝撃が関節に直接かかる', 'もも裏・ふくらはぎが縮んで、膝が伸びきらない', '体重が膝の内側に集中し、軟骨がすり減る'],
+      pain: [{ n: '膝の内側', at: { j: 'knee', o: [-0.035, -0.012, 0.005], snap: 'Tibia' }, r: 0.06 }],
       layer: 'sup', main: ['weak'],
-      sites: [
-        { n: '膝の内側の関節(軟骨)', at: { j: 'knee', o: [-0.035, -0.012, 0.005], snap: 'Tibia' }, k: 'pain', why: 'O脚ぎみの膝では体重が内側に集中し、内側の軟骨がすり減って痛みが出やすくなります。' }],
-      weak: { mu: ['vasM', 'quad', 'gMed'], why: '膝を伸ばして安定させる大腿四頭筋(とくに内側広筋)が弱くなっていて、着地の衝撃が関節に直接かかっています。', fix: '座って膝を伸ばす運動などで太ももの前の筋を使い、膝を支えて衝撃を受け止める力を取り戻します。', ex: ['座って膝を伸ばす(右)', 'レッグエクステンション', 'ヒップリフト'] },
-      tense: { mu: ['hams', 'gast'], why: '曲がった膝を支えるため、もも裏とふくらはぎが緊張し続けています。', fix: 'もも裏とふくらはぎをほぐし、緊張をゆるめます。', ex: ['hamsL', 'calf'] },
-      short: { mu: ['hams', 'gast', 'popl'], why: '膝が伸びきらない状態が続き、もも裏・ふくらはぎ・膝の裏の膝窩筋が縮んで硬くなっています。', fix: 'もも裏とふくらはぎを伸ばし、膝をまっすぐ伸ばせるようにします。', ex: ['長座前屈', 'ふくらはぎ(右・膝を伸ばす)'] },
+      weak: { mu: ['vasM', 'quad'], sub: ['gMed'], fix: '太ももの前を使い、膝を支える', ex: ['座って膝を伸ばす(右)', 'レッグエクステンション', 'ヒップリフト'] },
+      tense: { mu: ['hams', 'gast'], sub: [], fix: 'もも裏とふくらはぎをほぐす', ex: ['hamsL', 'calf'] },
+      short: { mu: ['hams', 'gast'], sub: ['popl'], fix: 'もも裏とふくらはぎを伸ばし、膝を伸ばせるようにする', ex: ['長座前屈', 'ふくらはぎ(右・膝を伸ばす)'] },
       daily: ['膝への負担が少ない運動(水中ウォーキング・自転車など)を続ける', '体重を適正に保つ', '正座や深くしゃがむ動作を避ける'],
       see: '膝が腫れる・熱を持つ、痛みで歩きにくい、夜間も痛む場合は、整形外科を受診してください。',
       cam: { theta: 1.2, phi: 1.45 },
@@ -9398,13 +9841,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'runnerknee', g: 'leg', name: 'ランナー膝(腸脛靭帯炎)', pose: '片脚の着地で膝が内に入る',
       sum: '走ったあとなどに、膝の外側が痛む状態。太ももの外側を通る腸脛靭帯が、膝の外側の骨の出っぱりとこすれて炎症を起こすと考えられています。長距離ランナーに多い不調です。',
       causes: ['走る距離・回数を急に増やした', '下り坂や硬い路面を多く走る', 'お尻の中殿筋が弱く、着地で骨盤が傾き膝が内に入る', 'すり減った靴'],
-      mech: '腸脛靭帯は、大殿筋と大腿筋膜張筋から続く太ももの外側の帯で、膝の外側まで伸びています。膝を曲げ伸ばしするたびに、膝の外側の骨の出っぱり(大腿骨外側上顆)の上を前後に動きます。着地のときに骨盤が傾いて膝が内に入ると、腸脛靭帯が強く引っぱられ、こすれる刺激が増えます。',
+      inside: ['腸脛靭帯が張りつめ、膝の外側の骨とこすれる', '中殿筋・小殿筋が弱く、着地で膝が内に入る', 'お尻と太ももの外側が縮んでいる'],
+      pain: [{ n: '膝の外側', at: { j: 'knee', o: [0.04, 0.02, -0.005], snap: 'Femur' }, r: 0.06 }],
       layer: 'sup', main: ['tense', 'weak'],
-      sites: [
-        { n: '大腿骨の外側上顆(腸脛靭帯がこすれる所)', at: { j: 'knee', o: [0.04, 0.02, -0.005], snap: 'Femur' }, k: 'pain', why: '膝の曲げ伸ばしのたびに腸脛靭帯がこの骨の出っぱりの上を前後に動き、こすれる刺激で炎症が起きます。' }],
-      weak: { mu: ['gMedMin'], why: 'お尻の中殿筋・小殿筋が弱い傾向があり、着地のたびに骨盤が傾いて膝が内に入り、腸脛靭帯が強く引っぱられます。', fix: '中殿筋を使って骨盤を水平に保つ力をつけ、着地で膝が内に入らないようにします。', ex: ['あお向けで膝を開く(右)', 'ヒップリフト', 'ランジ(右脚前)'] },
-      tense: { mu: ['itb', 'gMax', 'vasL'], why: '腸脛靭帯と、そこへ続く大殿筋・太ももの外側の筋が張りつめ、膝の外側の骨に強く押しつけられています。', fix: '太ももの外側とお尻をほぐし、腸脛靭帯を引っぱる力をゆるめます。', ex: ['quadL', 'glute'] },
-      short: { mu: ['gMax', 'vasL', 'recF'], why: 'お尻と太ももの前・外側の筋が縮んで硬くなっています。', fix: 'お尻と前ももを伸ばします。腸脛靭帯そのものは伸びにくいため、つながる筋を伸ばすのが中心です。', ex: ['4の字(右のお尻)', '前もも(右)', '膝を抱える(右)'] },
+      weak: { mu: ['gMedMin'], sub: [], fix: '中殿筋を使い、骨盤を水平に保つ', ex: ['あお向けで膝を開く(右)', 'ヒップリフト', 'ランジ(右脚前)'] },
+      tense: { mu: ['itb'], sub: ['gMax', 'vasL'], fix: '太ももの外側とお尻をほぐす', ex: ['quadL', 'glute'] },
+      short: { mu: ['gMax', 'vasL'], sub: ['recF'], fix: 'お尻と前ももを伸ばす', ex: ['4の字(右のお尻)', '前もも(右)', '膝を抱える(右)'] },
       daily: ['走る量は少しずつ増やす', '痛みが出たら距離を減らすか休む', '靴のすり減りを確かめる'],
       see: '休んでも痛みが引かない、腫れがある場合は、スポーツ整形外科などを受診してください。',
       cam: { theta: -1.1, phi: 1.45 },
@@ -9413,13 +9855,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'shin', g: 'leg', name: 'シンスプリント', pose: '走る・跳ぶの着地',
       sum: '走ったり跳んだりをくり返すことで、すねの内側(下の3分の1あたり)に痛みが出る状態。脛骨過労性骨膜炎とも呼ばれ、運動を始めたばかりの人や、部活動の学生に多く見られます。',
       causes: ['ランニングやジャンプの量を急に増やした', '硬い路面や、クッション性のない靴', '偏平足・着地で足首が内に倒れる(過回内)', 'ふくらはぎの筋が硬い・疲れている'],
-      mech: 'すねの内側には、ヒラメ筋・後脛骨筋・長趾屈筋が脛骨(すねの骨)の膜に付いています。着地のたびにこれらの筋は、足のアーチがつぶれるのを止め、体を支えるために強く働き、骨の膜を引っぱります。このくり返しの刺激で、骨膜に炎症が起きると考えられています。ふくらはぎが硬いと、着地の衝撃を受け止めにくくなります。',
+      inside: ['ヒラメ筋・後脛骨筋が着地のたびにすねの骨の膜を引っぱる', 'ふくらはぎが縮んで、衝撃を受け止められない', '足の裏の筋が弱く、アーチがつぶれる'],
+      pain: [{ n: 'すねの内側(下3分の1)', at: { j: 'ankle', o: [-0.022, 0.12, -0.012], snap: 'Tibia' }, r: 0.07 }],
       layer: 'mid', main: ['short', 'tense'],
-      sites: [
-        { n: '脛骨の内側の縁(下3分の1・筋の付着部)', at: { j: 'ankle', o: [-0.022, 0.12, -0.012], snap: 'Tibia' }, k: 'pain', why: 'ヒラメ筋・後脛骨筋・長趾屈筋が付く骨の膜が、着地のたびに引っぱられて炎症が起きます。ある1点だけが強く痛むときは疲労骨折のこともあります。' }],
-      weak: { mu: ['foot', 'gMed'], why: '足の裏の筋やお尻の中殿筋が弱い傾向があり、着地で足首が内に倒れて、すねの内側の筋に負担が集まります。', fix: '足の指でタオルをたぐる運動などで足裏の筋を使い、アーチを支える力をつけます。', ex: ['towel', 'カーフレイズ'] },
-      tense: { mu: ['sol', 'tibP', 'fdl'], why: '足のアーチがつぶれるのを止めるため、すねの内側の筋が着地のたびに強く働き、疲れて張りつめています。', fix: 'すねの内側の筋とふくらはぎをほぐします。痛む骨そのものは押しません。', ex: ['calf', 'shinIn'] },
-      short: { mu: ['sol', 'gast', 'tibP'], why: 'ふくらはぎ(ヒラメ筋・腓腹筋)が縮んで硬くなり、着地の衝撃を受け止めにくくなっています。', fix: 'ふくらはぎを膝を伸ばす・曲げる両方の形で伸ばし、すねの骨を引っぱる力を減らします。', ex: ['ふくらはぎ(右・膝を曲げる)', 'ふくらはぎ(右・膝を伸ばす)', 'すねの前(右)'] },
+      weak: { mu: ['foot'], sub: ['gMed'], fix: '足の指を使い、アーチを支える', ex: ['towel', 'カーフレイズ'] },
+      tense: { mu: ['sol', 'tibP'], sub: ['fdl'], fix: 'すねの内側の筋とふくらはぎをほぐす', ex: ['calf', 'shinIn'] },
+      short: { mu: ['sol', 'gast'], sub: ['tibP'], fix: 'ふくらはぎを伸ばす', ex: ['ふくらはぎ(右・膝を曲げる)', 'ふくらはぎ(右・膝を伸ばす)', 'すねの前(右)'] },
       daily: ['痛みのある間は走る量を減らし、水泳・自転車などに切り替える', 'クッション性のある靴を選び、合わなければインソールも検討する', '練習の後に、すねを冷やす'],
       see: '安静にしていても痛む、ある1点を押すと強く痛む、腫れがある場合は、疲労骨折のこともあるため整形外科を受診してください。',
       cam: { theta: 0.7, phi: 1.6 },
@@ -9428,14 +9869,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'sokutei', g: 'leg', name: '足の裏・かかとの痛み(足底筋膜炎)', pose: 'つま先で地面をける',
       sum: '朝起きて最初の一歩や、座ったあとの歩き始めに、かかとの裏が痛む状態。足の裏の膜(足底腱膜)のかかとに付くところに、小さな傷や炎症が起こると考えられています。',
       causes: ['立ち仕事・長い時間の歩行・ランニング', '体重の増加', 'ふくらはぎやアキレス腱が硬い', '偏平足やハイアーチ、クッション性のない靴'],
-      mech: '足底腱膜は、かかとの骨から指の付け根まで張っていて、足のアーチを弓の弦のように支えています。歩いて地面をけるとき、指が反って、この膜は引っぱられます。ふくらはぎ(腓腹筋・ヒラメ筋)が硬いと、アキレス腱を通じてかかとが引かれ、足底腱膜への負担も増えると考えられています。',
+      inside: ['足底腱膜がかかとの付け根で引っぱられ、傷や炎症が起きる', 'ふくらはぎ・アキレス腱が縮んで、かかとを引いている', '足の裏の筋が弱く、膜に負担が集まる'],
+      pain: [{ n: 'かかとの裏', at: ['Flexor digitorum brevis.o', 'Abductor hallucis.o'], r: 0.05 }],
       layer: 'sup', main: ['short'],
-      sites: [
-        { n: '足底腱膜の付着部(かかとの骨の内側の前)', at: ['Flexor digitorum brevis.o', 'Abductor hallucis.o'], k: 'pain', why: '足底腱膜がかかとの骨に付く所で、歩くたびに引っぱられ、小さな傷や炎症が起きます。朝の一歩目に痛むのが特徴です。' },
-        { n: 'アキレス腱の停止部(かかとの後ろ)', at: 'Triceps surae muscle.e', k: 'load', why: 'ふくらはぎが硬いと、アキレス腱を通じてかかとが引かれ、足底腱膜への負担も増えます。' }],
-      weak: { mu: ['foot', 'tibP'], why: '足の裏の筋と後脛骨筋が弱い傾向があり、アーチを筋で支えられないぶん、足底腱膜が引き伸ばされています。', fix: '足の指を使う運動で足裏の筋を使い、膜の代わりにアーチを支える力をつけます。', ex: ['towel', 'カーフレイズ'] },
-      tense: { mu: ['pf', 'foot', 'gast'], why: '足の裏の膜と筋が張りつめています。', fix: '足の裏をボールで転がし、ふくらはぎをさすってゆるめます。', ex: ['sole', 'calf'] },
-      short: { mu: ['gast', 'sol', 'achil', 'pf'], why: 'ふくらはぎとアキレス腱が縮んで硬くなり、かかとを引っぱって足底腱膜の負担を増やしています。', fix: 'ふくらはぎを伸ばし、かかとと足の裏を引っぱる力を減らします。', ex: ['ふくらはぎ(右・膝を伸ばす)', 'ふくらはぎ(右・膝を曲げる)'] },
+      weak: { mu: ['foot'], sub: ['tibP'], fix: '足の指を使い、アーチを支える', ex: ['towel', 'カーフレイズ'] },
+      tense: { mu: ['pf'], sub: ['foot', 'gast'], fix: '足の裏をボールで転がす', ex: ['sole', 'calf'] },
+      short: { mu: ['gast', 'sol'], sub: ['achil', 'pf'], fix: 'ふくらはぎを伸ばす', ex: ['ふくらはぎ(右・膝を伸ばす)', 'ふくらはぎ(右・膝を曲げる)'] },
       daily: ['朝の最初の一歩の前に、足首を回したり足の指を反らしたりして準備する', 'クッション性とアーチの支えがある靴をはく', '裸足で硬い床を長く歩かない'],
       see: '腫れやしびれがある、痛みが数か月続く場合は受診してください。',
       cam: { theta: 2.7, phi: 1.75 },
@@ -9444,13 +9883,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'komura', g: 'leg', name: 'こむら返り(足がつる)', pose: '寝ていて、つま先が伸びる',
       sum: 'ふくらはぎの筋が急に強く縮んだままになり、激しく痛む状態。寝ている間や運動中に起こりやすく、医学的には有痛性筋けいれんと呼ばれます。',
       causes: ['運動による筋の疲れ', '汗をかいたあとの、水分・ミネラル(電解質)の不足', '寝ているときに、つま先が下を向いてふくらはぎが縮んだ姿勢', '冷え、加齢'],
-      mech: '腓腹筋は膝と足首の2つの関節をまたぐ筋で、膝を伸ばしたままつま先を下に向けると、いちばん縮んだ状態になります。この縮みきった姿勢で筋に「縮め」という信号が出続けると、けいれんが起こりやすくなります。つったときは、つま先を手前に引いて、ふくらはぎをゆっくり伸ばすと治まりやすいとされます。',
+      inside: ['腓腹筋が縮みきった姿勢で、縮めの信号が出続けてけいれんする', '疲れ・冷え・水分不足で、ふくらはぎがつりやすくなっている'],
+      pain: [{ n: 'ふくらはぎ', at: { mu: 'gast' }, r: 0.08 }],
       layer: 'sup', main: ['short'],
-      sites: [
-        { n: '腓腹筋の筋腹(ふくらはぎのふくらみ)', at: { mu: 'gast' }, k: 'pain', why: 'つま先が伸びて縮みきったふくらはぎの筋に「縮め」の信号が出続けると、筋が急に縮んだまま戻らなくなります。' }],
-      weak: { mu: ['gast', 'sol'], why: 'ふくらはぎの筋の持久力が落ちていると、疲れやすく、つりやすくなります。', fix: 'かかとの上げ下げで、ふくらはぎを無理のない回数で使い続けます。', ex: ['座ってかかとを上げ下げ', 'カーフレイズ'] },
-      tense: { mu: ['gast', 'sol'], why: '運動や冷えで、ふくらはぎの筋が疲れて張っています。', fix: 'ふくらはぎをさすって温め、疲れた筋をゆるめます。', ex: ['calf'] },
-      short: { mu: ['gast', 'sol', 'plant'], why: 'ふくらはぎの筋が疲れて縮みやすい状態で、つま先が伸びた姿勢で縮みきってけいれんを起こします。', fix: 'つったら、つま先を手前に引いてふくらはぎをゆっくり伸ばします。寝る前に伸ばしておくと予防になります。', ex: ['ふくらはぎ(右・膝を伸ばす)', '長座前屈'] },
+      weak: { mu: ['gast'], sub: ['sol'], fix: 'かかとの上げ下げで、ふくらはぎを使う', ex: ['座ってかかとを上げ下げ', 'カーフレイズ'] },
+      tense: { mu: ['gast'], sub: ['sol'], fix: 'ふくらはぎをさすって温める', ex: ['calf'] },
+      short: { mu: ['gast'], sub: ['sol', 'plant'], fix: 'つま先を手前に引き、ふくらはぎを伸ばす', ex: ['ふくらはぎ(右・膝を伸ばす)', '長座前屈'] },
       daily: ['運動の前後や寝る前に、ふくらはぎを伸ばす', 'こまめに水分をとる', '布団の重みでつま先が伸びないようにし、足を冷やさない'],
       see: '何度もくり返す、足のむくみやしびれをともなう、筋がやせてきた場合は、血管・神経・内科の病気や薬の影響のこともあるため、受診してください。',
       cam: { theta: 0.9, phi: 1.2 },
@@ -9459,24 +9897,24 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'tennis', g: 'arm', name: 'テニス肘(肘の外側の痛み)', pose: 'キーボード・マウスで手首を反らす',
       sum: '物をつかむ・持ち上げる・ひねるときに、肘の外側が痛む状態。上腕骨外側上顆炎と呼ばれ、テニスをする人に限らず、パソコン作業や家事などで手首をよく使う人に多く見られます。',
       causes: ['手首を反らす・物を握る動作のくり返し(キーボード・マウス・フライパン・ラケット)', '指や手首を伸ばす筋の使いすぎ', '加齢による腱の変化(40〜50代に多い)'],
-      mech: '手首や指を反らす筋(短橈側手根伸筋・長橈側手根伸筋・総指伸筋)は、肘の外側の骨の出っぱり(外側上顆)に集まって付いています。物を握るときにも、手首を固定するためにこれらの筋が働くため、使いすぎると付け根の腱に小さな傷や炎症が起こります。とくに短橈側手根伸筋の腱が中心と考えられています。',
+      scene: 'pc',
+      inside: ['短橈側手根伸筋など手首を反らす筋を使いすぎている', 'その筋が付く肘の外側の骨(外側上顆)の腱に、小さな傷や炎症が起きる'],
+      pain: [{ n: '肘の外側', at: 'Common extensor tendon.o', r: 0.05 }],
       layer: 'sup', main: ['tense'],
-      sites: [
-        { n: '上腕骨の外側上顆(手首を反らす筋の起始部)', at: 'Common extensor tendon.o', k: 'pain', why: '手首や指を反らす筋の腱が集まって付く所で、物を握るたびに引っぱられ、腱に小さな傷や炎症が起きます(とくに短橈側手根伸筋)。' }],
-      tense: { mu: ['ecrb', 'ecrl', 'edc', 'supin', 'brad'], why: '手首を反らす・物を握る動作のくり返しで、前腕の外側の筋が使いすぎて張りつめ、付け根の腱を引っぱり続けています。', fix: '前腕の外側の筋をやさしくほぐし、付け根を引っぱる力をゆるめます。痛む骨の出っぱりは押しません。', ex: ['forearmOut'] },
-      short: { mu: ['ecrb', 'ecrl', 'edc'], why: '手首を反らす筋が縮んだまま硬くなっています。', fix: '手首を曲げるストレッチで前腕の外側を伸ばします。', ex: [], text: ['手首を曲げるストレッチ: 肘を伸ばして手のひらを下に向け、反対の手で手の甲を手前に引いて、前腕の外側を15〜30秒伸ばす(このモデルには手首の腱の通り道がないため、3Dでは再生できません)'] },
+      tense: { mu: ['ecrb'], sub: ['ecrl', 'edc', 'supin', 'brad'], fix: '前腕の外側をやさしくほぐす(痛む骨は押さない)', ex: ['forearmOut'] },
+      short: { mu: ['ecrb'], sub: ['ecrl', 'edc'], fix: '手首を曲げて、前腕の外側を伸ばす', ex: [], text: ['手首を曲げるストレッチ: 肘を伸ばして手のひらを下に向け、反対の手で手の甲を手前に引いて、前腕の外側を15〜30秒伸ばす(このモデルには手首の腱の通り道がないため、3Dでは再生できません)'] },
       daily: ['物を持つときは、手のひらを上に向けて持つ', 'マウス・キーボードの位置を見直し、手首を反らしたままにしない', '痛みが強いときは使う量を減らす(サポーターも一つの方法です)'],
       see: '肘が腫れている、しびれがある、指が動かしにくい、けがの後の痛みは、整形外科を受診してください。',
-      cam: { theta: 0.6, phi: 1.2, r: 1.7, ty: 0.95 },
+      cam: { theta: -1.2, phi: 1.25, r: 1.7, ty: 0.95 },
       def: Object.assign({}, SITTING, { hand: { grip: 0.4, pron: 170 }, start: { b: DESK }, end: { b: DESK, r: Object.assign({}, DESK, { wrist: -30 }), l: Object.assign({}, DESK, { wrist: -30 }), a: { neck: 10 } } }) },
     { id: 'kensho', g: 'arm', name: '腱鞘炎(手首の親指側)', pose: 'スマホを片手で操作する',
       sum: '手首の親指側が痛み、親指を動かすと痛みが強くなる状態。ドケルバン病とも呼ばれ、スマホの操作や育児(抱っこ)、パソコン作業などで親指をよく使う人に多く見られます。',
       causes: ['親指を広げる・反らす動作のくり返し(スマホの片手操作など)', '赤ちゃんを抱っこする、重いものを持つ', '妊娠・出産のころや更年期のホルモンの変化'],
-      mech: '親指を広げる長母指外転筋と、親指を伸ばす短母指伸筋の腱は、手首の親指側で同じトンネル(腱鞘)を通ります。使いすぎで腱と腱鞘がこすれ合って炎症が起き、腱鞘が厚くなると、さらにこすれやすくなります。',
+      scene: 'phone1',
+      inside: ['長母指外転筋・短母指伸筋の腱が、手首の親指側のトンネルでこすれている', '腱鞘が厚くなり、さらにこすれやすくなっている'],
+      pain: [{ n: '手首の親指側', at: { j: 'wrist', o: [0.02, 0.01, 0], snap: 'Radius' }, r: 0.04 }],
       layer: 'mid', main: ['tense'],
-      sites: [
-        { n: '手首の親指側(腱鞘のトンネル)', at: { j: 'wrist', o: [0.02, 0.01, 0], snap: 'Radius' }, k: 'pain', why: '長母指外転筋と短母指伸筋の腱が同じトンネル(腱鞘)を通る所で、こすれ合って炎症が起き、腱鞘が厚くなります。' }],
-      tense: { mu: ['apl', 'epb'], why: '親指を広げる・反らす筋の使いすぎで、腱と腱鞘がこすれ合い、炎症と張りが起きています。', fix: 'まず親指を休ませ、手首の親指側から前腕へやさしくさすります。熱っぽいときは冷やすことを優先します。', ex: ['thumb'] },
+      tense: { mu: ['apl', 'epb'], sub: [], fix: 'まず親指を休め、手首の親指側をやさしくさする', ex: ['thumb'] },
       daily: ['親指を休ませる: スマホは両手で持つか、机に置いて操作する', '使ったあとに熱っぽいときは冷やす。痛みが強いときは、親指と手首を固定するサポーターも一つの方法です', 'スマホの片手操作の時間を減らす', '抱っこは手首だけでなく、腕全体と体で支える', 'こまめに手を休める'],
       see: 'しびれがある、腫れが強い、数週間たってもよくならない場合は、整形外科を受診してください。',
       cam: { theta: 0.45, phi: 1.3, r: 1.8, ty: 1.1 },
@@ -9484,13 +9922,13 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'senaka', g: 'neck', name: '背中のこり(肩甲骨の間)', pose: '肩が前に出て、肩甲骨が開く',
       sum: '肩甲骨と背骨の間が、重く張ったように感じる状態。デスクワークで腕を前に出し続ける人に多く見られます。',
       causes: ['キーボードやマウスで、腕を前に出したままの姿勢が続く', '胸の筋が硬く、肩甲骨が外へ引き出される', '背中を丸めた座り方', '目の疲れやストレスによる緊張'],
-      mech: '肩甲骨の間の菱形筋・僧帽筋 中部は、肩甲骨が外へ開いた姿勢では「引き伸ばされながら」働き続けるため、こりを感じやすくなります。このタイプのこりは、伸ばすだけではかえって疲れることがあり、前で肩甲骨を引っぱっている胸の筋(大胸筋・小胸筋)をゆるめ、肩甲骨を寄せる筋を使って、肩甲骨を正しい位置に戻すことが大切です。',
+      scene: 'pc',
+      inside: ['菱形筋・僧帽筋 中部が伸ばされながら働き続け、こっている', '小胸筋・大胸筋が縮んで、肩甲骨を外へ引き出している'],
+      pain: [{ n: '肩甲骨の間', at: { mu: 'rhomb' }, r: 0.07 }],
       layer: 'mid', main: ['weak', 'tense'],
-      sites: [
-        { n: '菱形筋の停止部(肩甲骨の内側の縁)', at: ['Rhomboid major muscle.e', 'Rhomboid minor muscle.e'], k: 'load', why: '肩甲骨が外へ開いた姿勢では、菱形筋が引き伸ばされながら働き続け、肩甲骨の内側の縁が重く張ります。' }],
-      weak: { mu: ['rhomb', 'trapML', 'esT'], why: '菱形筋・僧帽筋 中部は、伸ばされたまま働き続けて弱い傾向があり、肩甲骨を背骨側へ戻せません。伸ばすだけでは、かえって疲れることがあります。', fix: '肩甲骨を寄せる運動で、伸ばされている筋を縮めて使い、肩甲骨を正しい位置に戻します。', ex: ['肩甲骨を寄せる', 'ベントオーバーロウ'] },
-      tense: { mu: ['rhomb', 'trapML', 'pecMin'], why: '肩甲骨の間の筋が引っぱられたまま緊張し、こりとして感じられます。', fix: '肩甲骨の間をボールでほぐし、胸の前もほぐします。', ex: ['scapBetween', 'pec'] },
-      short: { mu: ['pecMin', 'pecMaj'], why: '胸の筋が縮んで硬くなり、肩甲骨を外へ引き出しています。', fix: '胸を開くストレッチで、肩甲骨を前へ引く筋を伸ばします。', ex: ['胸を開く'] },
+      weak: { mu: ['rhomb', 'trapML'], sub: ['esT'], fix: '肩甲骨を寄せる筋を使う(伸ばすより効果的)', ex: ['肩甲骨を寄せる', 'ベントオーバーロウ'] },
+      tense: { mu: ['rhomb'], sub: ['trapML', 'pecMin'], fix: '肩甲骨の間と胸の前をほぐす', ex: ['scapBetween', 'pec'] },
+      short: { mu: ['pecMin'], sub: ['pecMaj'], fix: '胸を開いて伸ばす', ex: ['胸を開く'] },
       daily: ['キーボードを体に近づけ、肘を脇の近くに置く', '1時間に一度は肩甲骨を寄せて胸を開く', '背もたれに背中をつけて座る'],
       see: '安静にしても痛む、胸の痛みや息苦しさ、背中の片側だけの強い痛みがある場合は、内臓の病気のこともあるため、早めに受診してください。',
       cam: { theta: 2.6, phi: 1.3 },
@@ -9498,13 +9936,11 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'nechigae', g: 'neck', name: '寝違え', pose: '首を回すと痛む',
       sum: '朝起きたときに首から肩にかけて痛み、首を回したり傾けたりしにくくなる状態。急性の首の筋の痛みです。',
       causes: ['不自然な姿勢で長い時間寝る(高すぎる枕、ソファでのうたた寝など)', '首・肩が疲れていたり冷えていたりする', '寝返りが少ない'],
-      mech: '寝ている間に、首の筋(肩甲挙筋・胸鎖乳突筋・僧帽筋上部・板状筋)が引き伸ばされたまま、または縮んだまま長く続き、筋や関節のまわりに軽い炎症が起きると考えられています。痛む側へ首を動かすと、炎症のある筋が引っぱられて強く痛みます。',
+      inside: ['寝ている間に肩甲挙筋などが引き伸ばされ、軽い炎症が起きる', '炎症を守るように、首の筋がこわばっている'],
+      pain: [{ n: '首の横〜肩甲骨の上', at: { mu: 'levScap' }, r: 0.06 }],
       layer: 'mid', main: ['tense'],
-      sites: [
-        { n: '肩甲挙筋の起始部(首の骨の横)', at: ['Levator scapulae.o', 'Levator scapulae.o1', 'Levator scapulae.o2'], k: 'pain', why: '寝ている間に首の筋が不自然に引き伸ばされ、軽い炎症が起きると考えられています。首を回すと引っぱられて痛みます。' },
-        { n: '肩甲挙筋の停止部(肩甲骨の上の角)', at: 'Levator scapulae.e', k: 'pain', why: '首から肩甲骨にかけて痛む場合は、肩甲挙筋の下の付け根にも痛みが出ます。' }],
-      tense: { mu: ['levScap', 'scm', 'trapU', 'splen'], why: '寝ている間に引き伸ばされた首の筋が、炎症を守るように緊張してこわばっています。', fix: '痛みが落ち着いてから、痛む所から少し離れた肩のまわりをやさしくほぐします。', ex: ['neckBack'] },
-      short: { mu: ['levScap', 'trapU'], why: 'こわばった首の筋が縮んで、首を回しにくくなっています。', fix: '痛みのない範囲で、首の横をゆっくり伸ばします。', ex: ['首の横(左側)'] },
+      tense: { mu: ['levScap'], sub: ['scm', 'trapU', 'splen'], fix: '痛みが落ち着いてから、肩のまわりをやさしくほぐす', ex: ['neckBack'] },
+      short: { mu: ['levScap'], sub: ['trapU'], fix: '痛みのない範囲で、首の横を伸ばす', ex: ['首の横(左側)'] },
       careNote: '痛みの強い1〜2日は、痛む所を強くもんだり、無理に伸ばしたりしないでください。痛みが落ち着いてから、痛む所から少し離れた肩のまわりをやさしくほぐし、痛みのない範囲で動かします。',
       daily: ['痛みの強いうちは、楽な姿勢で安静にし、熱っぽいときは冷やす', '落ち着いてきたら温めて、少しずつ動かす', '枕の高さを見直す'],
       see: '手や腕のしびれ、力が入りにくい、発熱、強い頭痛をともなう、数日たってもよくならない場合は、受診してください。',
@@ -9513,14 +9949,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'gikkuri', g: 'back', name: 'ぎっくり腰', pose: '前かがみでひねりながら持ち上げる',
       sum: '物を持ち上げたり、体をひねったりした瞬間に、腰に強い痛みが走る状態。医学的には急性腰痛と呼ばれます。',
       causes: ['前かがみ・中腰での持ち上げ、とくにひねりながらの動作', '疲れがたまって、腰の筋が硬くなっている', '朝起きてすぐや、くしゃみなど体が準備できていないときの動作', '運動不足'],
-      mech: '前かがみでひねると、腰の脊柱起立筋・多裂筋・腰方形筋に一度に大きな力がかかり、筋や筋膜、背骨の小さな関節(椎間関節)などが傷ついて、強い痛みと筋のけいれん(こわばり)が起きると考えられています。お腹の奥の腹横筋や、お尻の筋がうまく働いていないと、腰だけで体を支えることになります。',
+      inside: ['前かがみでひねった瞬間、腰の筋・筋膜や背骨の小さな関節が傷つく', '腹横筋・お尻の筋が弱く、腰の筋だけで支えていた', '疲れで腰の筋がこっていた'],
+      pain: [{ n: '腰', at: { mu: 'esL' }, r: 0.08 }],
       layer: 'sup', main: ['weak'],
-      sites: [
-        { n: '脊柱起立筋の起始部(骨盤の後ろ・腰の背骨)', at: 'Erector spinae.o', k: 'pain', why: '前かがみでひねった瞬間に、腰の筋や筋膜が骨盤に付く所が傷つき、強い痛みと筋のこわばりが起きます。' },
-        { n: '腰の背骨の関節(椎間関節)', at: { j: 'lumbar', o: [0.022, -0.015, -0.045], snap: 'Vertebra L4' }, k: 'pain', why: 'ひねる力で、背骨の後ろの小さな関節が痛めつけられることもあります。' }],
-      weak: { mu: ['ta', 'gMax', 'multi'], why: 'お腹の奥の腹横筋とお尻の筋が弱い傾向があり、持ち上げるときに腰の筋だけで体を支えています。', fix: '痛みが落ち着いてから、ドローインとヒップリフトで腰を守る筋を使い、再発を防ぎます。', ex: ['drawin', 'ヒップリフト'] },
-      tense: { mu: ['esL', 'multi', 'ql', 'gMax'], why: '疲れがたまって腰とお尻の筋が硬く張っていると、急な動きで傷つきやすくなります。', fix: '落ち着いた時期に、お尻をほぐして腰の負担を減らします。', ex: ['glute'] },
-      short: { mu: ['esL', 'hams'], why: '腰ともも裏が縮んで硬いと、前かがみで股関節が使えず、腰に負担が集中します。', fix: '膝を抱えて腰をゆっくり丸め、腰の筋を伸ばします。', ex: ['膝を抱える(右)'] },
+      weak: { mu: ['ta', 'gMax'], sub: ['multi'], fix: '痛みが落ち着いてから、腰を守る筋を使う', ex: ['drawin', 'ヒップリフト'] },
+      tense: { mu: ['esL'], sub: ['multi', 'ql', 'gMax'], fix: 'お尻をほぐして腰の負担を減らす', ex: ['glute'] },
+      short: { mu: ['esL'], sub: ['hams'], fix: '膝を抱えて腰を伸ばす', ex: ['膝を抱える(右)'] },
       careNote: '痛めた直後は、無理にストレッチやマッサージをせず、横向きで膝を曲げるなど楽な姿勢で休みます。数日して痛みが落ち着いてきたら、安静にしすぎず、できる範囲でふだんの生活に戻るほうが回復が早いとされます。',
       daily: ['物を持つときは、膝を曲げて腰を落とし、体の正面で持つ', '持ったまま体をひねらず、足の向きを変える', '朝起きてすぐに重い物を持たない'],
       see: '足のしびれや力が入りにくい、尿や便が出にくい・もれる、発熱、転倒や事故の後、安静にしていても痛みが強くなる場合は、すぐに受診してください。',
@@ -9529,13 +9963,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'enpai', g: 'shape', name: '腰が曲がる(高齢者の円背)', pose: '背中と腰が丸まり、膝が曲がる',
       sum: '年齢とともに背中や腰が丸まり、前かがみの姿勢になる状態。円背(えんぱい)とも呼ばれます。前に倒れそうな体を、膝を曲げて支えるようになります。',
       causes: ['骨粗しょう症による背骨の圧迫骨折(気づかないうちに起こることもある)', '背中を起こす筋(脊柱起立筋・多裂筋)の筋力低下', '背骨の間のクッション(椎間板)の変化', '長年の前かがみの作業や姿勢'],
-      mech: '背骨は、背中側の脊柱起立筋や多裂筋が後ろから引いて起こしています。これらが弱ると背骨を起こせず、前に丸まります。体が前に倒れないように膝を曲げ、あごを上げてバランスをとるため、太ももの前の大腿四頭筋や首の後ろにも負担がかかります。お腹の筋や股関節の前の腸腰筋は縮んだまま硬くなっていて、さらに体を起こしにくくしています。',
+      inside: ['脊柱起立筋・多裂筋が弱く、背骨を起こせない', 'お腹・股関節の前・胸の筋が縮んで、体を起こせない', '骨粗しょう症による背骨の圧迫骨折が関わることも多い'],
+      pain: [{ n: '背中〜腰', at: { j: 'lumbar', o: [0, 0.1, -0.03], snap: 'Vertebra T12' }, r: 0.09 }],
       layer: 'mid', main: ['weak'],
-      sites: [
-        { n: '背中と腰の境目の背骨(圧迫骨折が起きやすい所)', at: { j: 'lumbar', o: [0, 0.1, 0.01], snap: 'Vertebra T12' }, k: 'pain', why: '骨粗しょう症があると、背骨の前側がつぶれる圧迫骨折が、背中と腰の境目のあたりで起きやすく、背中が丸まる原因になります。' }],
-      weak: { mu: ['es', 'multi', 'gMax', 'quad'], why: '背骨を後ろから起こす脊柱起立筋・多裂筋が弱くなっていて、背骨を起こせず前に丸まっています。膝を伸ばす大腿四頭筋も弱い傾向があります。', fix: '背中を起こす・肩甲骨を寄せる・膝を伸ばす運動で、体を後ろから起こして支える筋を使います。', ex: ['肩甲骨を寄せる', 'バックエクステンション', '座って膝を伸ばす(右)', 'drawin'] },
-      tense: { mu: ['pecMaj', 'pecMin'], why: '丸まった姿勢で胸の筋が縮んだまま緊張しています。', fix: '胸の前をほぐして緊張をゆるめます。', ex: ['pec'] },
-      short: { mu: ['rectA', 'ilio', 'pecMaj', 'hams'], why: '前かがみが続き、お腹・股関節の前・胸・もも裏の筋が縮んで硬くなり、さらに体を起こしにくくなっています。', fix: '胸と股関節の前を伸ばして、体を起こせる長さを取り戻します。', ex: ['胸を開く', '腸腰筋(右脚を後ろ)'] },
+      weak: { mu: ['es', 'multi'], sub: ['gMax', 'quad'], fix: '背中を起こす・膝を伸ばす筋を使う', ex: ['肩甲骨を寄せる', 'バックエクステンション', '座って膝を伸ばす(右)', 'drawin'] },
+      tense: { mu: ['pecMaj'], sub: ['pecMin'], fix: '胸の前をほぐす', ex: ['pec'] },
+      short: { mu: ['rectA', 'ilio'], sub: ['pecMaj', 'hams'], fix: '胸と股関節の前を伸ばす', ex: ['胸を開く', '腸腰筋(右脚を後ろ)'] },
       careNote: '骨粗しょう症がある方は、背中を強く丸める・ひねる・反らす運動で骨折することがあります。運動を始める前に、医師に相談してください。',
       daily: ['骨を丈夫にする食事(カルシウム・ビタミンD)と、適度な日光浴', '杖やシルバーカーを使って、背すじを伸ばして歩く', '高い所の物を取るときに無理に背伸びしない'],
       see: '急に背中や腰が痛くなった、身長が縮んだ、背中の曲がりが急に進んだ場合は、圧迫骨折のことがあるため、整形外科を受診してください。',
@@ -9544,13 +9977,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'ojaku', g: 'shape', name: 'O脚', pose: '太ももが内にひねられ、膝が離れる',
       sum: '両足のかかとをそろえて立ったとき、両膝の間がすいてしまう状態。骨の形によるものと、姿勢や筋のバランスによるもの(機能的なO脚)があります。',
       causes: ['太ももが内側にひねられ、膝が伸びきった(反りぎみの)立ち方', 'お尻の筋や内ももの筋が弱い', '偏平足などで足首が内に倒れる', '骨の形・変形性膝関節症(この場合は筋のケアでは変わりにくい)'],
-      mech: '機能的なO脚では、太ももが内にひねられ、すねが外にひねられることで、膝のお皿が内を向き、膝の間がすいて見えます。脚を外にひねって支えるお尻の大殿筋や深層の外旋筋、脚を閉じる内転筋群が弱い傾向があり、太ももの外側(外側広筋・腸脛靭帯)が張っています。骨そのものが曲がっているO脚は、ストレッチや筋トレでは変わりません。',
+      inside: ['内転筋群が弱く、脚をそろえて保てない', 'お尻の大殿筋・外旋筋が弱く、太ももが内にひねられる', '太ももの外側が張っている'],
+      pain: [{ n: '膝の内側', at: { j: 'knee', o: [-0.035, -0.012, 0.005], snap: 'Tibia' }, r: 0.05 }],
       layer: 'sup', main: ['weak'],
-      sites: [
-        { n: '膝の内側の関節(軟骨)', at: { j: 'knee', o: [-0.035, -0.012, 0.005], snap: 'Tibia' }, k: 'load', why: 'O脚では体重が膝の内側に集中し、内側の軟骨がすり減りやすくなります(変形性膝関節症の原因の一つ)。' }],
-      weak: { mu: ['add', 'gMax', 'rotators', 'vasM'], why: '脚を閉じる内転筋群と、脚を外にひねって支える大殿筋・深層の外旋筋が弱い傾向があり、太ももが内にひねられて膝の間がすいています。', fix: '内ももを締める・膝を開く運動で、脚をそろえて正しい向きに保つ筋を使います。', ex: ['内ももを締める', 'あお向けで膝を開く(右)', 'ヒップリフト', 'towel'] },
-      tense: { mu: ['itb', 'vasL'], why: '脚の外側で体重を受けるため、太ももの外側が張りつめています。', fix: '太ももの外側をほぐして張りをゆるめます。', ex: ['quadL'] },
-      short: { mu: ['vasL', 'recF', 'gast'], why: '太ももの外側・前とふくらはぎが縮んで硬くなっています。', fix: '前ももとふくらはぎを伸ばします。', ex: ['前もも(右)', 'ふくらはぎ(右・膝を伸ばす)'] },
+      weak: { mu: ['add', 'gMax'], sub: ['rotators', 'vasM'], fix: '内ももを締める・膝を開く運動で脚をそろえる', ex: ['内ももを締める', 'あお向けで膝を開く(右)', 'ヒップリフト', 'towel'] },
+      tense: { mu: ['itb', 'vasL'], sub: [], fix: '太ももの外側をほぐす', ex: ['quadL'] },
+      short: { mu: ['vasL'], sub: ['recF', 'gast'], fix: '前ももとふくらはぎを伸ばす', ex: ['前もも(右)', 'ふくらはぎ(右・膝を伸ばす)'] },
       daily: ['立つときは膝を伸ばしきらず、膝のお皿を正面に向ける', '足の親指と小指の付け根、かかとの3点で立つ', '横座り・とんび座りを避ける'],
       see: '膝の痛みや腫れがある、片側だけ急に曲がってきた、子どもで年齢が上がってもO脚が強い場合は、整形外科を受診してください(2歳ごろまでの軽いO脚は自然な成長の過程です)。',
       cam: { theta: 0.2, phi: 1.5 },
@@ -9558,13 +9990,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'ganimata', g: 'shape', name: 'ガニ股', pose: 'つま先と膝が外を向いて立つ',
       sum: 'つま先と膝が外を向き、膝が少し曲がって脚が外に開いた立ち方・歩き方。骨盤が後ろに倒れた姿勢と一緒に見られることが多いです。',
       causes: ['股関節を外にひねるお尻の深い筋(梨状筋など)が硬い', '内ももの筋(内転筋群)が弱い', '骨盤が後ろに倒れ、膝が曲がった立ち方', 'あぐらなど、脚を外に開いた座り方の習慣'],
-      mech: '梨状筋・双子筋・内閉鎖筋など股関節を外にひねる深い筋と大殿筋が硬く縮むと、太ももが外へひねられ、膝とつま先が外を向きます。脚を閉じる内転筋群が弱いと、脚をまっすぐそろえて保てません。骨盤が後ろへ倒れると、バランスをとるために膝が曲がり、さらにガニ股になりやすくなります。',
+      inside: ['梨状筋などお尻の深い筋が縮んで、太ももを外へひねっている', '内転筋群が弱く、脚を内側へ引き寄せられない'],
+      pain: [],
       layer: 'deep', main: ['short', 'weak'],
-      sites: [
-        { n: '股関節を外にひねる筋の停止部(大転子)', at: 'Trochanteric insertion.e', k: 'load', why: '梨状筋・双子筋・内閉鎖筋がここで太ももの骨を外へひねり、膝とつま先が外を向きます。' }],
-      weak: { mu: ['add', 'ilio', 'vasM'], why: '脚を閉じる内転筋群が弱い傾向があり、脚を内側へ引き寄せてまっすぐそろえる力が足りません。', fix: '内ももを締める運動で内転筋群を鍛え、脚をそろえて保つ力をつけます。', ex: ['内ももを締める', 'スクワット'] },
-      tense: { mu: ['gMax', 'piri'], why: 'お尻の筋が縮んだまま緊張しています。', fix: 'お尻をボールでほぐします。', ex: ['glute'] },
-      short: { mu: ['piri', 'rotators', 'gMax'], why: '股関節を外にひねる深い筋と大殿筋が縮んで硬くなり、太ももを外へひねっています。', fix: '4の字のストレッチなどで、お尻の奥の外旋筋を伸ばします。', ex: ['4の字(右のお尻)', '膝を抱える(右)'] },
+      weak: { mu: ['add'], sub: ['ilio', 'vasM'], fix: '内ももを締めて、内転筋群を鍛える', ex: ['内ももを締める', 'スクワット'] },
+      tense: { mu: ['gMax'], sub: ['piri'], fix: 'お尻をほぐす', ex: ['glute'] },
+      short: { mu: ['piri', 'rotators'], sub: ['gMax'], fix: 'お尻の奥の外旋筋を伸ばす', ex: ['4の字(右のお尻)', '膝を抱える(右)'] },
       daily: ['歩くときは、膝とつま先をまっすぐ前に向ける', '座るときは骨盤を立て、膝をそろえる', 'あぐらの時間を減らす'],
       see: '股関節や膝に痛みがある、歩き方が急に変わった場合は、整形外科を受診してください。',
       cam: { theta: 0.3, phi: 1.5 },
@@ -9572,14 +10003,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'uchimata', g: 'shape', name: '内股(膝が内に入る)', pose: '膝とつま先が内を向いて立つ',
       sum: '膝とつま先が内を向き、膝どうしが近づいた立ち方・歩き方。膝が内に入るため、膝の痛みや外反母趾につながることもあります。',
       causes: ['お尻の外側の筋(中殿筋)や、股関節を外にひねる筋が弱い', '内ももの筋(内転筋群)が硬い', '女の子座り(とんび座り)・横座りの習慣', '反り腰(骨盤の前傾)'],
-      mech: '中殿筋や深層の外旋筋は、太ももが内に倒れたり内にひねられたりしないように支えています。これらが弱いと、太ももが内にひねられ、膝が内を向きます(ニーイン)。内転筋群は縮んだまま硬くなっています。膝が内に入ると、膝の内側の靭帯や、お皿の動きにも負担がかかります。',
+      inside: ['中殿筋・外旋筋が弱く、太ももが内に倒れる', '内転筋群が縮んで、太ももを内へ引いている'],
+      pain: [{ n: '膝の内側の下', at: ['Gracilis muscle.e', 'Semitendinosus muscle.e', 'Sartorius muscle.e'], r: 0.05 }],
       layer: 'mid', main: ['weak'],
-      sites: [
-        { n: '鵞足(膝の内側の下・腱の付着部)', at: ['Gracilis muscle.e', 'Semitendinosus muscle.e', 'Sartorius muscle.e'], k: 'pain', why: '膝が内に入ると、膝の内側の下に付く腱(薄筋・半腱様筋・縫工筋)がこすれて、鵞足炎と呼ばれる痛みが出ることがあります。' },
-        { n: '内転筋の起始部(恥骨)', at: ['Adductor longus.o', 'Gracilis muscle.o'], k: 'load', why: '縮んだ内転筋群が、骨盤の付け根から太ももを内へ引いています。' }],
-      weak: { mu: ['gMedMin', 'rotators', 'gMax'], why: 'お尻の外側の中殿筋と股関節を外にひねる筋が弱い傾向があり、太ももが内に倒れ、内にひねられて膝が内を向いています。', fix: '膝を開く運動やヒップリフトでお尻の筋を鍛え、太ももを外から支える力をつけます。', ex: ['あお向けで膝を開く(右)', 'ヒップリフト'] },
-      tense: { mu: ['add'], why: '内ももの筋が緊張したままです。', fix: '内ももを手のひらでさすってほぐします。', ex: ['addL'] },
-      short: { mu: ['add'], why: '内転筋群が縮んで硬くなり、太ももを内へ引いています。', fix: '開脚や合せきで内ももを伸ばします。', ex: ['開脚', '合せき(足裏を合わせる)'] },
+      weak: { mu: ['gMedMin'], sub: ['rotators', 'gMax'], fix: 'お尻の筋を鍛え、太ももを外から支える', ex: ['あお向けで膝を開く(右)', 'ヒップリフト'] },
+      tense: { mu: ['add'], sub: [], fix: '内ももをさすってほぐす', ex: ['addL'] },
+      short: { mu: ['add'], sub: [], fix: '内ももを伸ばす', ex: ['開脚', '合せき(足裏を合わせる)'] },
       daily: ['女の子座り・横座りを避け、あぐらや正座に変える', '階段やしゃがむときに、膝とつま先を同じ向きにそろえる', '立つときにお尻を軽く締める'],
       see: '膝や股関節の痛みがある、子どもで転びやすい・歩き方が気になる場合は、整形外科を受診してください。',
       cam: { theta: 0.3, phi: 1.5 },
@@ -9587,13 +10016,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'henpei', g: 'shape', name: '扁平足', pose: '土踏まずがつぶれ、膝が内に入る',
       sum: '足の裏の土踏まず(内側のアーチ)が低くなり、足の裏全体が床につく状態。疲れやすい、足の裏やすねが痛むなどの原因になります。',
       causes: ['足の裏の筋や、アーチを支える後脛骨筋の弱り', '体重の増加、長時間の立ち仕事', 'ふくらはぎが硬い', '生まれつきの関節の柔らかさ'],
-      mech: '土踏まずのアーチは、骨と靭帯、足底腱膜に加えて、すねの奥から足の裏へ回りこむ後脛骨筋や、足の裏の母趾外転筋・短趾屈筋が下から支えています。これらが弱るとアーチがつぶれ、着地の衝撃を吸収しにくくなります。足首が内に倒れると、すねがひねられて膝も内に入りやすく、シンスプリントや膝の痛みにもつながります。ふくらはぎが硬いと、足首が十分に曲がらないぶん、アーチがつぶれて代わりをしやすくなります。',
+      inside: ['後脛骨筋と足の裏の筋が弱く、土踏まずがつぶれている', 'ふくらはぎが縮んで、アーチがつぶれて代わりをしている'],
+      pain: [{ n: '土踏まず', at: { bone: 'Navicular bone' }, r: 0.05 }],
       layer: 'deep', main: ['weak'],
-      sites: [
-        { n: '後脛骨筋の停止部(舟状骨・土踏まずの頂上)', at: { bone: 'Navicular bone' }, k: 'load', why: '後脛骨筋の腱がここに付いて土踏まずを下から吊り上げています。弱るとアーチがつぶれ、ここが痛むこともあります。' }],
-      weak: { mu: ['tibP', 'foot', 'fdl'], why: '土踏まずを支える後脛骨筋と、足の裏の母趾外転筋・短趾屈筋が弱くなっていて、アーチがつぶれています。', fix: '足の指でタオルをたぐる・指を広げる運動で足裏の筋を使い、アーチを持ち上げる力を取り戻します。', ex: ['towel', 'toeSpread', 'カーフレイズ'] },
-      tense: { mu: ['pf', 'gast', 'sol'], why: 'アーチがつぶれた足を支えるため、足の裏とふくらはぎが疲れて張っています。', fix: '足の裏をボールで転がし、ふくらはぎをさすってゆるめます。', ex: ['sole', 'calf'] },
-      short: { mu: ['gast', 'sol', 'fib'], why: 'ふくらはぎが縮んで硬く、足首が十分に曲がらないぶん、アーチがつぶれて代わりをしています。', fix: 'ふくらはぎを伸ばし、足首を曲げられるようにします。', ex: ['ふくらはぎ(右・膝を伸ばす)', 'ふくらはぎ(右・膝を曲げる)'] },
+      weak: { mu: ['tibP', 'foot'], sub: ['fdl'], fix: '足の指を使い、アーチを持ち上げる', ex: ['towel', 'toeSpread', 'カーフレイズ'] },
+      tense: { mu: ['pf'], sub: ['gast', 'sol'], fix: '足の裏とふくらはぎをほぐす', ex: ['sole', 'calf'] },
+      short: { mu: ['gast', 'sol'], sub: ['fib'], fix: 'ふくらはぎを伸ばす', ex: ['ふくらはぎ(右・膝を伸ばす)', 'ふくらはぎ(右・膝を曲げる)'] },
       daily: ['かかとが安定し、土踏まずを支える靴を選ぶ(必要ならインソール)', '裸足で砂浜や芝生を歩くなど、足の指を使う', '体重を適正に保つ'],
       see: '足の内側やくるぶしの下が痛む、片足だけ急に土踏まずが低くなってきた、子どもで痛みがある・疲れやすい場合は、整形外科を受診してください。',
       cam: { theta: 0.6, phi: 1.75 },
@@ -9601,14 +10029,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'gaihan', g: 'shape', name: '外反母趾', pose: '前に体重がかかり、膝が内に入る',
       sum: '足の親指が、付け根から小指側へ「くの字」に曲がる状態。付け根の内側が出っぱり、靴に当たって痛みます。女性に多く見られます。',
       causes: ['先の細い靴やかかとの高い靴で、指が締めつけられる', '足の横のアーチがつぶれる(開張足)・扁平足', '遺伝や、関節の柔らかさ', '足の指を使わない歩き方'],
-      mech: '親指は、内側へ引く母趾外転筋と、小指側へ引く母趾内転筋に両側から引かれています。かかとの高い靴で指の付け根に体重がかかり、横のアーチがつぶれると、母趾外転筋が弱くなり、母趾内転筋に引かれて親指が小指側へ曲がっていきます。ふくらはぎが硬いと、歩くときに指の付け根への負担が増えます。変形がすすんだものは、筋のケアでは元に戻りにくくなります。',
+      inside: ['母趾外転筋が弱く、親指を内側へ引けない', '母趾内転筋が縮んで、親指を小指側へ引いている'],
+      pain: [{ n: '親指の付け根の内側', at: 'Abductor hallucis.e', r: 0.04 }],
       layer: 'deep', main: ['weak'],
-      sites: [
-        { n: '親指の付け根の内側(母趾外転筋の停止部)', at: 'Abductor hallucis.e', k: 'pain', why: '親指が小指側へ曲がると、付け根の内側の骨が出っぱり、靴に当たって痛みます。ここを内側へ引く母趾外転筋の力が弱くなっています。' },
-        { n: '母趾内転筋の停止部(親指の付け根の外側)', at: 'Oblique head of adductor hallucis.e', k: 'load', why: '母趾内転筋がここで親指を小指側へ引き寄せています。' }],
-      weak: { mu: ['abdHal', 'tibP', 'foot'], why: '親指を内側へ引く母趾外転筋が弱くなっていて、反対側から引く母趾内転筋に負けています。', fix: '足の指を広げる運動で母趾外転筋を使い、親指を内側へ引き戻す力をつけます。', ex: ['toeSpread', 'towel'] },
-      tense: { mu: ['addHal', 'pf'], why: '足の裏の筋が縮んだまま緊張しています。', fix: '足の裏をボールで転がしてほぐします。', ex: ['sole'] },
-      short: { mu: ['addHal', 'gast'], why: '母趾内転筋とふくらはぎが縮んで硬くなり、親指を小指側へ引き、指の付け根に体重を集めています。', fix: 'ふくらはぎを伸ばし、歩くときに指の付け根にかかる負担を減らします。', ex: ['ふくらはぎ(右・膝を伸ばす)'] },
+      weak: { mu: ['abdHal'], sub: ['tibP', 'foot'], fix: '足の指を広げ、親指を内側へ引く', ex: ['toeSpread', 'towel'] },
+      tense: { mu: ['addHal'], sub: ['pf'], fix: '足の裏をほぐす', ex: ['sole'] },
+      short: { mu: ['addHal'], sub: ['gast'], fix: 'ふくらはぎを伸ばし、指の付け根の負担を減らす', ex: ['ふくらはぎ(右・膝を伸ばす)'] },
       daily: ['つま先にゆとりがあり、かかとが安定した靴を選ぶ', 'かかとの高い靴は長時間はかない', '足の指を広げる・動かす習慣をつける'],
       see: '痛みが強い、付け根が赤く腫れる、変形がすすんでいる、ほかの指まで曲がってきた場合は、整形外科を受診してください(装具や手術で治療することもあります)。',
       cam: { theta: 0.5, phi: 1.85 },
@@ -9616,14 +10042,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'kaikyaku', g: 'flex', name: '開脚ができない', pose: '脚を開くと骨盤が後ろに倒れる',
       sum: '床に座って脚を左右に開こうとしても大きく開けない、開くと上体が後ろに倒れてしまう状態。股関節まわりの筋の硬さが主な原因です。',
       causes: ['内ももの筋(内転筋群)が硬い', 'もも裏(ハムストリングス)が硬く、骨盤が後ろに倒れる', '骨盤を起こす筋(腸腰筋)が弱い', '股関節の骨の形(開ける角度には生まれつきの個人差もあります)'],
-      mech: '脚を横に開くと、内転筋群(長内転筋・大内転筋・薄筋・恥骨筋)が伸ばされます。とくに膝を伸ばしたままの開脚では、骨盤から膝の下まで伸びる薄筋やハムストリングスも伸ばされるため、もも裏が硬いと骨盤が後ろに引かれて上体が倒れます。骨盤を前に起こす腸腰筋が働くと、上体を前に倒しやすくなります。筋は、力を入れたあとにゆるめると伸びやすくなる性質があり、この「使う → ゆるめる → 伸ばす」の組み合わせが効果的とされます。',
+      inside: ['内転筋群が縮んで、脚が開かない', 'もも裏が縮んで、骨盤が後ろに倒れる', '腸腰筋が弱く、骨盤を前に起こせない'],
+      pain: [],
       layer: 'sup', main: ['short'],
-      sites: [
-        { n: '内転筋の起始部(恥骨)', at: ['Adductor longus.o', 'Gracilis muscle.o', 'Pectineus muscle.o'], k: 'load', why: '脚を開くと、内転筋群が骨盤の付け根から引き伸ばされます。ここが突っぱるのが、開脚で止まる所です。' },
-        { n: 'ハムストリングスの起始部(坐骨)', at: ['Semitendinosus muscle.o', 'Long head of biceps femoris.o', 'Semimembranosus muscle.o'], k: 'load', why: 'もも裏が硬いと、坐骨の付け根から骨盤が後ろへ引かれ、上体が後ろに倒れます。' }],
-      weak: { mu: ['ilio'], why: '骨盤を前に起こす腸腰筋の働きが弱い傾向があり、上体を前に倒せません。', fix: '脚を前に上げる運動で腸腰筋を使い、骨盤を起こす力をつけます。', ex: ['脚を前に上げる(右)'] },
-      tense: { mu: ['add', 'hams'], why: '伸ばされると身構えて、内ももともも裏に力が入ったままになっています。', fix: '力を入れてから抜く(PNF)と、筋がゆるんで伸びやすくなります。さすってほぐすのも効果的です。', ex: ['pnf', 'addL', 'hamsL'] },
-      short: { mu: ['add', 'hams'], why: '内転筋群ともも裏が縮んで硬く、脚を開くと骨盤を後ろへ引いて上体が倒れます。', fix: '開脚・合せき・前屈で、内ももともも裏をゆっくり伸ばします。', ex: ['開脚', '合せき(足裏を合わせる)', '長座前屈', '4の字(右のお尻)'] },
+      weak: { mu: ['ilio'], sub: [], fix: '脚を前に上げ、骨盤を起こす筋を使う', ex: ['脚を前に上げる(右)'] },
+      tense: { mu: ['add'], sub: ['hams'], fix: '力を入れてから抜くと、ゆるんで伸びやすい', ex: ['pnf', 'addL', 'hamsL'] },
+      short: { mu: ['add', 'hams'], sub: [], fix: '内ももともも裏をゆっくり伸ばす', ex: ['開脚', '合せき(足裏を合わせる)', '長座前屈', '4の字(右のお尻)'] },
       daily: ['お風呂上がりなど、体が温まっているときに伸ばす', '反動をつけず、20〜30秒かけてゆっくり', '毎日少しずつ続ける(数週間〜数か月かけて変わっていきます)'],
       see: '股関節や脚の付け根が痛む、引っかかる感じがある場合は、無理に開かず整形外科に相談してください。',
       cam: { theta: 0.8, phi: 1.05 },
@@ -9631,13 +10055,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'zenkutsu', g: 'flex', name: '前屈で手が床につかない', pose: '前屈で骨盤が倒れず、背中だけ丸まる',
       sum: '膝を伸ばしたまま前屈しても、手が床に届かない状態。もも裏やふくらはぎ、腰の筋の硬さが主な原因です。',
       causes: ['もも裏(ハムストリングス)が硬く、骨盤が前に倒れない', 'ふくらはぎが硬い', '腰の筋が硬い', '長い時間座りっぱなしの生活'],
-      mech: '前屈は、股関節で骨盤が前に倒れる動きと、背骨が丸まる動きの組み合わせです。ハムストリングスは骨盤(坐骨)から膝の下につくため、硬いと骨盤が前に倒れず、背中だけが丸まります。膝の裏からかかとへつながる腓腹筋も、膝を伸ばした前屈で引っぱられます。',
+      inside: ['もも裏(ハムストリングス)が縮んで、骨盤が前に倒れない', 'ふくらはぎ・腰の筋も縮んでいる'],
+      pain: [],
       layer: 'sup', main: ['short'],
-      sites: [
-        { n: 'ハムストリングスの起始部(坐骨)', at: ['Semitendinosus muscle.o', 'Long head of biceps femoris.o', 'Semimembranosus muscle.o'], k: 'load', why: 'もも裏が硬いと、前屈で坐骨の付け根が引っぱられ、骨盤が前に倒れません。' }],
-      weak: { mu: ['ilio'], why: '骨盤を前に起こす腸腰筋の働きが弱い傾向があります。', fix: '脚を前に上げて腸腰筋を使うと、反対側のもも裏がゆるみやすくなります(相反抑制)。', ex: ['脚を前に上げる(右)'] },
-      tense: { mu: ['hams', 'gast'], why: 'もも裏とふくらはぎに力が入ったままです。', fix: 'もも裏とふくらはぎをほぐしてから伸ばすと、伸びやすくなります。', ex: ['hamsL', 'calf'] },
-      short: { mu: ['hams', 'gast', 'esL'], why: 'もも裏(ハムストリングス)・ふくらはぎ・腰の筋が縮んで硬く、骨盤が前に倒れず背中だけが丸まっています。', fix: 'もも裏とふくらはぎを伸ばし、股関節から体を倒せるようにします。', ex: ['立って前屈', '長座前屈', '膝を抱える(右)', 'ふくらはぎ(右・膝を伸ばす)'] },
+      weak: { mu: ['ilio'], sub: [], fix: '脚を前に上げると、もも裏がゆるみやすい', ex: ['脚を前に上げる(右)'] },
+      tense: { mu: ['hams'], sub: ['gast'], fix: 'ほぐしてから伸ばす', ex: ['hamsL', 'calf'] },
+      short: { mu: ['hams'], sub: ['gast', 'esL'], fix: 'もも裏とふくらはぎを伸ばす', ex: ['立って前屈', '長座前屈', '膝を抱える(右)', 'ふくらはぎ(右・膝を伸ばす)'] },
       daily: ['お風呂上がりに伸ばす', '前屈は背中を丸めるより、おへそを太ももに近づけるように股関節から倒す', '座りっぱなしを避ける'],
       see: '前屈で腰や脚にしびれ・痛みが走る場合は、無理をせず受診してください。',
       cam: { theta: 1.4, phi: 1.4 },
@@ -9645,13 +10068,13 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'mukumi', g: 'leg', name: '脚のむくみ・冷え', pose: '長い時間座ったまま動かない',
       sum: '夕方になると脚がむくむ、靴がきつくなる、足先が冷える状態。座りっぱなし・立ちっぱなしで、脚の血液や水分の流れが滞ることが主な原因です。',
       causes: ['長い時間の座りっぱなし・立ちっぱなし', 'ふくらはぎの筋をあまり使わない', '塩分のとりすぎ、水分不足', '冷え、運動不足'],
-      mech: '脚の静脈の血液は、重力に逆らって心臓へ戻らなければなりません。ふくらはぎの腓腹筋・ヒラメ筋は、縮むたびに静脈を押しつぶして血液を上へ押し上げる「筋ポンプ」の働きをしていて、「第二の心臓」とも呼ばれます。じっとしているとこのポンプが働かず、水分が脚にたまってむくみます。',
+      scene: 'pc',
+      inside: ['腓腹筋・ヒラメ筋が使われず、血液を押し戻す筋ポンプが働かない', '水分が足首のまわりにたまっている'],
+      pain: [{ n: '足首〜ふくらはぎ(むくみ)', at: { j: 'ankle', o: [0, 0.06, 0] }, r: 0.08 }],
       layer: 'sup', main: ['weak'],
-      sites: [
-        { n: 'ふくらはぎ(筋ポンプ)', at: { mu: 'gast' }, k: 'load', why: 'ふくらはぎの筋が縮むたびに静脈を押して血液を心臓へ戻します。じっとしているとこのポンプが働かず、水分が足首のまわりにたまります。' }],
-      weak: { mu: ['gast', 'sol', 'tibA'], why: 'ふくらはぎの腓腹筋・ヒラメ筋があまり使われておらず、筋ポンプの働きが弱くなっています。', fix: 'かかととつま先の上げ下げで、ふくらはぎの筋をくり返し使い、血液と水分を押し戻します。', ex: ['座ってかかとを上げ下げ', '座ってつま先を上げる', 'カーフレイズ'] },
-      tense: { mu: ['gast', 'sol'], why: '動かさないふくらはぎが冷えて張っています。', fix: '足首からひざ裏へ向かって、下から上へさすります。', ex: ['calf'] },
-      short: { mu: ['gast', 'sol'], why: '座りっぱなしで、ふくらはぎが縮んだままになっています。', fix: 'ふくらはぎを伸ばして、筋をよく動くようにします。', ex: ['ふくらはぎ(右・膝を伸ばす)'] },
+      weak: { mu: ['gast', 'sol'], sub: ['tibA'], fix: 'かかととつま先の上げ下げで、ふくらはぎを動かす', ex: ['座ってかかとを上げ下げ', '座ってつま先を上げる', 'カーフレイズ'] },
+      tense: { mu: ['gast'], sub: ['sol'], fix: '足首からひざ裏へ、下から上へさする', ex: ['calf'] },
+      short: { mu: ['gast'], sub: ['sol'], fix: 'ふくらはぎを伸ばす', ex: ['ふくらはぎ(右・膝を伸ばす)'] },
       daily: ['30分〜1時間に一度は立ち上がって歩く', '座ったまま、かかととつま先の上げ下げをする', '寝るときに脚を少し高くする', '湯船で温める'],
       see: '片脚だけ急に腫れて痛む・赤くなる場合は、血のかたまり(深部静脈血栓症)のことがあるため、すぐに受診してください。息切れ、まぶたや全身のむくみ、尿の量の変化をともなう場合も、心臓や腎臓などの病気のことがあるため受診してください。',
       cam: { theta: 0.9, phi: 1.5 },
@@ -9659,14 +10082,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'yakyuhiji', g: 'arm', name: '野球肘', pose: 'ボールを投げる直前(腕をしならせる)',
       sum: 'ボールを投げる動作のくり返しで、肘の内側や外側が痛む状態。成長期の子どもに多く、放っておくと骨や軟骨が傷つくことがあります。',
       causes: ['投げすぎ(球数・練習日数が多い)', '肘が下がる、腕だけで投げるフォーム', '肩の後ろ・股関節・体幹が硬く、体全体を使って投げられない', '成長期で、骨の端(成長軟骨)が弱い'],
-      mech: '投げる直前に腕が後ろへしなるとき、肘の内側は強く引っぱられ、外側は骨どうしが押しつけられます。肘の内側の骨の出っぱり(内側上顆)には、手首や指を曲げる筋(円回内筋・橈側手根屈筋・浅指屈筋など)と靭帯がついていて、成長期にはこの部分が引きはがされるように傷つくことがあります。肩の後ろ(棘下筋・小円筋)や股関節、体幹が硬いと、そのぶん肘に頼った投げ方になります。肩甲骨を支える筋や、お尻の筋の働きも大切です。',
+      inside: ['投げる瞬間、手首を曲げる筋の付け根(肘の内側)が強く引っぱられる', '肩の後ろの棘下筋・小円筋が縮んで、肘に頼った投げ方になる', '肩甲骨・お尻の筋が弱く、体全体で投げられない'],
+      pain: [{ n: '肘の内側', at: 'Common flexor tendon.o', r: 0.05 }],
       layer: 'sup', main: ['short'],
-      sites: [
-        { n: '上腕骨の内側上顆(手首を曲げる筋の起始部)', at: 'Common flexor tendon.o', k: 'pain', why: '投げる直前に肘の内側が強く引っぱられ、手首や指を曲げる筋と靭帯の付け根が傷つきます。成長期には骨の端がはがれることもあります。' },
-        { n: '肘の外側の関節(上腕骨小頭)', at: { j: 'elbow', o: [0.018, -0.005, 0.012], snap: 'Humerus' }, k: 'pain', why: '同じ瞬間に肘の外側では骨どうしが押しつけられ、軟骨が傷つくことがあります(離断性骨軟骨炎)。' }],
-      weak: { mu: ['serr', 'trapL', 'gMed'], why: '肩甲骨を支える前鋸筋・僧帽筋 下部と、お尻の中殿筋が弱い傾向があり、体の土台から投げる力を伝えられません。', fix: '肩甲骨とお尻の筋を使い、腕だけに頼らない投げ方を支えます。', ex: ['肩甲骨を寄せる', 'あお向けで膝を開く(右)'] },
-      tense: { mu: ['flex', 'infra'], why: '投げすぎで前腕の内側と肩の後ろの筋が疲れて張っています。', fix: '前腕の内側と肩の後ろをほぐします。肘の痛む点は押しません。', ex: ['forearmIn', 'cuffL'] },
-      short: { mu: ['flex', 'infra', 'teres'], why: '前腕の内側の筋と肩の後ろ(棘下筋・小円筋・大円筋)が縮んで硬く、体全体を使えず肘に頼った投げ方になっています。', fix: '肩の後ろ・股関節・体幹を伸ばして、全身で投げられるようにし、肘の負担を減らします。', ex: ['腕を胸の前で引く(右)', '4の字(右のお尻)', '座ってひねる'], text: ['前腕の内側のストレッチ: 肘を伸ばして手のひらを前に向け、反対の手で指を手前に引いて15〜30秒(このモデルでは手首の腱の通り道がないため、3Dでは再生できません)'] },
+      weak: { mu: ['serr', 'trapL'], sub: ['gMed'], fix: '肩甲骨とお尻の筋を使う', ex: ['肩甲骨を寄せる', 'あお向けで膝を開く(右)'] },
+      tense: { mu: ['flex'], sub: ['infra'], fix: '前腕の内側と肩の後ろをほぐす', ex: ['forearmIn', 'cuffL'] },
+      short: { mu: ['infra', 'flex'], sub: ['teres'], fix: '肩の後ろ・股関節・体幹を伸ばす', ex: ['腕を胸の前で引く(右)', '4の字(右のお尻)', '座ってひねる'], text: ['前腕の内側のストレッチ: 肘を伸ばして手のひらを前に向け、反対の手で指を手前に引いて15〜30秒(このモデルでは手首の腱の通り道がないため、3Dでは再生できません)'] },
       careNote: '痛みがあるときは、まず投げるのを休むことがいちばん大切です。ストレッチやトレーニングは、痛みが落ち着いてから、指導者や医師と相談して行いましょう。',
       daily: ['球数や練習日数の目安を守り、休養日をつくる', '練習の前後に肩・股関節・体幹のストレッチをする', '痛みを我慢して投げ続けない'],
       see: '肘の痛みがある、肘が伸びきらない・曲がりきらない、肘が引っかかって動かなくなる、投げると肘から指先にしびれが走る場合は、早めに整形外科(スポーツ整形外科)を受診してください。成長期は、早く見つけるほど治りやすいとされます。',
@@ -9675,14 +10096,12 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'sango', g: 'women', name: '産後の骨盤のゆるみ', pose: '抱っこで腰を反らせて立つ',
       sum: '出産のあと、骨盤まわりが不安定になり、腰痛・恥骨や脚の付け根の痛み・尿もれ・お腹のたるみなどが起こりやすい状態。「骨盤矯正」と呼ばれるケアの多くは、骨盤を支える筋の働きを取り戻すことが中心です。',
       causes: ['妊娠中のホルモンの働きで、骨盤の靭帯がゆるむ', '出産で、骨盤の底を支える骨盤底筋が引き伸ばされる', '妊娠でお腹の筋が引き伸ばされて弱る(左右の腹直筋の間が開く「腹直筋離開」も)', '抱っこ・授乳での前かがみや反り腰、片側だけでの抱っこ'],
-      mech: '骨盤とお腹は、前と横を腹横筋、下を骨盤底筋、後ろを多裂筋が包む「筒」のような筋で支えられています(体幹のインナーユニット)。産後はこの筒の筋がゆるんでいるため、骨盤や腰が不安定になり、腰の筋(脊柱起立筋・腰方形筋)が代わりに頑張って腰痛が起きやすくなります。骨盤の骨の位置が手技で大きく動くわけではないとされ、まずはゆるんだ筋をもう一度働かせることが大切です。',
+      inside: ['腹横筋・骨盤底筋・多裂筋がゆるみ、骨盤を内側から支えられない', '代わりに腰の筋ががんばって、こっている', '抱っこで腰を反らせ、股関節の前が縮んでいる'],
+      pain: [{ n: '腰の下〜骨盤の後ろ', at: { j: 'si', o: [0, 0, 0], snap: 'Sacrum' }, r: 0.08 }, { n: '恥骨', at: { j: 'pubis', o: [0, 0, 0], snap: 'Hip bone' }, r: 0.05 }],
       layer: 'deep', main: ['weak'],
-      sites: [
-        { n: '恥骨結合(骨盤の前のつなぎ目)', at: { j: 'pubis', o: [0, 0, 0], snap: 'Hip bone' }, k: 'pain', why: '妊娠中のホルモンで骨盤の靭帯がゆるみ、骨盤の前のつなぎ目が不安定になって、恥骨や脚の付け根が痛むことがあります。' },
-        { n: '仙腸関節(骨盤の後ろのつなぎ目)', at: { j: 'si', o: [0, 0, 0], snap: 'Sacrum' }, k: 'pain', why: '骨盤の後ろのつなぎ目もゆるみ、腰の下やお尻の上が痛む原因になります。' }],
-      weak: { mu: ['ta', 'pfm', 'multi', 'rectA', 'gMax'], why: 'お腹の奥の腹横筋・骨盤底筋・多裂筋(体幹のインナーユニット)が妊娠と出産で引き伸ばされ、弱くなっています。骨盤を筋で支えられず不安定です。', fix: '骨盤底筋の体操とドローインで、ゆるんだ筋の筒をもう一度働かせ、骨盤を内側から支えます。', ex: ['pfmEx', 'drawin', 'ヒップリフト', 'あお向けで膝を開く(右)'] },
-      tense: { mu: ['esL', 'ql', 'trapU'], why: '支えの筋の代わりに腰の筋ががんばり、抱っこで首・肩も緊張しています。', fix: '腰の両わきと首の付け根をほぐします。', ex: ['lowBack', 'neckBack'] },
-      short: { mu: ['ilio', 'esL'], why: '抱っこで腰を反らせる姿勢が続き、股関節の前と腰の筋が縮んでいます。', fix: '膝を抱える・股関節の前を伸ばすストレッチで、反り腰を戻します。', ex: ['膝を抱える(右)', '腸腰筋(右脚を後ろ)'] },
+      weak: { mu: ['ta', 'pfm'], sub: ['multi', 'rectA', 'gMax'], fix: '骨盤底筋の体操とドローインで、ゆるんだ筋を働かせる', ex: ['pfmEx', 'drawin', 'ヒップリフト', 'あお向けで膝を開く(右)'] },
+      tense: { mu: ['esL', 'ql'], sub: ['trapU'], fix: '腰の両わきと首の付け根をほぐす', ex: ['lowBack', 'neckBack'] },
+      short: { mu: ['ilio'], sub: ['esL'], fix: '股関節の前を伸ばし、反り腰を戻す', ex: ['膝を抱える(右)', '腸腰筋(右脚を後ろ)'] },
       careNote: '体操を始める時期は、産後の1か月健診などで医師に確認してください。帝王切開のあとや、お腹の中央が縦に盛り上がる(腹直筋離開が大きい)場合は、上体を起こす腹筋運動(クランチなど)は控え、医師や助産師、理学療法士に相談しましょう。',
       daily: ['抱っこは左右交互に、赤ちゃんを体に近づけて', '授乳のときはクッションで高さを合わせ、前かがみを減らす', 'くしゃみや持ち上げる前に、骨盤底筋を軽く締める習慣をつける'],
       see: '強い腰痛や恥骨の痛みで歩きにくい、尿もれが続く、出血が続く、発熱がある場合は、産婦人科や整形外科を受診してください。',
@@ -9691,11 +10110,10 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { id: 'nyomore', g: 'women', name: '尿もれ(骨盤底筋のゆるみ)', pose: '重い物を持つ・くしゃみでお腹に力が入る',
       sum: 'くしゃみや咳、重い物を持ったとき、走ったときなどに尿がもれてしまう状態(腹圧性尿失禁)。出産や加齢で骨盤底筋がゆるむことが大きな原因で、女性に多く見られます。',
       causes: ['出産で骨盤底筋が引き伸ばされる', '加齢や閉経によるホルモンの変化', '体重の増加、便秘によるいきみ', 'お腹の奥の筋(腹横筋)の働きの低下'],
-      mech: '骨盤底筋は、骨盤の底でハンモックのように膀胱や子宮を支え、尿道を締める筋です。くしゃみや持ち上げる動作でお腹の圧が急に上がったとき、骨盤底筋が同時にきゅっと締まることで尿もれを防いでいます。この筋がゆるむと締めるのが間に合わず、尿がもれます。骨盤底筋は、腹横筋・多裂筋と一緒に働くため、お腹の奥の筋も合わせて使うと効果的です。骨盤底筋の体操は、続けることで改善が期待できるとされています。',
+      inside: ['骨盤底筋がゆるみ、お腹に力が入った瞬間に尿道を締められない', '一緒に働く腹横筋・多裂筋も弱い'],
+      pain: [],
       layer: 'deep', main: ['weak'],
-      sites: [
-        { n: '骨盤底筋(骨盤の底のハンモック)', at: { mu: 'pfm' }, k: 'load', why: '骨盤の底で膀胱や子宮を支え、尿道を締めている筋です。ゆるむと、くしゃみや持ち上げでお腹の圧が上がったときに締めるのが間に合いません。' }],
-      weak: { mu: ['pfm', 'ta', 'multi'], why: '出産や加齢で骨盤底筋が弱くなっていて、お腹の圧が急に上がったときに尿道を締められません。一緒に働く腹横筋・多裂筋も弱い傾向があります。', fix: '骨盤底筋の体操で締める力を取り戻し、ドローインでお腹の奥の筋も一緒に使います。', ex: ['pfmEx', 'drawin', 'ヒップリフト', '内ももを締める'] },
+      weak: { mu: ['pfm'], sub: ['ta', 'multi'], fix: '骨盤底筋の体操で締める力を取り戻す', ex: ['pfmEx', 'drawin', 'ヒップリフト', '内ももを締める'] },
       daily: ['骨盤底筋の体操を毎日の習慣にする(効果が出るまで数か月かかることもあります)', 'くしゃみ・咳・持ち上げの前に、骨盤底筋を締める', '便秘を防ぎ、体重を適正に保つ'],
       see: '排尿のときに痛む、血が混じる、急に回数が増えた、がまんできない強い尿意がある、体操を続けてもよくならない場合は、泌尿器科や婦人科を受診してください。',
       cam: { theta: 1.2, phi: 1.5 },
@@ -9706,34 +10124,39 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     c.def.name = c.name;
     // 使う: CARE_USE(3Dで再生)・TRAININGS(トレーニング図鑑へのリンク)・HI(筋の場所を表示)。ほぐす: HI。ストレッチ: STRETCHES・CARE_ST
     const find = (n) => HI[n] || CARE_USE.find((d) => d.name === n) || STRETCHES.find((d) => d.name === n) || CARE_ST.find((d) => d.name === n) || (TRAININGS.find((d) => d.name === n) ? { name: n, train: true } : null);
+    const mus = (ids) => ids.map((id) => ({ label: MU[id][0], re: new RegExp(MU[id][1]) }));
     for (const k of CAUSE_KEYS) {
       const p = c[k];
       if (!p) continue;
-      p.mus = p.mu.map((id) => ({ label: MU[id][0], re: new RegExp(MU[id][1]) }));
+      p.mus = mus(p.mu);
+      p.subs = mus(p.sub || []);
       p.defs = p.ex.map((n) => { const d = find(n); if (!d) throw new Error(c.id + ': ' + n + ' が見つかりません'); return d; });
     }
     // 中心の原因を先に、あとは 弱い → こっている → 縮んでいる の順
     c.pairs = c.main.concat(CAUSE_KEYS.filter((k) => c[k] && !c.main.includes(k)));
   });
-  // 原因の色(対策のカードも同じ色)。こっている筋は姿勢がくずれるほど濃く
+  // 原因の色(対策のカードも同じ色)。中心の筋は濃く、関連する筋は薄く。こっている筋は姿勢がくずれるほど濃く
   const CARE_COL = { weak: new THREE.Color(CAUSE.weak.col), tense: new THREE.Color(CAUSE.tense.col), short: new THREE.Color(CAUSE.short.col), usehi: new THREE.Color(0xd11f2d) };
   function careColor(c, base, role, k) {
     c.copy(base);
     if (!role) return c;
-    return c.lerp(CARE_COL[role], role === 'tense' ? 0.4 + 0.55 * k : 0.85);
+    const sub = role.endsWith('-sub'), r = sub ? role.slice(0, -4) : role;
+    const t = r === 'tense' ? 0.45 + 0.5 * k : 0.85;
+    return c.lerp(CARE_COL[r], sub ? t * 0.45 : t);
   }
   let careCur = null;
   const careBtns = [];
   // 1回: よい姿勢 1.2秒 → くずれる 1.8秒 → 負担がかかる姿勢 2.6秒 → 戻す 1.4秒
   const CA_GOOD = 1.2, CA_IN = 1.8, CA_BAD = 2.6, CA_OUT = 1.4, CA_ALL = CA_GOOD + CA_IN + CA_BAD + CA_OUT;
-  // 筋ごとの原因の種類。2つ以上に入る筋は、先に並ぶ原因(中心の原因)の色にする
+  // 筋ごとの原因の種類。中心の筋を先に決め、2つ以上に入る筋は先に並ぶ原因(中心の原因)の色にする
   function careStructs(c) {
-    const role = new Map(), out = { weak: [], tense: [], short: [] };
+    const role = new Map();
     structs.forEach((s) => {
       if (s.kind !== 'muscle') return;
-      for (const k of c.pairs) if (c[k].mus.some((x) => x.re.test(s.en))) { if (!role.has(s)) role.set(s, k); out[k].push(s); }
+      for (const k of c.pairs) if (c[k].mus.some((x) => x.re.test(s.en))) { role.set(s, k); return; }
+      for (const k of c.pairs) if (c[k].subs.some((x) => x.re.test(s.en))) { role.set(s, k + '-sub'); return; }
     });
-    return { role, out };
+    return { role };
   }
   function showStruct(s) {
     if (!s) return;
@@ -9745,24 +10168,37 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     syncCareLayer();
   }
 
-  // ---- 原因の場所(付着部・炎症が起きやすい所)の印 ----
-  // 付着部は Z-Anatomy の「筋の付着部」の点(ATTACH、右側)。関節の近くの点は、関節の中心からのずれ [外側, 上, 前] を骨の表面に寄せる
+  // ---- 3Dの印: 痛む場所(赤くぼんやり光る)、ほぐす場所(番号のポイント)、パソコン・スマホ ----
+  // 位置は resolveSite で静止姿勢の点の集まりと、いっしょに動く体節を求める(付着部 ATTACH、関節の近く、筋の中心、骨)
   const siteGroup = new THREE.Group();
   scene.add(siteGroup);
-  let siteObjs = [];
+  let siteObjs = []; // { g, r(体節), pulse? }
+  let sceneUpd = null; // パソコン・スマホの位置をそろえる関数
   const siteCache = new Map();
-  const SITE_COL = { pain: '#e0262b', load: '#c2185b' };
   const texCache = {};
-  function siteTex(n, k) {
-    const key = n + k;
+  function glowTex() {
+    if (texCache.glow) return texCache.glow;
+    const cv = document.createElement('canvas');
+    cv.width = cv.height = 128;
+    const g = cv.getContext('2d');
+    const gr = g.createRadialGradient(64, 64, 4, 64, 64, 62);
+    gr.addColorStop(0, 'rgba(255,40,40,0.95)');
+    gr.addColorStop(0.45, 'rgba(240,30,40,0.55)');
+    gr.addColorStop(1, 'rgba(230,20,30,0)');
+    g.fillStyle = gr;
+    g.fillRect(0, 0, 128, 128);
+    return (texCache.glow = new THREE.CanvasTexture(cv));
+  }
+  function pinTex(n) {
+    const key = 'pin' + n;
     if (texCache[key]) return texCache[key];
     const cv = document.createElement('canvas');
     cv.width = cv.height = 64;
     const g = cv.getContext('2d');
-    g.beginPath(); g.arc(32, 32, 27, 0, Math.PI * 2);
-    g.fillStyle = SITE_COL[k]; g.fill();
+    g.beginPath(); g.arc(32, 32, 26, 0, Math.PI * 2);
+    g.fillStyle = '#d4650f'; g.fill();
     g.lineWidth = 5; g.strokeStyle = '#fff'; g.stroke();
-    g.fillStyle = '#fff'; g.font = 'bold 34px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = '#fff'; g.font = 'bold 32px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
     g.fillText(String(n), 32, 34);
     return (texCache[key] = new THREE.CanvasTexture(cv));
   }
@@ -9789,7 +10225,6 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     return best;
   }
   function boneByName(en) { const s = structs.get(en); return s ? rightOf(s) : []; }
-  // 点の集まり(静止姿勢の座標)と、いっしょに動く体節を求める
   function resolveSite(at) {
     let pts = [];
     if (typeof at === 'string' || Array.isArray(at)) {
@@ -9799,21 +10234,16 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       if (at.snap) {
         const vs = [].concat(...boneByName(at.snap).map(meshVerts));
         const q = nearest(vs, g);
-        // 骨の表面の、寄せた点のまわり(頂点が少ない骨は近い順に30点)
-        if (q) { pts = vs.filter((v) => v.distanceTo(q) < 0.014); if (pts.length < 20) pts = vs.filter((v) => v.distanceTo(q) < 0.03).sort((x, y) => x.distanceToSquared(q) - y.distanceToSquared(q)).slice(0, 30); }
+        if (q) pts = vs.filter((v) => v.distanceTo(q) < 0.014);
       }
-      if (pts.length && pts.length < 15) { const q = pts[0]; for (let i = 0; i < 25; i++) pts.push(q.clone().add(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(0.014))); }
-      if (!pts.length) for (let i = 0; i < 40; i++) pts.push(g.clone().add(new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(0.016)));
+      if (!pts.length) pts = [g];
     } else if (at.mu || at.bone) {
       let vs = [];
       if (at.bone) vs = [].concat(...boneByName(at.bone).map(meshVerts));
       else structs.forEach((s) => { if (s.kind === 'muscle' && new RegExp(MU[at.mu][1]).test(s.en)) vs.push(...[].concat(...rightOf(s).map(meshVerts))); });
-      const c = vs.reduce((a, v) => a.add(v), new THREE.Vector3()).divideScalar(Math.max(1, vs.length));
-      const r = at.bone ? 1 : 0.022;
-      pts = at.bone ? vs : vs.filter((v) => v.distanceTo(c) < r);
-      if (pts.length < 10) pts = vs.slice().sort((a, b) => a.distanceToSquared(c) - b.distanceToSquared(c)).slice(0, 60);
+      pts = vs;
     }
-    if (pts.length > 150) { const step = pts.length / 150; pts = Array.from({ length: 150 }, (_, i) => pts[Math.floor(i * step)]); }
+    if (pts.length > 300) { const step = pts.length / 300; pts = Array.from({ length: 300 }, (_, i) => pts[Math.floor(i * step)]); }
     const cen = pts.reduce((a, v) => a.add(v), new THREE.Vector3()).divideScalar(Math.max(1, pts.length));
     // 近い骨の体節について動く(点ごとにいちばん近い骨を数えて多いほう。右の骨と、背骨・骨盤など真ん中の骨)
     const votes = new Map();
@@ -9832,47 +10262,123 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     }
     let seg = RIG.SEG.trunk, best = -1;
     votes.forEach((v, k) => { if (v > best) { best = v; seg = k; } });
-    return { pts, cen, seg };
+    return { cen, seg };
   }
-  function clearSites() {
-    for (const o of siteObjs) siteGroup.remove(o.g);
-    siteObjs = [];
+  function cachedSite(key, at) {
+    if (!siteCache.has(key)) siteCache.set(key, resolveSite(at));
+    return siteCache.get(key);
+  }
+  function addMark(r, sprite) {
+    const g = new THREE.Group();
+    g.matrixAutoUpdate = false;
+    sprite.position.copy(r.cen);
+    g.add(sprite);
+    siteGroup.add(g);
+    const o = { g, r, sprite };
+    siteObjs.push(o);
+    return o;
+  }
+  function clearMarks(kind) {
+    siteObjs = siteObjs.filter((o) => { if (kind && o.kind !== kind) return true; siteGroup.remove(o.g); return false; });
     dirty = true;
   }
-  function showSites(c) {
-    clearSites();
-    c.sites.forEach((site, i) => {
-      const key = c.id + i;
-      if (!siteCache.has(key)) siteCache.set(key, resolveSite(site.at));
-      const r = siteCache.get(key);
-      const g = new THREE.Group();
-      g.matrixAutoUpdate = false;
-      const geo = new THREE.BufferGeometry().setFromPoints(r.pts);
-      const pm = new THREE.PointsMaterial({ color: SITE_COL[site.k], size: 7, sizeAttenuation: false, depthTest: false, transparent: true, opacity: 0.9 });
-      const pts = new THREE.Points(geo, pm);
-      pts.renderOrder = 20;
-      g.add(pts);
-      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: siteTex(i + 1, site.k), depthTest: false, transparent: true, sizeAttenuation: false }));
-      sp.scale.set(0.024, 0.024, 1);
-      sp.center.set(0.5, i % 2 ? 1.25 : -0.25); // 近い印が重ならないよう、上下交互に置く
-      sp.position.copy(r.cen);
+  // 痛む場所: 体の表面より手前に、赤い光をぼんやり重ねる(奥にあっても見える)
+  function showPain(c) {
+    clearMarks();
+    c.pain.forEach((p, i) => {
+      const r = cachedSite(c.id + 'p' + i, p.at);
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex(), depthTest: false, transparent: true, opacity: 0.8 }));
+      sp.scale.set(p.r * 2.4, p.r * 2.4, 1);
+      sp.renderOrder = 20;
+      const o = addMark(r, sp);
+      o.kind = 'pain';
+      o.pulse = true;
+    });
+    updateSites();
+  }
+  // ほぐす場所: 対象の筋の中心に番号のポイント(右側)
+  function showPoints(ids) {
+    clearMarks('point');
+    ids.forEach((id, i) => {
+      const r = cachedSite('mu' + id, { mu: id });
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: pinTex(i + 1), depthTest: false, transparent: true, sizeAttenuation: false }));
+      sp.scale.set(0.026, 0.026, 1);
       sp.renderOrder = 21;
-      g.add(sp);
-      siteGroup.add(g);
-      siteObjs.push({ g, r, pm });
+      addMark(r, sp).kind = 'point';
     });
     updateSites();
   }
   function updateSites() {
     for (const o of siteObjs) { o.g.matrix.copy(segMats[o.r.seg]); o.g.matrixWorldNeedsUpdate = true; }
+    if (sceneUpd) sceneUpd();
     dirty = true;
   }
+  // 痛む場所はゆっくり明滅させる
+  (function pulse() {
+    requestAnimationFrame(pulse);
+    let any = false;
+    const a = 0.55 + 0.3 * Math.sin(performance.now() / 380);
+    for (const o of siteObjs) if (o.pulse) { o.sprite.material.opacity = a; any = true; }
+    if (any) dirty = true;
+  })();
   function flyToSite(i) {
-    const o = siteObjs[i];
+    const o = siteObjs.filter((x) => x.kind === 'pain')[i];
     if (!o) return;
     const p = o.r.cen.clone().applyMatrix4(segMats[o.r.seg]);
-    flyTo({ r: 0.95, tx: p.x, ty: p.y, tz: p.z });
+    flyTo({ r: 1.1, tx: p.x, ty: p.y, tz: p.z });
   }
+  // 不調の場面: pc = 机・モニター・キーボード、phone = 両手でスマホ、phone1 = 右手でスマホ
+  const sceneGroup = new THREE.Group();
+  scene.add(sceneGroup);
+  const sceneMat = new THREE.MeshStandardMaterial({ color: 0x8a9099, roughness: 0.6 });
+  const deskMat = new THREE.MeshStandardMaterial({ color: 0xb59a7a, roughness: 0.8 });
+  const screenMat = new THREE.MeshStandardMaterial({ color: 0x2a3a52, roughness: 0.3, emissive: 0x1d3c66, emissiveIntensity: 0.5 });
+  const box = (w, h, d, m) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+  function headPoint(E) {
+    // 目のあたり(首の付け根から上と前)を頭の体節で動かす
+    return new THREE.Vector3(JC.neck.x, JC.neck.y + 0.19, JC.neck.z + 0.1).applyMatrix4(segMats[RIG.SEG.head]);
+  }
+  function buildScene(kind) {
+    sceneGroup.clear();
+    sceneUpd = null;
+    if (!kind) return;
+    const L = LCTX.L;
+    const P = (E, n) => new THREE.Vector3(...LOAD.at(E, L.pt[n]));
+    if (kind === 'pc') {
+      const desk = box(1.1, 0.03, 0.6, deskMat), legL = box(0.04, 1, 0.04, sceneMat), legR = legL.clone();
+      const kb = box(0.36, 0.015, 0.12, sceneMat), mon = box(0.5, 0.31, 0.02, screenMat), stand = box(0.04, 1, 0.04, sceneMat);
+      sceneGroup.add(desk, legL, legR, kb, mon, stand);
+      let fixed = null;
+      sceneUpd = () => {
+        const E = segMats.map((m) => m.elements);
+        const gl = P(E, 'grip.l'), gr = P(E, 'grip.r'), h = gl.clone().add(gr).multiplyScalar(0.5);
+        // 机はよい姿勢のときの手の高さに置いて固定し、キーボードは手の下について動く
+        if (!fixed) fixed = { x: h.x, y: h.y - 0.045, z: h.z + 0.08, eye: headPoint(E) };
+        const top = fixed.y;
+        desk.position.set(fixed.x, top - 0.015, fixed.z + 0.12);
+        for (const [lg, x] of [[legL, -0.5], [legR, 0.5]]) { lg.scale.set(1, top, 1); lg.position.set(fixed.x + x, top / 2, fixed.z + 0.36); }
+        kb.position.set(h.x, top + 0.008, h.z + 0.02);
+        // モニターはよい姿勢の目の高さより少し下、目から約60cm前
+        const my = Math.max(top + 0.2, fixed.eye.y - 0.08);
+        mon.position.set(fixed.x, my, fixed.z + 0.36);
+        const sh = my - 0.155 - top;
+        stand.scale.set(1, Math.max(0.01, sh), 1); stand.position.set(fixed.x, top + sh / 2, fixed.z + 0.38);
+      };
+      careSceneReset = () => { fixed = null; };
+    } else {
+      const ph = box(0.075, 0.15, 0.009, screenMat);
+      sceneGroup.add(ph);
+      sceneUpd = () => {
+        const E = segMats.map((m) => m.elements);
+        const c = kind === 'phone1' ? P(E, 'grip.r') : P(E, 'grip.l').add(P(E, 'grip.r')).multiplyScalar(0.5);
+        ph.position.copy(c).add(new THREE.Vector3(0, 0.02, kind === 'phone1' ? 0.04 : 0.02));
+        // 画面を顔に向ける
+        ph.lookAt(headPoint(E));
+      };
+    }
+    // 位置は次の描画で姿勢を当てはめたあと(deform → updateSites)に決める
+  }
+  let careSceneReset = null;
 
   // ---- 見る層(問題の筋がある層から下を表示する) ----
   const CARE_LAYERS = [['sup', '表層から'], ['mid', '中層から'], ['deep', '深層から'], ['bone', '骨だけ']];
@@ -9890,10 +10396,10 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', contiguous && b.dataset.l === top ? 'true' : 'false'));
   }
 
-  function careChip(x, role) {
+  function careChip(x, role, sub) {
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'mchip care-' + role;
+    b.className = 'mchip care-' + role + (sub ? ' sub' : '');
     b.textContent = x.label;
     b.addEventListener('click', () => {
       let s = null;
@@ -9909,13 +10415,27 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     bottom.textContent = '';
     top.appendChild(el('h3', '', c.name));
     top.appendChild(el('p', 'cc-sum', c.sum));
-    // 1. 原因の場所
+    // 1. 原因: 体の中で起きていること(何筋がどうなっているか)と、痛む場所・きっかけ
     const s1 = el('section', 'cc-sec');
-    s1.appendChild(el('h4', 'cc-step', '原因になっている場所'));
+    s1.appendChild(el('h4', 'cc-step', '体の中で起きていること'));
     const lg = el('div', 'cc-key');
-    for (const k of c.pairs) { const sp = el('span', 'cc-k ' + k, CAUSE[k].name); lg.appendChild(sp); }
-    if (c.sites.length) lg.appendChild(el('span', 'cc-k site', '付着部・痛む場所'));
+    for (const k of c.pairs) lg.appendChild(el('span', 'cc-k ' + k, CAUSE[k].name));
+    if (c.pain.length) lg.appendChild(el('span', 'cc-k site', '痛む場所'));
     s1.appendChild(lg);
+    const ul0 = el('ul', 'cc-in');
+    c.inside.forEach((t) => ul0.appendChild(el('li', '', t)));
+    s1.appendChild(ul0);
+    if (c.pain.length) {
+      const pr = el('div', 'cc-pain');
+      pr.appendChild(el('span', 'lb', '痛む場所'));
+      c.pain.forEach((p, i) => {
+        const b = el('button', 'chip', p.n);
+        b.type = 'button';
+        b.addEventListener('click', () => flyToSite(i));
+        pr.appendChild(b);
+      });
+      s1.appendChild(pr);
+    }
     const ls = el('div', 'seg cc-layer');
     ls.id = 'cc-layer';
     ls.setAttribute('role', 'group');
@@ -9931,26 +10451,6 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     lr.appendChild(el('span', '', '見る層'));
     lr.appendChild(ls);
     s1.appendChild(lr);
-    if (c.sites.length) {
-      const ol = el('ol', 'cc-sites');
-      c.sites.forEach((site, i) => {
-        const li = el('li', site.k);
-        const b = el('button', '');
-        b.type = 'button';
-        b.appendChild(el('span', 'no', String(i + 1)));
-        const tx = el('span', 'tx');
-        tx.appendChild(el('b', '', site.n));
-        tx.appendChild(el('em', '', site.k === 'pain' ? '炎症・痛みが起きやすい' : '負担が集中する'));
-        tx.appendChild(el('span', '', site.why));
-        b.appendChild(tx);
-        b.addEventListener('click', () => flyToSite(i));
-        li.appendChild(b);
-        ol.appendChild(li);
-      });
-      s1.appendChild(ol);
-    }
-    s1.appendChild(el('p', 'cc-h5', '体の中で起きていること'));
-    s1.appendChild(el('p', 'cc-mech', c.mech));
     s1.appendChild(el('p', 'cc-h5', 'きっかけ'));
     const ul = el('ul', 'cc-list');
     c.causes.forEach((t) => ul.appendChild(el('li', '', t)));
@@ -9959,21 +10459,24 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     // 2. 原因と対策(1対1)
     const s2 = el('section', 'cc-sec');
     s2.appendChild(el('h4', 'cc-step', '原因と対策'));
-    s2.appendChild(el('p', 'cc-sub', '原因の種類ごとに、対応する対策を組にしています。対策をタップすると、その動きを3Dで再生します。'));
     if (c.careNote) s2.appendChild(el('p', 'cc-warn', c.careNote));
     for (const k of c.pairs) {
       const p = c[k], C = CAUSE[k];
       const box = el('div', 'cc-pair ' + k);
       const head = el('div', 'cc-ph');
-      const ca = el('span', 'cc-tag', '原因');
-      head.appendChild(ca);
+      head.appendChild(el('span', 'cc-tag', '原因'));
       head.appendChild(el('b', '', C.long));
       if (c.main.includes(k)) head.appendChild(el('span', 'cc-main', '中心'));
       box.appendChild(head);
-      const chips = el('div', 'chips');
+      const chips = el('div', 'chips cc-mus');
       p.mus.forEach((x) => chips.appendChild(careChip(x, k)));
       box.appendChild(chips);
-      box.appendChild(el('p', 'cc-why', p.why));
+      if (p.subs.length) {
+        const sub = el('div', 'cc-subs');
+        sub.appendChild(el('span', '', '関連'));
+        p.subs.forEach((x) => sub.appendChild(careChip(x, k, true)));
+        box.appendChild(sub);
+      }
       const fx = el('div', 'cc-fix');
       const fh = el('div', 'cc-ph');
       fh.appendChild(el('span', 'cc-tag', '対策'));
@@ -10000,7 +10503,9 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
           if (def.hi) startHi(c, def, k, b);
           else {
             if (focus) setFocus(null);
+            clearMarks('point');
             startStretch(def, b);
+            setPoseUi(false);
             $('#excard').classList.toggle('st', !def.use);
             $('#ex-list-h').className = def.use ? 'contract' : 'stretch';
           }
@@ -10011,7 +10516,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
         exBtns.push(b);
       });
       if (p.defs.length) fx.appendChild(ex);
-      if (p.defs.some((d) => d.train)) fx.appendChild(el('p', 'cc-ad', '↗ はトレーニング図鑑で動きと働く筋を見られます。'));
+      if (p.defs.some((d) => d.train)) fx.appendChild(el('p', 'cc-ad', '↗ はトレーニング図鑑で見られます。'));
       if (p.text) {
         const ul2 = el('ul', 'cc-list');
         p.text.forEach((t) => ul2.appendChild(el('li', '', t)));
@@ -10032,9 +10537,15 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     bottom.appendChild(el('p', 'exnote', 'ここで紹介しているのは一般的な情報で、診断や治療の代わりにはなりません。痛みやしびれがあるときは無理をせず、ストレッチや運動は痛みのない範囲で行ってください。'));
     syncCareLayer();
   }
-  // 3Dで動きを再生しない対策(ドローイン・骨盤底筋の体操・ほぐす場所): 対象の筋を色で示し、その筋を選ぶ
+  // 不調の姿勢を見ているあいだは、姿勢のメーター・説明・筋の一覧を出さない(対策の再生中は出す)
+  function setPoseUi(pose) {
+    exCard.classList.toggle('carepose', pose);
+    sceneGroup.visible = pose;
+  }
+  // 3Dで動きを再生しない対策(ドローイン・骨盤底筋の体操・ほぐす場所): 対象の筋を色で示し、ほぐす場所は番号のポイントで示す
   function startHi(c, item, kind, btn) {
     startCare(c, c.btn);
+    setPoseUi(false);
     exBtns.forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
     const ss = [];
     structs.forEach((s) => { if (s.kind === 'muscle' && item.mu.some((id) => new RegExp(MU[id][1]).test(s.en))) ss.push(s); });
@@ -10046,13 +10557,14 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     tr.hi = true;
     setCareK(0, 'good');
     lastCaPhase = '';
+    if (loosen) showPoints(item.mu);
     $('#ex-phase').textContent = loosen ? 'ほぐす場所' : '使う筋';
     $('#ex-phase').dataset.dir = 'hold';
-    $('#ex-phase-sub').textContent = 'この動きは3Dでは再生しません';
+    $('#ex-phase-sub').textContent = loosen ? '番号のところを押す・さする' : 'この動きは3Dでは再生しません';
     exPlay.textContent = '再生';
     $('#ex-back').hidden = false;
     $('#ex-name').textContent = (loosen ? 'ほぐす: ' : '使う: ') + item.name;
-    $('#ex-aim').textContent = (loosen ? 'オレンジ' : '赤') + 'で表示している筋が対象です。';
+    $('#ex-aim').textContent = loosen ? 'オレンジの筋の、番号のポイントをほぐします。' : '赤で表示している筋を使います。';
     $('#ex-load').textContent = 'やり方: ' + item.how;
     $('#ex-list-h').textContent = '対象の筋 ' + ss.length + '種';
     $('#ex-list-h').className = loosen ? 'care' : 'contract';
@@ -10075,9 +10587,9 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       if (ss.every((s) => s.layer !== 'sup')) setFocus(ss);
       else if (focus) setFocus(ss);
       updateBounds();
-      const box = new THREE.Box3();
-      for (const s of ss) for (const m of s.meshes) box.expandByObject(m);
-      const cc = box.getCenter(new THREE.Vector3()), size = box.getSize(new THREE.Vector3()).length();
+      const bx = new THREE.Box3();
+      for (const s of ss) for (const m of s.meshes) bx.expandByObject(m);
+      const cc = bx.getCenter(new THREE.Vector3()), size = bx.getSize(new THREE.Vector3()).length();
       flyTo({ r: clamp(size * 2.2, 0.9, 3.2), tx: cc.x, ty: cc.y, tz: cc.z });
     }
     poseDirty = true;
@@ -10091,7 +10603,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     const interp = trInterp(def);
     const frames = LOAD.solveExercise(LCTX, def, 0, NF, interp);
     placeFrames(def, frames);
-    const { role, out } = careStructs(c);
+    const { role } = careStructs(c);
     muscleMeshes.forEach((m) => { m.userData.care = role.get(m.userData.s) || null; });
     tr = { def, btn, kg: 0, frames, interp, t: 0, k: 0, playing: true, items: [] };
     lastCaPhase = '';
@@ -10099,37 +10611,21 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     setRhythmState(def.rhythm !== false);
     setHandState(def.hand || { grip: 0, pron: 90 });
     buildProps(def, 0);
-    if (changed) { renderCare(c); showSites(c); setCareLayer(c.layer); $('#carepick').textContent = c.name; }
+    clearMarks('point');
+    if (changed) { renderCare(c); showPain(c); buildScene(c.scene); setCareLayer(c.layer); $('#carepick').textContent = c.name; }
+    else if (careSceneReset) careSceneReset();
     exBtns.forEach((b) => b.setAttribute('aria-pressed', 'false'));
     exCard.hidden = false;
     exCard.classList.remove('st');
+    setPoseUi(true);
     $('#ex-back').hidden = true;
     $('#ex-list-h').className = 'care';
-    $('#ex-name').textContent = '姿勢: ' + c.pose;
+    $('#ex-name').textContent = c.pose;
     $('#ex-aim').textContent = 'よい姿勢と、' + c.name + 'につながる姿勢をくり返します。';
-    $('#ex-load').textContent = c.pairs.map((k) => ({ weak: '緑', tense: 'オレンジ', short: '紫' })[k] + ' = ' + CAUSE[k].long).join('、') + (c.sites.length ? '、番号の印 = 付着部・痛む場所' : '') + '。こっている筋は、姿勢がくずれるほど濃くなります。';
-    $('#ex-pos-a').textContent = 'よい姿勢';
-    $('#ex-pos-b').textContent = c.pose;
     exPlay.textContent = '一時停止';
-    const n = role.size;
-    $('#ex-list-h').textContent = '原因になっている筋 ' + n + '種';
     const list = $('#ex-movers');
     list.textContent = '';
-    for (const k of c.pairs) for (const s of out[k]) {
-      if (role.get(s) !== k) continue;
-      const li = document.createElement('li');
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.innerHTML = '<span class="nm"></span><span class="kind"></span>';
-      b.querySelector('.nm').textContent = s.name;
-      const kk = b.querySelector('.kind');
-      kk.textContent = CAUSE[k].name;
-      kk.dataset.k = k;
-      b.addEventListener('click', () => showStruct(s));
-      li.appendChild(b);
-      list.appendChild(li);
-      tr.items.push({ s });
-    }
+    role.forEach((r, s) => { if (!r.endsWith('-sub')) tr.items.push({ s }); });
     const fit = fitFrames(def, frames);
     let to = Object.assign({ theta: 1.15, phi: 1.38 }, fit, c.cam ? { theta: c.cam.theta, phi: c.cam.phi } : {});
     // 手・腕の不調は上半身に寄せる
@@ -10475,6 +10971,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     JC = RIG.computeJoints(byName);
     buildBoneField();
     muscleMeshes.forEach(initSkin);
+    if (!EXMODE) setupGround();
     if (EXMODE) {
       setupTraining();
       openTab('tab-ex', false);
@@ -10498,6 +10995,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     buildLayerRows();
     $('#loading').hidden = true;
     if (location.hash === '#dev') window.__dev = { angles, setHandState, applyPose: () => applyPose(), pt: (n) => LOAD.at(segMats.map((m) => m.elements), LCTX.L.pt[n]), exAngles, muscleMeshes, JC, flyTo, structs, deform, LCTX, TRAININGS, startTraining: (i, kg) => startTraining(TRAININGS[i], exBtns[i], kg), STRETCHES, startStretch: (i) => { const j = STRETCHES.filter((d) => !d.hidden).indexOf(STRETCHES[i]); startStretch(STRETCHES[i], exBtns[j] || document.createElement('button')); }, tr: () => tr, disc, ring, select, setLayer, goExtreme, goPose, zeroAngles, setTrainingK: (k) => { stopExercise(); setTrainingK(k, true); poseDirty = true; }, setStretchK: (k) => { stopExercise(); setStretchK(k, 'hold'); poseDirty = true; }, CARES, CARE_ST, CARE_USE, HI, startCare: (i) => CARES[i].btn.click(), setCareK: (k) => { stopExercise(); setCareK(k, 'bad'); poseDirty = true; }, careStructs, focusSet: setFocus, siteObjs: () => siteObjs, flyToSite };
+    if (location.hash === '#dev') Object.assign(window.__dev, { orbit: (th, ph, r, t) => { cam.tween = null; applyCam(Object.assign(camState(), { theta: th, phi: ph }, r ? { r } : {}, t ? { tx: t[0], ty: t[1], tz: t[2] } : {})); }, buildProps: () => buildProps(tr.def, tr.kg), segMats: () => segMats.map((m) => m.elements.slice()) });
     window.__ready = true;
     dirty = true;
   }).catch((err) => {

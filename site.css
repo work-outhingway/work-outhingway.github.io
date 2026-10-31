@@ -289,14 +289,9 @@ html.js-reveal .reveal.in { opacity: 1; transform: none; }
 .appr .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .appr .tags a { border: 1px solid var(--line); border-radius: 99px; padding: 3px 10px; font-size: 13px; text-decoration: none; color: inherit; }
 /* 不調の解説ページ: 原因の場所と、原因 ↔ 対策の組(弱い → 使う 緑、こっている → ほぐす オレンジ、縮んでいる → ストレッチ 紫) */
-.sites { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 8px; counter-reset: site; }
-.sites li { counter-increment: site; position: relative; border: 1px solid #f0c4c6; background: #fdf3f3; border-radius: 12px; padding: 10px 14px 10px 46px; }
-.sites li.load { border-color: #ecc0d3; background: #fcf2f6; }
-.sites li::before { content: counter(site); position: absolute; left: 12px; top: 10px; width: 24px; height: 24px; border-radius: 50%; background: #e0262b; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 13px; }
-.sites li.load::before { background: #c2185b; }
-.sites li span { display: block; font-size: 12px; font-weight: 700; color: #c2202a; }
-.sites li.load span { color: #a3164e; }
-.sites li p { margin: 4px 0 0; }
+.inside { margin: 8px 0 0; padding-left: 1.2em; } .inside li { margin: 4px 0; }
+.tags.pain span { display: inline-block; background: #fdeaea; color: #b3202a; border-radius: 999px; padding: 3px 10px; margin: 0 6px 6px 0; font-size: 13px; font-weight: 700; }
+.pair .subs { font-size: 13px; color: var(--muted, #666); margin: 2px 0 6px; }
 .pair { --c: #157a51; border: 1px solid color-mix(in srgb, var(--c) 35%, var(--line)); border-left: 5px solid var(--c); border-radius: 12px; padding: 4px 16px 14px; margin-top: 14px; }
 .pair.tense { --c: #c25a0c; } .pair.short { --c: #7d3c98; }
 .pair h3, .pair h4 { color: var(--c); }
