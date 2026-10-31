@@ -2,18 +2,18 @@
 <html lang="ja">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="前屈・前もも・ふくらはぎ・胸・肩・首など代表的なストレッチ19種目で、どの筋肉がどれだけ伸びるかを3Dで表示。その筋が伸ばされる最大に対する割合を青の濃さで見られます。">
+<meta name="description" content="ダウンドッグ・ワールドグレイテストストレッチ・カウチストレッチ・前もも・胸・首など、よく紹介されるストレッチ19種目で、どの筋肉がどれだけ伸びるかを3Dで表示。その筋が伸ばされる最大に対する割合を青の濃さで見られます。">
 <link rel="canonical" href="https://work-outhingway.github.io/stretch.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="筋骨格アトラス">
 <meta property="og:title" content="ストレッチ図鑑|ストレッチで伸びる筋肉を3Dで見る(19種目)">
-<meta property="og:description" content="前屈・前もも・ふくらはぎ・胸・肩・首など代表的なストレッチ19種目で、どの筋肉がどれだけ伸びるかを3Dで表示。その筋が伸ばされる最大に対する割合を青の濃さで見られます。">
+<meta property="og:description" content="ダウンドッグ・ワールドグレイテストストレッチ・カウチストレッチ・前もも・胸・首など、よく紹介されるストレッチ19種目で、どの筋肉がどれだけ伸びるかを3Dで表示。その筋が伸ばされる最大に対する割合を青の濃さで見られます。">
 <meta property="og:url" content="https://work-outhingway.github.io/stretch.html">
 <meta property="og:locale" content="ja_JP">
 <meta property="og:image" content="https://work-outhingway.github.io/img/stretch.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="google-site-verification" content="YttDPv5ANMofoC2DyxM0FCG_CilAQm-fvV7C-GWKQ5c">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"ストレッチ図鑑","url":"https://work-outhingway.github.io/stretch.html","description":"前屈・前もも・ふくらはぎ・胸・肩・首など代表的なストレッチ19種目で、どの筋肉がどれだけ伸びるかを3Dで表示。その筋が伸ばされる最大に対する割合を青の濃さで見られます。","applicationCategory":"EducationalApplication","operatingSystem":"Web ブラウザ","inLanguage":"ja","offers":[{"@type":"Offer","price":"0","priceCurrency":"JPY","name":"無料で試す"},{"@type":"Offer","price":"1000","priceCurrency":"JPY","name":"買い切り"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"ストレッチ図鑑","url":"https://work-outhingway.github.io/stretch.html","description":"ダウンドッグ・ワールドグレイテストストレッチ・カウチストレッチ・前もも・胸・首など、よく紹介されるストレッチ19種目で、どの筋肉がどれだけ伸びるかを3Dで表示。その筋が伸ばされる最大に対する割合を青の濃さで見られます。","applicationCategory":"EducationalApplication","operatingSystem":"Web ブラウザ","inLanguage":"ja","offers":[{"@type":"Offer","price":"0","priceCurrency":"JPY","name":"無料で試す"},{"@type":"Offer","price":"1000","priceCurrency":"JPY","name":"買い切り"}]}</script>
 <style>body { margin: 0; } .homelink { display: inline-block; font-size: 12px; color: var(--ink-2); text-decoration: none; margin-bottom: 2px; } .homelink:hover { color: var(--ink); }</style>
 <script>try{if(localStorage.getItem("kinlab-premium")){(window.adsbygoogle=window.adsbygoogle||[]).pauseAdRequests=1;document.documentElement.classList.add("premium")}}catch(e){}</script>
 <style>html.premium .adbox,html.premium ins.adsbygoogle{display:none!important}</style>
@@ -7116,6 +7116,8 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       boneMeshes.push(obj);
     } else {
       obj.material = newMuscleMat(s.layer);
+      // 頂点を毎フレーム動かすので境界球が古くなり、ズームすると視野外と判定されて消える。視錐台での間引きはしない
+      obj.frustumCulled = false;
       muscleMeshes.push(obj);
     }
     s.meshes.push(obj);
@@ -8810,11 +8812,49 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   // orient・supports・place・prop は体の置き方と器具の表示にだけ使う(力の計算はしない)。aim: 一般に伸ばされる筋、how: やり方、tip: 気をつけること
   const SEATED = [{ pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }];
   const LYING = [{ pts: ['back'], floor: true }, { pts: ['butt'], floor: true }, { pts: ['heel.l', 'heel.r'], floor: true }];
+  // hidden: 一覧には出さない(体の不調図鑑の対策から使う昔ながらの種目)
   const STRETCHES = [
-    { name: '立って前屈', g: 'leg', aim: 'おもにハムストリングス・腓腹筋・脊柱起立筋', how: '膝を伸ばしたまま、股関節から上体を前に倒し、腕を下へ垂らす。',
+    { name: 'ダウンドッグ', g: 'leg', aim: 'おもにハムストリングス・腓腹筋・ヒラメ筋・広背筋', how: '四つんばいから膝を伸ばしてお尻を高く上げ、腕と背中を一直線にして、かかとを床へ近づける。',
+      tip: 'かかとが床につかなくてもかまいません。背中を丸めず、お尻を斜め上へ引き上げます。', orient: { level: ['palm.r', 'ball.r'], range: [20, 160] },
+      supports: [{ pts: PALMS, floor: true }, { pts: ['ball.l', 'ball.r', 'knee.l', 'knee.r'], floor: true }], rhythm: false, hand: { grip: 0, pron: 180 },
+      start: { b: { hip: 90, knee: 90, ankle: -30, shoulder: 90, wrist: 90 } }, end: { b: { hip: 80, knee: 0, ankle: 15, shoulder: 165, wrist: 45, scapUp: 30 } } },
+    { name: 'チャイルドポーズ', g: 'body', aim: 'おもに広背筋・大円筋・脊柱起立筋・大殿筋', how: '四つんばいからお尻をかかとの上へ下ろし、腕を前へ伸ばしたまま、おでこを床へ近づける。',
+      tip: '手を遠くへ伸ばすほど、脇の下から背中(広背筋)が伸びます。', orient: { level: ['palm.r', 'knee.r'], range: [30, 160] },
+      supports: [{ pts: PALMS, floor: true }, { pts: ['knee.l', 'knee.r', 'toe.l', 'toe.r'], floor: true }], rhythm: false, hand: { grip: 0, pron: 180 },
+      start: { b: { hip: 90, knee: 90, ankle: -45, shoulder: 90, wrist: 90 } }, end: { b: { hip: 122, knee: 140, ankle: -45, shoulder: 168, wrist: 15, scapUp: 30 }, a: { trunk: 20, neck: 15 } } },
+    { name: 'キャット(背中を丸める)', g: 'body', aim: 'おもに脊柱起立筋・多裂筋・僧帽筋中部・菱形筋', how: '四つんばいで、おへそをのぞきこむように背中を丸め、肩甲骨を左右に開く。',
+      tip: '息を吐きながら丸め、吸いながら背中を反らす(カウ)と交互に行うのが一般的です。', orient: { level: ['palm.r', 'knee.r'], range: [70, 120] },
+      supports: [{ pts: PALMS, floor: true }, { pts: ['knee.l', 'knee.r', 'toe.l', 'toe.r'], floor: true }], rhythm: false, hand: { grip: 0, pron: 180 },
+      start: { b: { hip: 90, knee: 90, ankle: -45, shoulder: 90, wrist: 90 } }, end: { b: { hip: 70, knee: 90, ankle: -45, shoulder: 70, wrist: 90, scapPro: 20 }, a: { trunk: 30, neck: 40 } } },
+    { name: 'ワールドグレイテストストレッチ(右脚前)', g: 'body', aim: 'おもに腸腰筋(後ろ脚)・大殿筋・ハムストリングス(前脚)・大胸筋・腹斜筋', how: '右脚を大きく前に出したランジから左手を床につき、右腕を天井へ向けて上体を右へひらく。',
+      tip: '後ろ脚の膝を伸ばし、胸を開きながら指先を目で追います。', orient: { level: ['heel.r', 'ball.l'], range: [0, 90] },
+      supports: [{ pts: ['heel.r', 'ball.r'], floor: true }, { pts: ['ball.l'], floor: true }, { pts: ['palm.l'], floor: true }], rhythm: false, hand: { grip: 0, pron: 180 },
+      start: { r: { hip: 115, knee: 95, ankle: 20, shoulder: 70 }, l: { hip: -10, knee: 10, ankle: 20, shoulder: 70, wrist: 60 }, a: { trunk: 10 } },
+      end: { r: { hip: 115, knee: 95, ankle: 20, shoulderAbd: 150, shoulderRot: 30 }, l: { hip: -15, knee: 5, ankle: 20, shoulder: 70, wrist: 60 }, a: { trunk: 10, trunkRot: 38, neckRot: 45 } } },
+    { name: '肩甲骨はがし(背中を丸める)', g: 'body', aim: 'おもに菱形筋・僧帽筋中部・下部・三角筋後部', how: '両手を前で組んで腕を前へ押し出し、背中を丸めて肩甲骨を左右に開き、おへそをのぞきこむ。',
+      tip: '腕で前へ、背中で後ろへ引き合うようにすると、肩甲骨のあいだが伸びます。デスクワークの合間に。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, hand: { grip: 0.5, pron: 90 },
+      start: { b: { shoulder: 80, shoulderAbd: -10, elbow: 20 } }, end: { b: { shoulder: 90, shoulderAbd: -12, elbow: 5, scapPro: 22, scapElev: 5 }, a: { trunk: 20, neck: 35 } } },
+    { name: 'カウチストレッチ(右)', g: 'leg', aim: 'おもに大腿直筋・大腿四頭筋・腸腰筋', how: '壁(ソファ)の前で右膝を床につき、右のすねを壁に沿わせて立て、左脚を前に出して上体を起こす。',
+      tip: '上体を起こすほど、太ももの前と股関節の前が強く伸びます。きついときは上体を前に倒したままで。', orient: { level: ['knee.r', 'heel.l'], range: [-30, 40] },
+      supports: [{ pts: ['heel.l', 'ball.l'], floor: true }, { pts: ['knee.r'], floor: true }], rhythm: false,
+      start: { l: { hip: 100, knee: 90 }, r: { hip: 20, knee: 140, ankle: -40 }, a: { trunk: 25 } }, end: { l: { hip: 80, knee: 85, ankle: 10 }, r: { hip: -10, knee: 140, ankle: -40 }, a: { trunk: -5 } } },
+    { name: 'フロッグ(カエル足)', g: 'leg', aim: 'おもに内転筋群(大内転筋・長内転筋・薄筋・恥骨筋)', how: '四つんばいから膝を左右に大きく開き、ひじを床について、お尻を後ろへ引く。',
+      tip: '膝と足首を同じ高さに保ち、腰を反らさないようにします。', orient: { level: ['palm.r', 'knee.r'], range: [30, 150] },
+      supports: [{ pts: PALMS, floor: true }, { pts: ['knee.l', 'knee.r'], floor: true }], rhythm: false, hand: { grip: 0, pron: 180 },
+      start: { b: { hip: 90, hipAbd: 15, knee: 90, shoulder: 90, elbow: 90 } }, end: { b: { hip: 100, hipAbd: 48, hipRot: 30, knee: 90, ankle: 15, shoulder: 100, elbow: 90 } } },
+    { name: 'ディープスクワット(しゃがみこみ)', g: 'leg', aim: 'おもにヒラメ筋・大殿筋・内転筋群・脊柱起立筋(腰)', how: 'かかとを床につけたまま深くしゃがみ、ひじで膝を内側から押し広げる。',
+      tip: 'かかとが浮くときは、つま先を少し外へ向けるか、かかとの下に薄い板を置きます。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false,
+      start: { b: { hip: 20, knee: 20 } }, end: { b: { hip: 122, hipAbd: 20, hipRot: 25, knee: 140, ankle: 25, shoulder: 60, elbow: 30 }, a: { trunk: 15 } } },
+    { name: '寝てもも裏(右・タオル)', g: 'leg', aim: 'おもにハムストリングス・腓腹筋', how: 'あお向けで右足にタオルをかけ、膝を伸ばしたまま脚を真上へ引き上げる。',
+      tip: '反対の脚は床に伸ばしたまま。つま先を手前に引くとふくらはぎも伸びます。', orient: { pitch: -90 }, supports: LYING, rhythm: false,
+      start: { r: { hip: 30, knee: 40 }, b: { shoulder: 100, elbow: 30 } }, end: { r: { hip: 90, knee: 0, ankle: 15 }, b: { shoulder: 100, elbow: 30 } } },
+    { name: 'ドアで胸を伸ばす', g: 'arm', aim: 'おもに大胸筋・小胸筋・三角筋前部', how: '両ひじを肩の高さで90度に曲げてドア枠(壁)に前腕をつけ、片脚を一歩前に出して胸を前へ押し出す。',
+      tip: '肩をすくめず、腰を反らさずに胸を前へ。腕の高さを変えると伸びる場所が変わります。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, hand: { grip: 0, pron: 90 },
+      start: { b: { shoulderAbd: 85, shoulderRot: 75, elbow: 90 } }, end: { b: { shoulderAbd: 85, shoulder: -30, shoulderRot: 75, elbow: 90, scapPro: -14 }, l: { hip: 15, knee: 10 } } },
+    { name: '立って前屈', hidden: true, g: 'leg', aim: 'おもにハムストリングス・腓腹筋・脊柱起立筋', how: '膝を伸ばしたまま、股関節から上体を前に倒し、腕を下へ垂らす。',
       tip: '背中を丸めるより、骨盤から倒すほうがもも裏が伸びます。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false,
       start: {}, end: { b: { hip: 95, shoulder: 60 }, a: { trunk: 25, neck: 15 } } },
-    { name: '長座前屈', g: 'leg', aim: 'おもにハムストリングス・腓腹筋・脊柱起立筋', how: '床に座って脚を前に伸ばし、つま先に向かって上体を倒す。',
+    { name: '長座前屈', hidden: true, g: 'leg', aim: 'おもにハムストリングス・腓腹筋・脊柱起立筋', how: '床に座って脚を前に伸ばし、つま先に向かって上体を倒す。',
       tip: 'つま先を手前に引く(足首を曲げる)と、ふくらはぎも一緒に伸びます。', orient: { fix: 'thigh.r', pitch: -90 }, supports: SEATED, rhythm: false,
       start: { b: { hip: 85, shoulder: 25 } }, end: { b: { hip: 110, ankle: 15, shoulder: 120 }, a: { trunk: 30, neck: 10 } } },
     { name: '前もも(右)', g: 'leg', aim: 'おもに大腿四頭筋(とくに大腿直筋)・腸腰筋', how: '片脚で立ち、右の足首を持ってかかとをお尻に近づけ、膝を少し後ろへ引く。',
@@ -8827,22 +8867,22 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { name: 'ふくらはぎ(右・膝を伸ばす)', g: 'leg', aim: 'おもに腓腹筋・ヒラメ筋', how: '壁に手をつき、右脚を後ろに引いて膝を伸ばしたまま、かかとを床につけて体を前へ。',
       tip: 'つま先をまっすぐ前に向け、かかとを浮かせないようにします。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false,
       start: { l: { hip: 10, knee: 10 }, r: { hip: -10 }, b: { shoulder: 80, elbow: 20 } }, end: { l: { hip: 35, knee: 40, ankle: 15 }, r: { hip: -15, ankle: 25 }, b: { shoulder: 80, elbow: 20 } } },
-    { name: 'ふくらはぎ(右・膝を曲げる)', g: 'leg', aim: 'おもにヒラメ筋', how: '右脚を少し後ろに引き、かかとを床につけたまま両膝を曲げて腰を落とす。',
+    { name: 'ふくらはぎ(右・膝を曲げる)', hidden: true, g: 'leg', aim: 'おもにヒラメ筋', how: '右脚を少し後ろに引き、かかとを床につけたまま両膝を曲げて腰を落とす。',
       tip: '膝を曲げると腓腹筋がゆるみ、奥のヒラメ筋が中心に伸びます。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false,
       start: { l: { hip: 10, knee: 10 }, r: { hip: -5 } }, end: { l: { hip: 45, knee: 50, ankle: 20 }, r: { hip: 15, knee: 45, ankle: 25 }, a: { trunk: 10 } } },
-    { name: '開脚', g: 'leg', aim: 'おもに内転筋群・ハムストリングス', how: '床に座って脚を左右に大きく開き、上体を前に倒す。',
+    { name: '開脚', hidden: true, g: 'leg', aim: 'おもに内転筋群・ハムストリングス', how: '床に座って脚を左右に大きく開き、上体を前に倒す。',
       tip: '膝のお皿を上に向けたまま開くと、内ももが伸びます。', orient: { fix: 'thigh.r', pitch: -90 }, supports: SEATED, rhythm: false,
       start: { b: { hip: 80, hipAbd: 15, shoulder: 20 } }, end: { b: { hip: 110, hipAbd: 48, shoulder: 70 }, a: { trunk: 30 } } },
-    { name: '合せき(足裏を合わせる)', g: 'leg', aim: 'おもに内転筋群(恥骨筋・長内転筋・薄筋)', how: '床に座って足の裏を合わせ、膝を床に近づける。',
+    { name: '合せき(足裏を合わせる)', hidden: true, g: 'leg', aim: 'おもに内転筋群(恥骨筋・長内転筋・薄筋)', how: '床に座って足の裏を合わせ、膝を床に近づける。',
       tip: '背すじを伸ばしたまま、上体を少し前に倒すとさらに伸びます。', orient: { pitch: -5 }, supports: SEATED, rhythm: false,
       start: { b: { hip: 95, hipAbd: 10, knee: 120 } }, end: { b: { hip: 100, hipAbd: 48, hipRot: 45, knee: 140 }, a: { trunk: 15 } } },
-    { name: '膝を抱える(右)', g: 'leg', aim: 'おもに大殿筋・脊柱起立筋(腰)', how: 'あお向けに寝て、右膝を両手で胸に引き寄せる。',
+    { name: '膝を抱える(右)', hidden: true, g: 'leg', aim: 'おもに大殿筋・脊柱起立筋(腰)', how: 'あお向けに寝て、右膝を両手で胸に引き寄せる。',
       tip: '反対の脚は床に伸ばしたまま、腰を床に押しつけるようにします。', orient: { pitch: -90 }, supports: LYING, rhythm: false,
       start: { r: { hip: 30, knee: 60 }, b: { shoulder: 40, elbow: 90 } }, end: { r: { hip: 122, knee: 135 }, b: { shoulder: 50, elbow: 90 } } },
     { name: '4の字(右のお尻)', g: 'leg', aim: 'おもに梨状筋・大殿筋・中殿筋', how: 'あお向けで両膝を立て、右の足首を左の太ももにのせて、左脚を胸へ引き寄せる。',
       tip: '右膝を外へ押し開くようにすると、お尻の奥(梨状筋)が伸びます。', orient: { pitch: -90 }, supports: LYING, rhythm: false,
       start: { b: { hip: 50, knee: 90 } }, end: { r: { hip: 100, hipAbd: 15, hipRot: 45, knee: 100 }, l: { hip: 95, knee: 90 } } },
-    { name: '胸を開く', g: 'arm', aim: 'おもに大胸筋・三角筋前部・上腕二頭筋', how: '両手を背中の後ろで組み、肩甲骨を寄せて腕を後ろへ引き、胸を張る。',
+    { name: '胸を開く', hidden: true, g: 'arm', aim: 'おもに大胸筋・三角筋前部・上腕二頭筋', how: '両手を背中の後ろで組み、肩甲骨を寄せて腕を後ろへ引き、胸を張る。',
       tip: '肩をすくめず、肩甲骨を寄せて下げるようにします。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false, hand: { grip: 0.3, pron: 120 },
       start: {}, end: { b: { shoulder: -45, shoulderAbd: 10, shoulderRot: -10, scapPro: -15, scapElev: -5 }, a: { trunk: -10, neck: -10 } } },
     { name: '腕を胸の前で引く(右)', g: 'arm', aim: 'おもに三角筋後部・棘下筋・小円筋・菱形筋', how: '右腕を胸の前で横に伸ばし、左腕で肘のあたりを胸に引き寄せる。',
@@ -8854,7 +8894,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { name: '体の横を伸ばす(右)', g: 'body', aim: 'おもに広背筋・腹斜筋・腰方形筋・大円筋', how: '右腕を頭の上へ伸ばし、上体を左へ倒す。',
       tip: '前かがみにならず、真横へ倒します。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET],
       start: {}, end: { r: { shoulderAbd: 168, shoulderRot: 40 }, a: { trunkLat: -32, neckLat: -10 } } },
-    { name: '座ってひねる', g: 'body', aim: 'おもに腹斜筋・脊柱起立筋(多裂筋など)', how: 'いすに座って骨盤を正面に向けたまま、上体と首を右へひねる。',
+    { name: '座ってひねる', hidden: true, g: 'body', aim: 'おもに腹斜筋・脊柱起立筋(多裂筋など)', how: 'いすに座って骨盤を正面に向けたまま、上体と首を右へひねる。',
       tip: '背すじを伸ばし、息を吐きながらひねります。', prop: 'seat', orient: { pitch: 0 }, place: { pt: 'butt', y: 0.46 }, supports: [{ pts: ['butt'] }, { pts: ['heel.l', 'heel.r'], floor: true }], rhythm: false,
       start: { b: { hip: 90, knee: 90 } }, end: { b: { hip: 90, knee: 90 }, l: { shoulder: 40, shoulderAbd: -10, elbow: 30 }, r: { shoulder: -20, shoulderAbd: 20, elbow: 30 }, a: { trunkRot: 38, neckRot: 45 } } },
     { name: '上体を反らす(コブラ)', g: 'body', aim: 'おもに腹直筋・腹斜筋・腸腰筋', how: 'うつ伏せで手を胸の横につき、腕で床を押して上体を起こす。',
@@ -8863,19 +8903,34 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     { name: '首の横(左側)', g: 'body', aim: 'おもに僧帽筋上部・胸鎖乳突筋・斜角筋・肩甲挙筋', how: '左肩を下げたまま、頭を右へ倒す。',
       tip: '右手を頭にのせて軽く引いてもかまいませんが、強く引っぱらないこと。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET], rhythm: false,
       start: {}, end: { l: { scapElev: -8 }, a: { neckLat: 38, neck: 5 } } },
-    { name: '首の後ろ', g: 'body', aim: 'おもに頭板状筋・僧帽筋上部・半棘筋', how: '両手を頭の後ろで組み、あごを胸に近づけるように頭を前へ倒す。',
+    { name: '首の後ろ', hidden: true, g: 'body', aim: 'おもに頭板状筋・僧帽筋上部・半棘筋', how: '両手を頭の後ろで組み、あごを胸に近づけるように頭を前へ倒す。',
       tip: '手の重さを使う程度にし、強く押さないでください。', orient: { fix: 'foot.r', pitch: 0 }, supports: [FEET],
       start: { b: { shoulder: 120, shoulderAbd: 50, shoulderRot: 50, elbow: 140 } }, end: { b: { shoulder: 120, shoulderAbd: 50, shoulderRot: 50, elbow: 140 }, a: { neck: 48 } } },
-    { name: 'すねの前(右)', g: 'leg', aim: 'おもに前脛骨筋・長趾伸筋・長母趾伸筋', how: '右脚を少し後ろに引き、足の甲を下に向けてつま先を伸ばし、足首を伸ばす。',
+    { name: 'すねの前(右)', hidden: true, g: 'leg', aim: 'おもに前脛骨筋・長趾伸筋・長母趾伸筋', how: '右脚を少し後ろに引き、足の甲を下に向けてつま先を伸ばし、足首を伸ばす。',
       tip: '足の甲を床につけて体重を少しずつかけると、さらに伸びます。', orient: { fix: 'foot.l', pitch: 0 }, supports: [{ pts: ['foot.l'], cop: true, floor: true }], rhythm: false,
       start: { r: { hip: -5, knee: 10 } }, end: { r: { hip: -12, knee: 35, ankle: -45 }, l: { knee: 15, ankle: 8 } } }
   ];
   STRETCHES.forEach((d) => { d.stretch = true; });
   // 1回: 伸ばす 2.2秒 → キープ 3秒 → 戻す 1.6秒 → 休む 0.8秒(画面ではキープを短くしているが、実際は20〜30秒)
   const ST_IN = 2.2, ST_HOLD = 3, ST_OUT = 1.6, ST_REST = 0.8, ST_ALL = ST_IN + ST_HOLD + ST_OUT + ST_REST;
-  const FREE_ST = ['立って前屈', '前もも(右)', '胸を開く'];
+  const FREE_ST = ['ダウンドッグ', '前もも(右)', 'ドアで胸を伸ばす'];
   // 筋でないもの(腱・腱膜・腸脛靭帯など)と皮筋は一覧に出さない
   const NOT_STRETCH = /aponeurosis|tendon|tract|arch|ring|Platysma/i;
+  // 手の体節を少し回すと長さが変わる筋 = 手首をまたぐ筋(一度だけ調べる)
+  let WRIST_X = null;
+  function crossesWrist() {
+    if (WRIST_X) return WRIST_X;
+    const A = { l: {}, r: {}, a: {} };
+    const M0 = RIG.pose(JC, A), E0 = M0.map((m) => m.elements);
+    const M1 = RIG.pose(JC, A);
+    for (const sd of ['l', 'r']) {
+      const H = HANDS[sd], seg = RIG.SEG['hand.' + sd];
+      if (H) M1[seg].multiply(aboutAxis(H.wrist, new THREE.Vector3(1, 0, 0), 0.4)).multiply(aboutAxis(H.wrist, H.along, 0.4));
+    }
+    const E1 = M1.map((m) => m.elements);
+    WRIST_X = muscleMeshes.map((m) => Math.abs(m.userData.model.strain(E1) - m.userData.model.strain(E0)) > 0.002);
+    return WRIST_X;
+  }
   function startStretch(def, btn) {
     if (!JC || !LCTX) return;
     exBtns.forEach((b) => b.setAttribute('aria-pressed', b === btn ? 'true' : 'false'));
@@ -8884,18 +8939,26 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     const frames = LOAD.solveExercise(LCTX, def, 0, NF, interp);
     placeFrames(def, frames);
     // 楽な姿勢とキープの姿勢での各筋の長さの変化(立った姿勢に対する割合)。楽な姿勢より伸びた筋を「伸ばされる筋」とする
+    // 手の向き(前腕のひねり)は画面と同じものを入れて長さを測る(入れないと、ひねりだけで前腕の筋が伸びたように見える)
+    setHandState(def.hand || { grip: 0, pron: 90 });
     const strainsAt = (k) => {
       const A = interp(k);
       if (def.rhythm !== false) for (const s of ['l', 'r']) Object.assign(A[s], RIG.rhythm(A[s]));
-      const E = RIG.pose(JC, A).map((m) => m.elements);
+      const M = RIG.pose(JC, A);
+      for (const sd of ['l', 'r']) { const H = HANDS[sd]; if (H && H.active) M[RIG.SEG['hand.' + sd]].multiply(H.twist); }
+      const E = M.map((m) => m.elements);
       return muscleMeshes.map((m) => m.userData.model.strain(E));
     };
     const S0 = strainsAt(0), S1 = strainsAt(1);
+    // 手首をまたぐ筋(手根・指の筋)は、前腕のひねりと手首の曲げの組み合わせで長さが逆向きに出ることがある。
+    // 手のひらを床につく種目で、関係ない前腕の筋が「伸びた」と出ないよう、ストレッチでは数えない
+    const wristX = def.use ? null : crossesWrist();
     const by = new Map();
     muscleMeshes.forEach((m, i) => {
       const u = m.userData, s = u.s;
       u.stBase = S0[i];
       if (NOT_STRETCH.test(s.en)) return;
+      if (wristX && wristX[i]) { u.stBase = S1[i]; return; }
       const v = S1[i], d = v - S0[i];
       // 使う: 楽な姿勢からどれだけ縮んだか(その筋の最大収縮に対する割合)
       if (def.use) {
@@ -8992,6 +9055,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   }
   if (MODE === 'stretch') {
     STRETCHES.forEach((def) => {
+      if (def.hidden) return;
       const b = document.createElement('button');
       b.type = 'button';
       b.className = 'chip';
@@ -10422,7 +10486,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
         // リンクで開いたときは一覧をたたむ。トップから開いたときは一覧を見せる
         window.__careOpen(!want);
       } else {
-      const LIST = MODE === 'stretch' ? STRETCHES : TRAININGS, start = MODE === 'stretch' ? startStretch : startTraining;
+      const LIST = MODE === 'stretch' ? STRETCHES.filter((d) => !d.hidden) : TRAININGS, start = MODE === 'stretch' ? startStretch : startTraining;
       start(LIST[0], exBtns[0]);
       // 解説ページからのリンク(training.html?ex=種目名)はその種目のボタンを押したのと同じにする
       const want = new URLSearchParams(location.search).get('ex');
@@ -10433,7 +10497,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     poseDirty = true;
     buildLayerRows();
     $('#loading').hidden = true;
-    if (location.hash === '#dev') window.__dev = { angles, setHandState, applyPose: () => applyPose(), pt: (n) => LOAD.at(segMats.map((m) => m.elements), LCTX.L.pt[n]), exAngles, muscleMeshes, JC, flyTo, structs, deform, LCTX, TRAININGS, startTraining: (i, kg) => startTraining(TRAININGS[i], exBtns[i], kg), STRETCHES, startStretch: (i) => startStretch(STRETCHES[i], exBtns[i]), tr: () => tr, disc, ring, select, setLayer, goExtreme, goPose, zeroAngles, setTrainingK: (k) => { stopExercise(); setTrainingK(k, true); poseDirty = true; }, setStretchK: (k) => { stopExercise(); setStretchK(k, 'hold'); poseDirty = true; }, CARES, CARE_ST, CARE_USE, HI, startCare: (i) => CARES[i].btn.click(), setCareK: (k) => { stopExercise(); setCareK(k, 'bad'); poseDirty = true; }, careStructs, focusSet: setFocus, siteObjs: () => siteObjs, flyToSite };
+    if (location.hash === '#dev') window.__dev = { angles, setHandState, applyPose: () => applyPose(), pt: (n) => LOAD.at(segMats.map((m) => m.elements), LCTX.L.pt[n]), exAngles, muscleMeshes, JC, flyTo, structs, deform, LCTX, TRAININGS, startTraining: (i, kg) => startTraining(TRAININGS[i], exBtns[i], kg), STRETCHES, startStretch: (i) => { const j = STRETCHES.filter((d) => !d.hidden).indexOf(STRETCHES[i]); startStretch(STRETCHES[i], exBtns[j] || document.createElement('button')); }, tr: () => tr, disc, ring, select, setLayer, goExtreme, goPose, zeroAngles, setTrainingK: (k) => { stopExercise(); setTrainingK(k, true); poseDirty = true; }, setStretchK: (k) => { stopExercise(); setStretchK(k, 'hold'); poseDirty = true; }, CARES, CARE_ST, CARE_USE, HI, startCare: (i) => CARES[i].btn.click(), setCareK: (k) => { stopExercise(); setCareK(k, 'bad'); poseDirty = true; }, careStructs, focusSet: setFocus, siteObjs: () => siteObjs, flyToSite };
     window.__ready = true;
     dirty = true;
   }).catch((err) => {
