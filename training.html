@@ -47,7 +47,7 @@
     --on-ink: #f5f7f8;
     --contract: #d02a37;
     --stretch: #1d63d8;
-    --neutral: #d9b5a9;
+    --neutral: #d9a798;
     --ramp: linear-gradient(90deg, #0a2466, #1f63e0 15%, #5b95f2 27.5%, #a9c7f7 40%, var(--neutral) 50%, #f3a9ad 60%, #ec5a63 72.5%, #d11f2d 85%, #6e0715);
     --floor: #8c9ca7;
     --focus: #1d63d8;
@@ -7038,13 +7038,38 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(32, 1, 0.02, 50);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x7d8a96, 0.62));
-  const key = new THREE.DirectionalLight(0xffffff, 0.7);
+  // 光: 空からの光(下からは赤みのある照り返し)+カメラについた主光+弱い補助光+背後からの輪郭光
+  scene.add(new THREE.HemisphereLight(0xfff6f0, 0x6e4a46, 0.42));
+  const key = new THREE.DirectionalLight(0xfff4ec, 0.66);
   key.position.set(1.2, 1.6, 2.4);
   scene.add(camera); camera.add(key);
-  const rim = new THREE.DirectionalLight(0xffffff, 0.4);
+  const fill = new THREE.DirectionalLight(0xe8f0ff, 0.22);
+  fill.position.set(-2.2, 0.4, 1.4);
+  camera.add(fill);
+  const rim = new THREE.DirectionalLight(0xffffff, 0.45);
   rim.position.set(-3, 2, -3);
   scene.add(rim);
+  // 映り込み用の環境(明るい箱を並べたスタジオ)。筋の表面のつや・みずみずしさを出す
+  let envMap = null;
+  try {
+    const envScene = new THREE.Scene();
+    const room = new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), new THREE.MeshBasicMaterial({ side: THREE.BackSide, vertexColors: true }));
+    const pos = room.geometry.attributes.position, col = [];
+    for (let i = 0; i < pos.count; i++) { const t = (pos.getY(i) / 10 + 1) / 2; col.push(0.05 + 0.13 * t, 0.045 + 0.125 * t, 0.045 + 0.135 * t); }
+    room.geometry.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    envScene.add(room);
+    const panel = (w, h, x, y, z, c) => {
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide }));
+      m.position.set(x, y, z); m.lookAt(0, 0, 0); envScene.add(m);
+    };
+    panel(5, 3, 3, 5, 6, 0xffffff);
+    panel(3, 5, -7, 2, 3, 0x8c96a6);
+    panel(7, 1.5, 0, 3, -7, 0xd8d8d8);
+    panel(10, 10, 0, 9.5, 0, 0x585858);
+    const pm = new THREE.PMREMGenerator(renderer);
+    envMap = pm.fromScene(envScene, 0.04).texture;
+    pm.dispose();
+  } catch (e) { envMap = null; }
 
   const floorMat = new THREE.MeshBasicMaterial({ color: 0x8fa0ab, transparent: true, opacity: 0.28, depthWrite: false });
   const ringMat = new THREE.MeshBasicMaterial({ color: 0x8fa0ab, transparent: true, opacity: 0.8, depthWrite: false });
@@ -7116,7 +7141,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   // ---- 構造(部位)の一覧 ----
   // 左右の .l/.r は1つの構造にまとめる。name=和名、en=英名、layer=sup/mid/deep/bone、ref=旧版の説明
   const LAYER_IDS = ['sup', 'mid', 'deep', 'bone'];
-  const NEUTRAL = { sup: 0xdcb8ac, mid: 0xc9a198, deep: 0xb48c88 };
+  const NEUTRAL = { sup: 0xd9a798, mid: 0xc69087, deep: 0xae7a74 };
   const LAYER_INFO = {
     sup: { name: '表層筋', desc: '皮膚のすぐ下にある筋' },
     mid: { name: '中層筋', desc: '表層筋と深層筋のあいだの筋' },
@@ -7128,12 +7153,42 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   const layers = {};
   LAYER_IDS.forEach((id) => { layers[id] = { meshes: [], mats: [], group: new THREE.Group() }; scene.add(layers[id].group); });
   // 筋は1本(片側)ずつ材質を持ち、長さの変化で色を変える。骨は共通の材質
-  const boneMat = new THREE.MeshStandardMaterial({ color: 0xeee8d8, roughness: 0.72, metalness: 0, side: THREE.DoubleSide, transparent: true });
+  // 覆い: いちばん外側に見えている層より奥の層(骨・深い筋)は、すき間からのぞいても目立たないよう、
+  // 筋の奥の暗い赤に寄せて塗る(表層をはがすと元の色に戻る)。値は層ごとに共有し、シェーダーで混ぜる
+  const COVER_COL = new THREE.Color(0xa86e66);
+  const cover = {};
+  LAYER_IDS.forEach((id) => { cover[id] = { value: 0 }; });
+  function withCover(m, layer) {
+    m.onBeforeCompile = (sh) => {
+      sh.uniforms.uCover = cover[layer];
+      sh.uniforms.uCoverCol = { value: COVER_COL };
+      sh.fragmentShader = 'uniform float uCover;\nuniform vec3 uCoverCol;\n' + sh.fragmentShader.replace('#include <color_fragment>',
+        '#include <color_fragment>\n  diffuseColor.rgb = mix(diffuseColor.rgb, uCoverCol, uCover);');
+    };
+    m.customProgramCacheKey = () => 'cover';
+    return m;
+  }
+  // 骨: 少しつやのある象牙色。筋: 湿った膜のつや(クリアコート)と、ふちの柔らかい照り(シーン)で、みずみずしく見せる
+  const boneMat = withCover(new THREE.MeshPhysicalMaterial({
+    color: 0xeee6d4, roughness: 0.5, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.45,
+    envMap, envMapIntensity: 0.8, side: THREE.DoubleSide
+  }), 'bone');
   layers.bone.mats.push(boneMat);
   function newMuscleMat(layer) {
-    const m = new THREE.MeshStandardMaterial({ color: NEUTRAL[layer], roughness: 0.55, metalness: 0, side: THREE.DoubleSide, transparent: true });
+    const m = withCover(new THREE.MeshPhysicalMaterial({
+      color: NEUTRAL[layer], roughness: 0.48, metalness: 0, clearcoat: 0.55, clearcoatRoughness: 0.2,
+      sheen: new THREE.Color(0x3a1512), envMap, envMapIntensity: 1, side: THREE.DoubleSide
+    }), layer);
     layers[layer].mats.push(m);
     return m;
+  }
+  // 各層の覆いの強さ = それより外側の筋の層の見え方(はがすアニメーションに合わせて変わる)。
+  // 「この筋と骨格だけ表示」のときは覆わない
+  // 表層を表示しているときだけ覆う(中層は表層のすき間に見えて自然なので覆わない)。表層をはがしたあとは元の色で見せる
+  function updateCover() {
+    const k = focus ? 0 : layerAlpha.sup;
+    const v = { sup: 0, mid: 0, deep: 0.85 * k, bone: 0.92 * k };
+    for (const id of LAYER_IDS) if (cover[id].value !== v[id]) { cover[id].value = v[id]; dirty = true; }
   }
   // GLTFLoader はノード名の空白や「.」を書き換えるので、元の名前を JSON から引き直す
   const origName = new Map();
@@ -7241,6 +7296,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       mat.depthWrite = a > 0.5;
     }
     L.group.visible = a > 0.01;
+    updateCover();
   }
   refreshPeelButtons();
 
@@ -7266,7 +7322,9 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     else for (const m of sel.s.meshes) m.material.emissive.setHex(hex);
   }
   // 骨は材質を共有しているので、選んだ骨だけ別の材質に差し替える
+  // 選んだ骨は覆わずに元の色で見せる
   const boneHi = boneMat.clone();
+  boneHi.onBeforeCompile = () => {};
   boneHi.emissive = new THREE.Color(0x5a3a1a);
   layers.bone.mats.push(boneHi);
   function boneMatHi(s, on) { for (const m of s.meshes) m.material = on ? boneHi : boneMat; }
@@ -7391,9 +7449,11 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADoJB0A0EkEAEpTT057ImFzc2V0Ijp7ImdlbmVy
 
   // ---- 選んだ筋と骨格だけを表示する(複数選べる) ----
   let focus = null; // 表示する筋の構造の集合。null ならすべて表示
+  updateCover();
   const focusBar = $('#focusbar'), fchips = $('#fchips'), focusBtn = $('#i-focus');
   function applyFocus() {
     for (const m of muscleMeshes) m.visible = !focus || focus.has(m.userData.s);
+    updateCover();
     if (focus) for (const s of focus) if (!layerOn[s.layer]) setLayer(s.layer, true);
     focusBar.hidden = !focus;
     fchips.textContent = '';
