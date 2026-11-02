@@ -464,31 +464,34 @@
   }
   .loading { position: absolute; inset: 0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--ink-2); font-size: 13px; pointer-events: none; text-align: center; padding: 16px; }
   .loading[hidden] { display: none; }
-  .kun { overflow: visible; }
-  .kun-shadow { fill: var(--ink); opacity: 0.12; transform-origin: 100px 184px; animation: kunShadow 1.4s ease-in-out infinite; }
+  .ks { overflow: visible; max-width: 100%; height: auto; }
   .kun-legs rect { fill: #f3e6dc; stroke: #c9b3a5; stroke-width: 1.5; }
   .kun-tendon { fill: #f3e6dc; stroke: #c9b3a5; stroke-width: 1.5; }
   .kun-belly { fill: #d8404c; stroke: #a92834; stroke-width: 2; }
   .kun-fiber { fill: none; stroke: #ff8b93; stroke-width: 2; stroke-linecap: round; opacity: 0.55; }
   .kun-cheek { fill: #ff9aa5; opacity: 0.8; }
   .kun-eye, .kun-mouth { fill: none; stroke: #2a1416; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-  .kun-arm { stroke: #c23440; stroke-width: 9; stroke-linecap: round; }
-  .kun-bar { stroke: #34414b; stroke-width: 5; stroke-linecap: round; }
-  .kun-plate { fill: #34414b; }
   .kun-sweat { fill: #6fb7ff; opacity: 0; animation: kunSweat 1.4s ease-in infinite; }
-  .kun-sweat.s2 { animation-delay: 0.7s; }
-  .kun-body { transform-origin: 100px 162px; animation: kunSquash 1.4s ease-in-out infinite; }
-  .kun-lift { animation: kunLift 1.4s ease-in-out infinite; }
-  @keyframes kunLift { 0%, 100% { transform: translateY(16px); } 50% { transform: translateY(-14px); } }
-  @keyframes kunSquash { 0%, 100% { transform: scale(1.06, 0.92); } 50% { transform: scale(0.97, 1.04); } }
-  @keyframes kunShadow { 0%, 100% { transform: scaleX(1.08); } 50% { transform: scaleX(0.9); } }
   @keyframes kunSweat { 0% { opacity: 0; transform: translateY(-6px); } 30% { opacity: 0.9; } 100% { opacity: 0; transform: translateY(26px); } }
+  .ks-arm { fill: none; stroke: #c23440; stroke-width: 4.5; stroke-linecap: round; }
+  .ks-hand { fill: #c23440; }
+  .ks-shadow { fill: var(--ink); opacity: 0.12; }
+  .ks-floor { fill: none; stroke: var(--ink-2); stroke-width: 1.2; stroke-linecap: round; opacity: 0.25; }
   .kun-title { margin: 6px 0 0; font-size: 15px; font-weight: 700; color: var(--ink); }
-  .kun-tip { margin: 0; min-height: 1.5em; }
-  .kun-track { position: relative; width: 160px; height: 4px; border-radius: 2px; background: var(--chip); overflow: hidden; margin-top: 8px; }
-  .kun-track i { position: absolute; inset: 0 auto 0 0; width: 40%; border-radius: 2px; background: linear-gradient(90deg, var(--stretch), var(--contract)); animation: kunTrack 1.3s ease-in-out infinite; }
-  @keyframes kunTrack { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
-  @media (prefers-reduced-motion: reduce) { .kun *, .kun-track i { animation: none !important; } }
+  .kun-tip { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  /* 骨(模型と山)。明るい背景でも見えるよう細い縁取り */
+  .sk-model, .ks-pile { filter: drop-shadow(0 0 0.6px #6f5c40) drop-shadow(0 0 0.4px #6f5c40); }
+  .sk-model .sk-f, .ks-pile circle, .ks-pskull { fill: #f1e8d8; }
+  .sk-model .sk-s, .sk-model .sk-s path, .ks-pile path { fill: none; stroke: #f1e8d8; stroke-linecap: round; }
+  .ks-pskull { stroke: none; }
+  .sk-model .sk-s:not(g) { stroke-width: 2.6; }
+  .sk-model .sk-h { fill: #5b4a37; }
+  .sk-model .sk-l { fill: none; stroke: #5b4a37; stroke-width: 0.9; }
+  .sk-stand { fill: none; stroke: var(--ink-2); stroke-width: 2.2; stroke-linecap: round; opacity: 0.45; }
+  /* 読み込み中は色の凡例を隠す(スマホで場面と重なるため。色もまだ無い) */
+  main:has(> #loading:not([hidden])) > .legend { visibility: hidden; }
+  @media (max-height: 680px) { .ks { width: 200px; } }
+  @media (prefers-reduced-motion: reduce) { .ks * { animation: none !important; } }
   .credit { margin: 16px 0 0; font-size: 11px; line-height: 1.5; color: var(--ink-2); }
   .credit a { color: inherit; }
   .search { display: block; margin-top: 12px; }
@@ -566,35 +569,151 @@
       <p>学習用のモデルです。長さの変化は概算で、医療行為には使えません。</p>
     </div>
     <div class="loading" id="loading" role="status">
-      <svg class="kun" viewBox="0 0 200 200" width="168" height="168" aria-hidden="true">
-        <ellipse class="kun-shadow" cx="100" cy="184" rx="42" ry="6"/>
-        <g class="kun-legs"><rect x="80" y="150" width="11" height="30" rx="5.5"/><rect x="109" y="150" width="11" height="30" rx="5.5"/></g>
-        <g class="kun-lift">
-          <path class="kun-arm" d="M70 112 L52 70"/><path class="kun-arm" d="M130 112 L148 70"/>
-          <path class="kun-bar" d="M26 66 H174"/>
-          <rect class="kun-plate" x="22" y="48" width="12" height="36" rx="3"/><rect class="kun-plate" x="166" y="48" width="12" height="36" rx="3"/>
-          <rect class="kun-plate" x="34" y="54" width="7" height="24" rx="2"/><rect class="kun-plate" x="159" y="54" width="7" height="24" rx="2"/>
+      <svg class="ks" viewBox="0 0 240 222" width="250" height="231" aria-hidden="true">
+        <path class="ks-floor" d="M8 211 H232"/>
+        <g class="ks-pile"><path d="M14 208 L40 203" stroke-width="4"/><circle cx="14" cy="208" r="2.6"/><circle cx="40" cy="203" r="2.6"/><path d="M22 201 L50 208" stroke-width="4"/><circle cx="22" cy="201" r="2.6"/><circle cx="50" cy="208" r="2.6"/><path d="M34 199 L58 204" stroke-width="4"/><circle cx="34" cy="199" r="2.6"/><circle cx="58" cy="204" r="2.6"/><path class="ks-pskull" d="M40 196 c6 0 9 4 8.5 8.5 c-.3 2.5 -2 3.6 -3 4.5 h-11 c-1 -.9 -2.7 -2 -3 -4.5 C31 200 34 196 40 196 Z"/></g>
+        <path class="sk-stand" d="M175.2 204 V209 M158 210 H192"/>
+        <g class="sk-model" transform="translate(132 62) scale(.72)">
+          <g class="bn" data-g="0"><path class="sk-f" d="M47 106 C44 112 46 121 53 124 L57 119 H63 L67 124 C74 121 76 112 73 106 C67 109 53 109 47 106 Z"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="101" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="94" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="87" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="80" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="73" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="66" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="59" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="52" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="1"><rect class="sk-f" x="56.5" y="45" width="7" height="5.4" rx="2"/></g>
+          <g class="bn" data-g="2"><path class="sk-s" d="M57 76 C44 74 42 83 47 85"/></g>
+          <g class="bn" data-g="2"><path class="sk-s" d="M63 76 C76 74 78 83 73 85"/></g>
+          <g class="bn" data-g="2"><path class="sk-s" d="M57 69 C42 67 40 76 45 78"/></g>
+          <g class="bn" data-g="2"><path class="sk-s" d="M63 69 C78 67 80 76 75 78"/></g>
+          <g class="bn" data-g="2"><path class="sk-s" d="M57 62 C42 60 40 68 45 70"/></g>
+          <g class="bn" data-g="2"><path class="sk-s" d="M63 62 C78 60 80 68 75 70"/></g>
+          <g class="bn" data-g="2"><path class="sk-s" d="M57 55 C45 53 43 60 48 62"/></g>
+          <g class="bn" data-g="2"><path class="sk-s" d="M63 55 C75 53 77 60 72 62"/></g>
+          <g class="bn" data-g="3"><g class="sk-s"><path d="M58 46 L44 44" stroke-width="3"/></g></g>
+          <g class="bn" data-g="3"><g class="sk-s"><path d="M62 46 L76 44" stroke-width="3"/></g></g>
+          <g class="bn" data-g="4"><path class="sk-f" d="M60 12 C71 12 76 20 75 29 C74 34 71 37 69 39 L67 44 H53 L51 39 C49 37 46 34 45 29 C44 20 49 12 60 12 Z"/><circle class="sk-h" cx="55" cy="29" r="3.6"/><circle class="sk-h" cx="65" cy="29" r="3.6"/><path class="sk-h" d="M60 33 L58.4 37 H61.6 Z"/><path class="sk-l" d="M54 41.5 H66 M57 40 V43 M60 40 V43 M63 40 V43"/></g>
+          <g class="bn" data-g="5"><g class="sk-s"><path d="M43 47 L39 80" stroke-width="4.6"/></g></g>
+          <g class="bn" data-g="6"><g class="sk-s"><path d="M38.5 84 L35 112" stroke-width="3.6"/></g></g>
+          <g class="bn" data-g="6"><g class="sk-s"><path d="M34.5 116 L32 125" stroke-width="2.4"/><path d="M36 116 L35.5 126" stroke-width="2.4"/></g></g>
+          <g class="bn" data-g="7"><g class="sk-s"><path d="M77 47 L81 80" stroke-width="4.6"/></g></g>
+          <g class="bn" data-g="8"><g class="sk-s"><path d="M81.5 84 L85 112" stroke-width="3.6"/></g></g>
+          <g class="bn" data-g="8"><g class="sk-s"><path d="M85.5 116 L88 125" stroke-width="2.4"/><path d="M84 116 L84.5 126" stroke-width="2.4"/></g></g>
+          <g class="bn" data-g="9"><g class="sk-s"><path d="M67 125 L68 157" stroke-width="5.4"/></g></g>
+          <g class="bn" data-g="9"><circle class="sk-f" cx="68" cy="161" r="3.2"/></g>
+          <g class="bn" data-g="10"><g class="sk-s"><path d="M68 165 L68 191" stroke-width="4.4"/></g></g>
+          <g class="bn" data-g="10"><path class="sk-f" d="M65.5 191 L79 194.5 L78.5 197 H64.5 Z"/></g>
+          <g class="bn" data-g="11"><g class="sk-s"><path d="M53 125 L52 157" stroke-width="5.4"/></g></g>
+          <g class="bn" data-g="11"><circle class="sk-f" cx="52" cy="161" r="3.2"/></g>
+          <g class="bn" data-g="12"><g class="sk-s"><path d="M52 165 L52 191" stroke-width="4.4"/></g></g>
+          <g class="bn" data-g="12"><path class="sk-f" d="M54.5 191 L41 194.5 L41.5 197 H55.5 Z"/></g>
         </g>
-        <g class="kun-body">
+        <ellipse class="ks-shadow" cx="100" cy="211" rx="17" ry="2.6"/>
+        <path class="ks-arm" d="M85 176 L95 186"/><circle class="ks-hand" cx="95" cy="186" r="3"/>
+        <g class="ks-kun" transform="translate(100 210) scale(.5) translate(-100 -180)">
+          <g class="kun-legs"><rect x="80" y="150" width="11" height="30" rx="5.5"/><rect x="109" y="150" width="11" height="30" rx="5.5"/></g>
           <rect class="kun-tendon" x="93" y="42" width="14" height="16" rx="6"/>
           <path class="kun-belly" d="M100 52 C142 60 150 128 100 160 C50 128 58 60 100 52 Z"/>
           <path class="kun-fiber" d="M86 66 C76 92 78 122 92 146"/><path class="kun-fiber" d="M114 66 C124 92 122 122 108 146"/><path class="kun-fiber" d="M100 60 V152"/>
           <circle class="kun-cheek" cx="80" cy="112" r="6"/><circle class="kun-cheek" cx="120" cy="112" r="6"/>
           <path class="kun-eye" d="M82 98 L90 102 L82 106"/><path class="kun-eye" d="M118 98 L110 102 L118 106"/>
           <path class="kun-mouth" d="M93 118 Q100 112 107 118"/>
+          <path class="kun-sweat" d="M146 90 C150 97 152 101 149 104 C146 107 141 104 142 100 C143 97 145 94 146 90 Z"/>
         </g>
-        <path class="kun-sweat" d="M146 90 C150 97 152 101 149 104 C146 107 141 104 142 100 C143 97 145 94 146 90 Z"/>
-        <path class="kun-sweat s2" d="M56 96 C59 101 61 104 59 106 C57 108 53 106 54 103 C55 101 56 99 56 96 Z"/>
+        <path class="ks-arm" d="M115 176 L105 186"/><circle class="ks-hand" cx="105" cy="186" r="3"/>
       </svg>
       <p class="kun-title">筋肉くんが準備運動中…</p>
-      <p class="kun-tip" id="kunTip">骨144本を並べています</p>
-      <span class="kun-track" aria-hidden="true"><i></i></span>
+      <p class="kun-tip">筋肉くんが骨を1つずつ並べて人体模型を組み立てています</p>
     </div>
     <script>
       (function () {
-        var tips = ['骨144本を並べています', '筋239本を骨に貼りつけています', '関節に油をさしています', 'ダンベルを用意しています', 'ストレッチをしています', 'もうすぐ動けます'];
-        var i = 0, el = document.getElementById('kunTip');
-        var t = setInterval(function () { if (!el.isConnected || document.getElementById('loading').hidden) return clearInterval(t); i = (i + 1) % tips.length; el.textContent = tips[i]; }, 1800);
+        // 筋肉くんが骨の山から骨を1つずつ運んで模型に置く。#loading が隠れたら止まる。動きを減らす設定では完成形のまま
+        var svg = document.querySelector('#loading .ks'), box = document.getElementById('loading');
+        if (!svg || !window.requestAnimationFrame) return;
+        if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var bones = [].slice.call(svg.querySelectorAll('.bn')), model = svg.querySelector('.sk-model');
+        var kun = svg.querySelector('.ks-kun'), arms = svg.querySelectorAll('.ks-arm'), hands = svg.querySelectorAll('.ks-hand'), shadow = svg.querySelector('.ks-shadow');
+        var SC = 0.72, OX = 132, OY = 62, N = 13, D = 0.9, HOLD = 1.6, FADE = 0.5, T = N * D + HOLD + FADE;
+        var PILE = { x: 40, y: 199 }, REST = 100, tg = [], t0 = null;
+        var ease = function (q) { q = q < 0 ? 0 : q > 1 ? 1 : q; return q * q * (3 - 2 * q); };
+        var mix = function (a, b, q) { return a + (b - a) * q; };
+        var targets = function () {
+          var lo = [], k, b, r;
+          for (k = 0; k < N; k++) lo.push([1e9, 1e9, -1e9, -1e9]);
+          for (k = 0; k < bones.length; k++) {
+            b = bones[k].getBBox(); r = lo[+bones[k].getAttribute('data-g')];
+            r[0] = Math.min(r[0], b.x); r[1] = Math.min(r[1], b.y); r[2] = Math.max(r[2], b.x + b.width); r[3] = Math.max(r[3], b.y + b.height);
+          }
+          for (k = 0; k < N; k++) { r = lo[k]; tg.push({ lx: (r[0] + r[2]) / 2, ly: (r[1] + r[3]) / 2, x: OX + SC * (r[0] + r[2]) / 2, y: OY + SC * (r[1] + r[3]) / 2 }); }
+        };
+        var standX = function (k) { return k < 0 ? REST : Math.min(136, tg[k].x - 34); };
+        // 筋肉くんの元の座標の点を画面の座標に(足元を中心に傾け、0.5倍)
+        var pt = function (cx, lift, lean, x, y) {
+          var a = lean * Math.PI / 180, dx = (x - 100) * 0.5, dy = (y - 180) * 0.5;
+          return { x: cx + dx * Math.cos(a) - dy * Math.sin(a), y: 210 - lift + dx * Math.sin(a) + dy * Math.cos(a) };
+        };
+        var draw = function (cx, lift, lean, hand, hand2) {
+          kun.setAttribute('transform', 'translate(' + cx + ' ' + (210 - lift) + ') rotate(' + lean + ') scale(.5) translate(-100 -180)');
+          var s1 = pt(cx, lift, lean, 72, 110), s2 = pt(cx, lift, lean, 128, 110);
+          arms[0].setAttribute('d', 'M' + s1.x + ' ' + s1.y + ' L' + hand.x + ' ' + hand.y);
+          arms[1].setAttribute('d', 'M' + s2.x + ' ' + s2.y + ' L' + hand2.x + ' ' + hand2.y);
+          hands[0].setAttribute('cx', hand.x); hands[0].setAttribute('cy', hand.y); hands[1].setAttribute('cx', hand2.x); hands[1].setAttribute('cy', hand2.y);
+          var f = Math.max(0.4, 1 - lift / 90);
+          shadow.setAttribute('cx', cx); shadow.setAttribute('rx', 17 * f); shadow.style.opacity = 0.12 * f;
+        };
+        var restHand = function (cx, lift, lean, side) { return pt(cx, lift, lean, 100 + side * 40, 150); };
+        var frame = function (now) {
+          if (box.hidden || !svg.isConnected) return;
+          if (!tg.length) { try { targets(); } catch (e) { return; } }
+          if (t0 === null) t0 = now;
+          var t = ((now - t0) / 1000) % T, i = Math.floor(t / D), p = t / D - i, k, g, cx, lift = 0, lean = 0, hand, carry = -1;
+          if (i < N) {
+            var tgt = tg[i], from = standX(i - 1), to = standX(i), reachLift = Math.max(0, 152 - tgt.y);
+            if (p < 0.3) {
+              var qa = ease(p / 0.3);
+              cx = mix(from, 66, qa); lean = -16 * qa;
+              var rh = restHand(from, 0, 0, 1);
+              hand = { x: mix(rh.x, PILE.x, qa), y: mix(rh.y, PILE.y, qa) };
+              if (p > 0.24) carry = i;
+            } else if (p < 0.8) {
+              var qb = ease((p - 0.3) / 0.5);
+              cx = mix(66, to, qb); lean = mix(-16, 6, qb); lift = reachLift * qb + 6 * Math.abs(Math.sin(2 * Math.PI * qb));
+              hand = { x: mix(PILE.x, tgt.x, qb), y: mix(PILE.y, tgt.y, qb) - 34 * Math.sin(Math.PI * qb) };
+              carry = i;
+            } else {
+              var qc = ease((p - 0.8) / 0.2);
+              cx = to; lean = mix(6, 0, qc); lift = reachLift * (1 - qc);
+              var rh2 = restHand(to, lift, lean, 1);
+              hand = { x: mix(tgt.x, rh2.x, qc), y: mix(tgt.y, rh2.y, qc) };
+            }
+          } else {
+            // 完成: ばんざいして跳ねる
+            var h = t - N * D; cx = standX(N - 1);
+            lift = 12 * Math.abs(Math.sin(h * Math.PI * 2.2)) * (h < HOLD ? 1 : 0);
+            var up = ease(h / 0.25);
+            var s1 = pt(cx, lift, 0, 72, 110), s2 = pt(cx, lift, 0, 128, 110);
+            hand = { x: s1.x - 8 * up, y: mix(s1.y + 18, s1.y - 20, up) };
+            draw(cx, lift, 0, hand, { x: s2.x + 8 * up, y: mix(s2.y + 18, s2.y - 20, up) });
+            model.style.opacity = h > HOLD ? 1 - (h - HOLD) / FADE : 1;
+            for (k = 0; k < bones.length; k++) { bones[k].style.visibility = 'visible'; bones[k].removeAttribute('transform'); }
+            return requestAnimationFrame(frame);
+          }
+          model.style.opacity = 1;
+          for (k = 0; k < bones.length; k++) {
+            g = +bones[k].getAttribute('data-g');
+            if (g < i || (g === i && carry < 0 && p >= 0.8)) { bones[k].style.visibility = 'visible'; bones[k].removeAttribute('transform'); }
+            else if (g === i && carry === i) {
+              var dx = (hand.x + 6 - tg[i].x) / SC, dy = (hand.y - 2 - tg[i].y) / SC, rot = p < 0.8 ? -50 * (1 - ease((p - 0.3) / 0.5)) : 0;
+              bones[k].style.visibility = 'visible';
+              bones[k].setAttribute('transform', 'translate(' + dx + ' ' + dy + ') rotate(' + rot + ' ' + tg[i].lx + ' ' + tg[i].ly + ')');
+            } else bones[k].style.visibility = 'hidden';
+          }
+          draw(cx, lift, lean, { x: hand.x, y: hand.y }, { x: hand.x + 10, y: hand.y + 2 });
+          requestAnimationFrame(frame);
+        };
+        requestAnimationFrame(frame);
       })();
     </script>
     <p class="gl-fail" id="glFail" hidden>この環境では3D表示が使えません。別のブラウザで開いてください。</p>
