@@ -171,6 +171,7 @@ a.card:hover { border-color: var(--ink-2); }
 .movers .kind[data-k="iso"] { color: var(--ink-2); }
 .movers .bar { height: 8px; background: var(--chip); border-radius: 4px; overflow: hidden; }
 .movers .bar i { display: block; height: 100%; background: var(--contract); }
+.movers.st .bar i { background: var(--stretch); }
 .movers .pc { text-align: right; font-family: var(--font-mono); font-size: 13px; }
 .steps { padding-left: 1.4em; margin: 0; }
 .steps li { padding: 4px 0; }
