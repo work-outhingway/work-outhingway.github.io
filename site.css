@@ -353,3 +353,5 @@ html.js-reveal .reveal.in { opacity: 1; transform: none; }
 .apps .more { text-align: center; margin: 28px 0 0; font-size: 14px; color: var(--ink-2); }
 @media (max-width: 760px) { .app-grid { grid-template-columns: 1fr; } .hero .stats.big b { font-size: 34px; } }
 @media (prefers-reduced-motion: reduce) { .app, .app .thumb img { transition: none; } }
+.hero .hero-text > .eyebrow { font-family: var(--font-ui); font-size: 15px; font-weight: 700; letter-spacing: 0.08em; text-transform: none; }
+.hero h1 .nw { display: inline-block; }
