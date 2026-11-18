@@ -438,6 +438,13 @@
   .switch[aria-checked="true"] { background: var(--ink); }
   .switch[aria-checked="true"] i { transform: translateX(20px); }
   .peelrow { display: flex; gap: 8px; margin-top: 14px; }
+  .combo { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .combo > strong { display: block; font-size: 13px; color: var(--ink-2); margin-bottom: 8px; }
+  .comborow { display: flex; gap: 8px; }
+  .cbtn { flex: 1; border: 1px solid var(--line); background: transparent; color: var(--ink); border-radius: 99px; padding: 8px 10px; font-size: 13px; font-weight: 700; }
+  .cbtn[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+  .cconfirm { margin-top: 10px; padding: 10px 12px; border-radius: 10px; background: var(--line); }
+  .cconfirm p { margin: 0 0 8px; font-size: 13px; }
   .btn { flex: 1; border: 1px solid var(--ink); background: var(--ink); color: var(--on-ink); border-radius: 10px; padding: 11px 12px; font-weight: 700; font-size: 14px; }
   .btn.ghost { background: transparent; color: var(--ink); }
   .btn:disabled { opacity: 0.35; cursor: default; }
@@ -754,7 +761,18 @@
           <button type="button" class="btn" id="peel">1枚はがす</button>
           <button type="button" class="btn ghost" id="restore">1枚戻す</button>
         </div>
-        <p class="tip">表層筋、中層筋、深層筋の順にはがすと、骨格が見えてきます。はがした状態でも関節を動かせます。骨や筋をダブルタップすると拡大します。</p>
+        <div class="combo">
+          <strong>2つの層を同時に表示</strong>
+          <div class="comborow">
+            <button type="button" class="cbtn" data-c="sup,mid" aria-pressed="false">表層＋中層</button>
+            <button type="button" class="cbtn" data-c="mid,deep" aria-pressed="false">中層＋深層</button>
+          </div>
+          <div class="cconfirm" id="cconfirm" hidden>
+            <p>2つの層を同時に表示すると動作が重くなります。よろしいですか？</p>
+            <div class="comborow"><button type="button" class="btn" id="c-yes">表示する</button><button type="button" class="btn ghost" id="c-no">やめる</button></div>
+          </div>
+        </div>
+        <p class="tip">筋の層は1つずつ表示します(動作を軽くするため)。表層筋、中層筋、深層筋の順にはがすと、骨格が見えてきます。はがした状態でも関節を動かせます。骨や筋をダブルタップすると拡大します。</p>
       </section>
       <section id="panel-find" role="tabpanel" aria-labelledby="tab-find" hidden>
         <label class="search"><span>名前で探す</span><input type="search" id="q" placeholder="例: 上腕二頭筋、肩甲骨" autocomplete="off"></label>
@@ -7364,7 +7382,11 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   // ---- 層(はがす) ----
   const PEEL_ORDER = ['sup', 'mid', 'deep'];
   const layerOn = {}, layerAlpha = {};
-  LAYER_IDS.forEach((id) => { layerOn[id] = true; layerAlpha[id] = 1; });
+  // 筋の層は1つずつ表示する(既定は表層+骨格)。表示していない層は変形の計算もしないので軽くなる。
+  // 2つの層を同時に見るのは「表層＋中層」「中層＋深層」だけ(確認してから)
+  LAYER_IDS.forEach((id) => { layerOn[id] = id === 'sup' || id === 'bone'; layerAlpha[id] = layerOn[id] ? 1 : 0; layers[id].group.visible = layerOn[id]; });
+  let poseReady = false; // 最初の姿勢を当てはめたあと true
+  let combo = null; // 2つの層を同時に表示しているとき ['sup','mid'] など
   let selected = null;
   const peelBtn = $('#peel'), restoreBtn = $('#restore');
   function buildLayerRows() {
@@ -7377,28 +7399,66 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       row.className = 'lrow';
       row.innerHTML =
         '<div class="ltxt"><strong>' + LAYER_INFO[id].name + '</strong><span>' + LAYER_INFO[id].desc + ' ・ ' + counts[id] + '種</span></div>' +
-        '<button type="button" class="switch" role="switch" id="sw-' + id + '" aria-checked="true" aria-label="' + LAYER_INFO[id].name + 'を表示"><i></i></button>';
+        '<button type="button" class="switch" role="switch" id="sw-' + id + '" aria-checked="' + (layerOn[id] ? 'true' : 'false') + '" aria-label="' + LAYER_INFO[id].name + 'を表示"><i></i></button>';
       el.appendChild(row);
-      row.querySelector('button').addEventListener('click', () => setLayer(id, !layerOn[id]));
+      row.querySelector('button').addEventListener('click', () => {
+        if (id === 'bone') setLayer(id, !layerOn[id]);
+        else if (layerOn[id] && !combo) showOnly(null); // もう一度押すと筋を消して骨格だけ
+        else showOnly(id);
+      });
     });
     let nm = 0, nb = 0;
     structs.forEach((s) => { if (s.kind === 'bone') nb++; else nm++; });
     $('#count').textContent = '骨' + nb + '種・筋' + nm + '種';
   }
+  // 1枚はがす: 表層 → 中層 → 深層 → 骨格だけ。1枚戻す: その逆
+  const topLayer = () => PEEL_ORDER.find((x) => layerOn[x]) || null;
   peelBtn.addEventListener('click', () => {
-    const id = PEEL_ORDER.find((x) => layerOn[x]);
-    if (id) setLayer(id, false);
+    const top = topLayer();
+    if (top) showOnly(PEEL_ORDER[PEEL_ORDER.indexOf(top) + 1] || null);
   });
   restoreBtn.addEventListener('click', () => {
-    const id = PEEL_ORDER.slice().reverse().find((x) => !layerOn[x]);
-    if (id) setLayer(id, true);
+    const top = topLayer();
+    if (top === 'sup') return;
+    showOnly(top ? PEEL_ORDER[PEEL_ORDER.indexOf(top) - 1] : 'deep');
   });
   function refreshPeelButtons() {
     peelBtn.disabled = !PEEL_ORDER.some((x) => layerOn[x]);
-    restoreBtn.disabled = PEEL_ORDER.every((x) => layerOn[x]);
+    restoreBtn.disabled = !!layerOn.sup && !combo;
+    document.querySelectorAll('.cbtn').forEach((b) => b.setAttribute('aria-pressed', combo && combo.join() === b.dataset.c ? 'true' : 'false'));
+  }
+  // 筋の層を1つだけ表示する(null なら筋をすべて消して骨格だけ)。骨格の表示はそのまま
+  function showOnly(id) {
+    combo = null;
+    for (const x of PEEL_ORDER) if (layerOn[x] !== (x === id)) setLayer(x, x === id);
+    refreshPeelButtons();
+  }
+  function showCombo(c) {
+    combo = c;
+    for (const x of PEEL_ORDER) if (layerOn[x] !== c.includes(x)) setLayer(x, c.includes(x));
+    refreshPeelButtons();
+  }
+  // 選んだ・探した筋が見えるようにする(「この筋と骨格だけ表示」中は層を足すだけ)
+  function revealLayer(id) {
+    if (layerOn[id] && (focus || id === 'bone' || !PEEL_ORDER.slice(0, PEEL_ORDER.indexOf(id)).some((x) => layerOn[x]))) return;
+    if (focus || id === 'bone') setLayer(id, true);
+    else showOnly(id);
+  }
+  let pendingCombo = null;
+  const cconfirm = $('#cconfirm');
+  document.querySelectorAll('.cbtn').forEach((b) => b.addEventListener('click', () => {
+    const c = b.dataset.c.split(',');
+    if (combo && combo.join() === b.dataset.c) { showOnly(c[0]); cconfirm.hidden = true; return; }
+    pendingCombo = c;
+    cconfirm.hidden = false;
+  }));
+  if (cconfirm) {
+    $('#c-yes').addEventListener('click', () => { if (pendingCombo) showCombo(pendingCombo); pendingCombo = null; cconfirm.hidden = true; });
+    $('#c-no').addEventListener('click', () => { pendingCombo = null; cconfirm.hidden = true; });
   }
   function setLayer(id, on) {
     layerOn[id] = on;
+    if (on && id !== 'bone') catchUp(layers[id].meshes);
     const sw = $('#sw-' + id);
     if (sw) sw.setAttribute('aria-checked', on ? 'true' : 'false');
     refreshPeelButtons();
@@ -7574,6 +7634,9 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     for (const m of muscleMeshes) m.visible = !focus || focus.has(m.userData.s);
     updateCover();
     if (focus) for (const s of focus) if (!layerOn[s.layer]) setLayer(s.layer, true);
+    // 解除したら筋の層は1つ(または選んだ2つ)に戻す
+    if (!focus && !combo && PEEL_ORDER.filter((x) => layerOn[x]).length > 1) showOnly(topLayer());
+    if (focus) catchUp(muscleMeshes.filter((m) => m.visible && layerOn[m.userData.s.layer]));
     focusBar.hidden = !focus;
     fchips.textContent = '';
     if (focus) {
@@ -7855,14 +7918,27 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
     document.querySelector('.legend').classList.toggle('nocolor', !colorOn);
     poseDirty = true;
   });
-  function deform() {
+  // 表示していなかった筋を、いまの姿勢に合わせて変形する
+  function catchUp(list) {
+    if (!poseReady) return;
+    const st = list.filter((m) => m.userData.stale !== false);
+    if (st.length) deform(st);
+  }
+  function deform(only) {
+    poseReady = true;
     const E = segMats.map((m) => m.elements);
     const IE = segMats.map((m) => _inv.copy(m).invert().elements.slice());
     const TI = IE[RIG.SEG.trunk], TE = E[RIG.SEG.trunk];
     const BP = BF.p, BN = BF.n, BS = BF.seg;
     for (const b of boneMeshes) { b.matrix.copy(segMats[b.userData.seg]); if (b.userData.fing) b.matrix.multiply(b.userData.fing); b.matrixWorldNeedsUpdate = true; }
-    for (const m of muscleMeshes) {
+    for (const m of only || muscleMeshes) {
       const u = m.userData, geo = m.geometry;
+      // 長さの変化(一覧や色に使う)はすべての筋で出す。形の変形は見えている筋だけ(見えていない筋は表示したときに追いつく)
+      const s = u.model.strain(E);
+      u.strain = s;
+      const L = u.s.layer;
+      if (!only && !(m.visible && (layerOn[L] || layerAlpha[L] > 0.01))) { u.stale = true; setMuscleColor(m, u, s); continue; }
+      u.stale = false;
       const P = geo.getAttribute('position'), N = geo.getAttribute('normal');
       const p = P.array, r = u.rest, rn = u.restN, nn = N ? N.array : null;
       const n = P.count;
@@ -7900,9 +7976,6 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
           nn[3 * i + 2] = w * (a[2] * nx + a[6] * ny + a[10] * nz) + v * (b[2] * nx + b[6] * ny + b[10] * nz);
         }
       }
-      // 長さの変化 → 色(縮むと赤、伸びると青)
-      const s = u.model.strain(E);
-      u.strain = s;
       // 縮むと太く、伸びると細くなる。骨から離れる向きに動かすので、膨らみは外側に出る
       const g = BULGE * (1 / Math.sqrt(Math.max(0.3, 1 + s)) - 1);
       const bd = u.bd, cap = 2.5 * u.thick;
@@ -7959,6 +8032,15 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       }
       P.needsUpdate = true;
       if (N) N.needsUpdate = true;
+      setMuscleColor(m, u, s);
+    }
+    boundsDirty = true;
+    dirty = true;
+    if (siteObjs.length) updateSites();
+  }
+  // 長さの変化 → 色(縮むと赤、伸びると青)
+  function setMuscleColor(m, u, s) {
+    {
       if (!colorOn) m.material.color.copy(u.layerColor);
       else if (MODE === 'training') actColor(m.material.color, u.layerColor, (u.act || 0) / ACT_FULL);
       // ストレッチ図鑑: 楽な姿勢より長くなった筋だけ、最大伸長に対する割合で青くする(座る・寝るだけで伸びる筋は色をつけない)
@@ -7969,8 +8051,6 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       else if (MODE === 'care') careColor(m.material.color, u.layerColor, u.care, tr ? tr.k : 0);
       else rampColor(m.material.color, u.layerColor, s, u.pot);
     }
-    boundsDirty = true;
-    if (siteObjs.length) updateSites();
   }
   function updateBounds() {
     if (!boundsDirty) return;
@@ -8304,7 +8384,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
         b.firstChild.textContent = x.label;
         b.lastChild.textContent = pct(x.v);
         b.addEventListener('click', () => {
-          if (!layerOn[x.s.layer]) setLayer(x.s.layer, true);
+          revealLayer(x.s.layer);
           select({ s: x.s, side: x.side });
         });
         box.appendChild(b);
@@ -9390,7 +9470,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       x.now = b.querySelector('.now');
       b.addEventListener('click', () => {
         if (focus && !focus.has(x.s)) toggleFocus(x.s, true);
-        if (!layerOn[x.s.layer]) setLayer(x.s.layer, true);
+        revealLayer(x.s.layer);
         select({ s: x.s, side: x.side === 'both' ? 'r' : x.side });
       });
       li.appendChild(b);
@@ -9683,7 +9763,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       x.now = b.querySelector('.now');
       b.addEventListener('click', () => {
         if (focus && !focus.has(x.s)) toggleFocus(x.s, true);
-        if (!layerOn[x.s.layer]) setLayer(x.s.layer, true);
+        revealLayer(x.s.layer);
         select({ s: x.s, side: x.side === 'both' ? 'r' : x.side });
       });
       li.appendChild(b);
@@ -10379,8 +10459,7 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   function showStruct(s) {
     if (!s) return;
     if (focus && !focus.has(s)) toggleFocus(s, true);
-    if (!layerOn[s.layer]) setLayer(s.layer, true);
-    if (!focus) PEEL_ORDER.slice(0, PEEL_ORDER.indexOf(s.layer)).forEach((x) => { if (layerOn[x]) setLayer(x, false); });
+    revealLayer(s.layer);
     const m = s.meshes.find((x) => x.userData.side === 'r') || s.meshes[0];
     select({ s, side: m.userData.side });
     syncCareLayer();
@@ -10599,19 +10678,19 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
   let careSceneReset = null;
 
   // ---- 見る層(問題の筋がある層から下を表示する) ----
-  const CARE_LAYERS = [['sup', '表層から'], ['mid', '中層から'], ['deep', '深層から'], ['bone', '骨だけ']];
+  // 筋の層は1つずつ(動作を軽くするため)。骨格はいつも表示
+  const CARE_LAYERS = [['sup', '表層'], ['mid', '中層'], ['deep', '深層'], ['bone', '骨だけ']];
   function setCareLayer(id) {
-    const i = LAYER_IDS.indexOf(id);
-    PEEL_ORDER.forEach((x) => { const on = LAYER_IDS.indexOf(x) >= i; if (layerOn[x] !== on) setLayer(x, on); });
+    showOnly(id === 'bone' ? null : id);
     if (!layerOn.bone) setLayer('bone', true);
     syncCareLayer();
   }
   function syncCareLayer() {
     const seg = $('#cc-layer');
     if (!seg) return;
-    const top = PEEL_ORDER.find((x) => layerOn[x]) || 'bone';
-    const contiguous = LAYER_IDS.slice(LAYER_IDS.indexOf(top)).every((x) => layerOn[x]);
-    seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', contiguous && b.dataset.l === top ? 'true' : 'false'));
+    const on = PEEL_ORDER.filter((x) => layerOn[x]);
+    const cur = on.length === 0 ? 'bone' : on.length === 1 ? on[0] : null;
+    seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.l === cur ? 'true' : 'false'));
   }
 
   function careChip(x, role, sub) {
@@ -10986,11 +11065,10 @@ const ASSETS = { bones: { b64: "Z2xURgIAAADQlikAuGMEAEpTT057ImFzc2V0Ijp7ImdlbmVy
       b.className = 'chip';
       b.textContent = s.name;
       b.addEventListener('click', () => {
-        if (!layerOn[s.layer]) setLayer(s.layer, true);
+        // その筋の層だけを表示する(手前の層ははがす)
+        revealLayer(s.layer);
         // 筋だけ表示しているときは、その筋を表示に加える
         if (focus && s.kind === 'muscle' && !focus.has(s)) toggleFocus(s, true);
-        // 手前の層を一時的にはがして見えるようにする
-        if (s.layer !== 'bone' && !focus) PEEL_ORDER.slice(0, PEEL_ORDER.indexOf(s.layer)).forEach((x) => { if (layerOn[x]) setLayer(x, false); });
         const m = s.meshes.find((x) => x.userData.side === 'r') || s.meshes[0];
         select({ s, side: m.userData.side });
         updateBounds();
