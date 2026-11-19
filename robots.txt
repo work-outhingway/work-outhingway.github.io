@@ -1,5 +1,24 @@
+# 検索エンジンと AI 検索のクローラーを歓迎します
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: GPTBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: ClaudeBot
+User-agent: Claude-SearchBot
+User-agent: Claude-User
+User-agent: Google-Extended
+User-agent: Applebot
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /thanks.html
+Disallow: /tester.html
+
 User-agent: *
 Allow: /
 Disallow: /thanks.html
+Disallow: /tester.html
 
 Sitemap: https://work-outhingway.github.io/sitemap.xml
