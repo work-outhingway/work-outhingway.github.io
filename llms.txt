@@ -1,0 +1,115 @@
+# 筋骨格アトラス
+
+> 骨と筋肉を3Dで見られる無料の解剖学サイト(日本語)。筋トレ種目で働く筋肉、ストレッチで伸びる筋肉、肩こり・腰痛などの不調に関係する筋肉を、3D筋骨格モデル(Z-Anatomy / BodyParts3D、CC BY-SA)で図解しています。学習用で、医療行為の代わりにはなりません。
+
+## 3Dアプリ
+
+- [筋骨格アトラス|骨と筋肉を3Dで動かして学ぶ解剖図鑑](https://work-outhingway.github.io/atlas.html): 骨144種・筋239種の3D解剖アトラス。骨と筋肉をタップで名前表示、層をはがして深層筋まで見られ、関節を動かすと縮む筋・伸びる筋が色でわかります。ブラウザで無料で試せます。
+- [トレーニング図鑑|筋トレで効く筋肉を3Dで見る(33種目)](https://work-outhingway.github.io/training.html): スクワット・ベンチプレス・懸垂・アームカールなど筋トレ33種目で、どの筋肉にどれだけ効くかを3Dで表示。重りの重さと向きから、筋力に対する負荷を色の濃さで見られます。
+- [ストレッチ図鑑|ストレッチで伸びる筋肉を3Dで見る(19種目)](https://work-outhingway.github.io/stretch.html): ダウンドッグ・ワールドグレイテストストレッチ・カウチストレッチ・前もも・胸・首など、よく紹介されるストレッチ19種目で、どの筋肉がどれだけ伸びるかを3Dで表示。その筋が伸ばされる最大に対する割合を青の濃さで見られます。
+- [体の不調図鑑|肩こり・腰痛・O脚などの原因と解消法を3Dで見る](https://work-outhingway.github.io/care.html): 肩こり・腰痛・五十肩・O脚・扁平足・産後の骨盤など代表的な体の不調31種について、原因になる姿勢と、弱い・こっている・縮んでいる筋、痛む場所を3Dで表示。原因ごとに対応する対策(使う・ほぐす・ストレッチ)を、その場で再生できます。
+
+## トレーニング解説(鍛えられる筋肉とやり方)
+
+- [トレーニング解説](https://work-outhingway.github.io/exercises.html): スクワット・ベンチプレス・懸垂など筋トレ33種目のやり方と鍛えられる筋肉を、3Dモデルの図で短く解説。脚・胸・背中・肩・腕・おなかの部位ごとに探せます。
+- [スクワット](https://work-outhingway.github.io/ex-squat.html): しゃがんで立つ、下半身の基本種目。太もも前とお尻をまとめて鍛えます。
+- [ランジ(右脚前)](https://work-outhingway.github.io/ex-lunge.html): 片脚を前に踏み出してしゃがむ種目。前脚の太もも前とお尻に効きます。
+- [ブルガリアンスクワット(右脚前)](https://work-outhingway.github.io/ex-bulgarian-split-squat.html): 後ろ足を台にのせて、前脚1本でしゃがむ種目。軽い重さでも太もも前とお尻に強く効きます。
+- [ルーマニアンデッドリフト](https://work-outhingway.github.io/ex-romanian-deadlift.html): 膝を軽く曲げたまま上体を倒す種目。もも裏とお尻をしっかり使います。
+- [ヒップリフト](https://work-outhingway.github.io/ex-hip-lift.html): あお向けでお尻を持ち上げる種目。器具なしでお尻ともも裏を鍛えられます。
+- [カーフレイズ](https://work-outhingway.github.io/ex-calf-raise.html): かかとを上げ下げする種目。ふくらはぎ(腓腹筋・ヒラメ筋)を鍛えます。
+- [レッグレイズ](https://work-outhingway.github.io/ex-leg-raise.html): あお向けで脚を上げ下げする種目。脚の付け根(腸腰筋)とおなかを使います。
+- [デッドリフト](https://work-outhingway.github.io/ex-deadlift.html): 床のバーを持ち上げて立つ種目。お尻・もも裏・背中を一度に鍛えます。
+- [グッドモーニング](https://work-outhingway.github.io/ex-good-morning.html): バーを担いだまま上体を前に倒す種目。もも裏と背中を鍛えます。
+- [レッグエクステンション](https://work-outhingway.github.io/ex-leg-extension.html): マシンで膝を伸ばす種目。太もも前(大腿四頭筋)だけを集中して鍛えます。
+- [レッグカール](https://work-outhingway.github.io/ex-leg-curl.html): 膝を曲げてかかとをお尻へ近づける種目。もも裏(ハムストリングス)を鍛えます。
+- [腕立て伏せ](https://work-outhingway.github.io/ex-push-up.html): 器具なしでできる胸の基本種目。大胸筋・肩の前・二の腕の裏を鍛えます。
+- [懸垂](https://work-outhingway.github.io/ex-chin-up.html): バーにぶら下がって体を引き上げる種目。背中(広背筋)と腕を鍛えます。
+- [ラットプルダウン](https://work-outhingway.github.io/ex-lat-pulldown.html): マシンでバーを引き下ろす種目。懸垂と同じ背中の筋を、重さを選んで鍛えられます。
+- [ベントオーバーロウ](https://work-outhingway.github.io/ex-bent-over-row.html): 上体を倒してバーを引く種目。背中の広い範囲を鍛えます。
+- [シーテッドロー](https://work-outhingway.github.io/ex-seated-row.html): 座ってハンドルをおなかへ引く種目。背中の真ん中(菱形筋・僧帽筋中部)と広背筋を鍛えます。
+- [ワンハンドロー(右手)](https://work-outhingway.github.io/ex-one-arm-row.html): 片手・片膝をベンチについてダンベルを引く種目。背中を片側ずつ鍛えます。
+- [ベンチプレス](https://work-outhingway.github.io/ex-bench-press.html): ベンチでバーを押し上げる、胸の代表的な種目です。
+- [インクラインベンチプレス](https://work-outhingway.github.io/ex-incline-bench-press.html): 背もたれを起こしたベンチで押す種目。胸の上部と肩の前を鍛えます。
+- [ショルダープレス](https://work-outhingway.github.io/ex-shoulder-press.html): ダンベルを頭の上へ押し上げる種目。肩(三角筋)と二の腕の裏を鍛えます。
+- [サイドレイズ](https://work-outhingway.github.io/ex-side-raise.html): 腕を横に上げる種目。肩の横(三角筋中部)を鍛えて、肩幅を広く見せます。
+- [フロントレイズ](https://work-outhingway.github.io/ex-front-raise.html): 腕を前に上げる種目。肩の前(三角筋前部)を鍛えます。
+- [アームカール](https://work-outhingway.github.io/ex-arm-curl.html): 肘を曲げてダンベルを上げる種目。力こぶ(上腕二頭筋)を鍛えます。
+- [フレンチプレス](https://work-outhingway.github.io/ex-french-press.html): 頭の後ろでダンベルを上げ下げする種目。二の腕の裏(上腕三頭筋)を鍛えます。
+- [ディップス](https://work-outhingway.github.io/ex-dips.html): 平行棒で体を沈めて押し上げる種目。二の腕の裏と胸の下部を鍛えます。
+- [ダンベルフライ](https://work-outhingway.github.io/ex-dumbbell-fly.html): あお向けで腕を開いて閉じる種目。胸(大胸筋)を伸ばしながら鍛えます。
+- [ペックフライ(マシン)](https://work-outhingway.github.io/ex-pec-fly.html): マシンで腕を胸の前に閉じる種目。胸(大胸筋)に集中して効かせられます。
+- [ダンベルプルオーバー](https://work-outhingway.github.io/ex-dumbbell-pullover.html): 1つのダンベルを頭の後ろへ下ろして戻す種目。背中と胸の両方を使います。
+- [キックバック](https://work-outhingway.github.io/ex-kickback.html): 上体を倒して肘を後ろへ伸ばす種目。二の腕の裏(上腕三頭筋)を鍛えます。
+- [アップライトロウ](https://work-outhingway.github.io/ex-upright-row.html): バーを体に沿って引き上げる種目。肩の横と首の付け根(僧帽筋上部)を鍛えます。
+- [シュラッグ](https://work-outhingway.github.io/ex-shrug.html): 肩をすくめる種目。首の付け根から肩(僧帽筋上部)を鍛えます。
+- [クランチ](https://work-outhingway.github.io/ex-crunch.html): 背中を丸めて上体を起こす種目。おなか(腹直筋)を鍛えます。
+- [バックエクステンション](https://work-outhingway.github.io/ex-back-extension.html): 台にうつ伏せで上体を起こす種目。背中(脊柱起立筋)とお尻を鍛えます。
+
+## ストレッチ解説(伸びる筋肉とやり方)
+
+- [ストレッチ解説](https://work-outhingway.github.io/stretches.html): ダウンドッグ・カウチストレッチ・腸腰筋・ふくらはぎ・胸・首など、ストレッチ19種目のやり方と伸びる筋肉を、3Dモデルの図で短く解説。部位ごとに探せます。
+- [ダウンドッグ](https://work-outhingway.github.io/st-downdog.html): 体で「への字」をつくり、もも裏・ふくらはぎ・背中をまとめて伸ばすストレッチです。
+- [チャイルドポーズ](https://work-outhingway.github.io/st-childs-pose.html): 正座から上体を前に倒し、背中(広背筋)と腰をゆるめるストレッチです。
+- [キャット(背中を丸める)](https://work-outhingway.github.io/st-cat.html): 四つんばいで背中を丸め、背骨まわり(脊柱起立筋)と肩甲骨のあいだを伸ばします。
+- [ワールドグレイテストストレッチ(右脚前)](https://work-outhingway.github.io/st-worlds-greatest-stretch.html): ランジから上体をひねる、運動前にぴったりの全身ストレッチ。脚の付け根・お尻・胸・わき腹が伸びます。
+- [肩甲骨はがし(背中を丸める)](https://work-outhingway.github.io/st-scapula-stretch.html): 腕を前へ押し出して背中を丸め、肩甲骨のあいだ(菱形筋・僧帽筋中部)を伸ばします。座ったままでもできます。
+- [カウチストレッチ(右)](https://work-outhingway.github.io/st-couch-stretch.html): すねを壁に沿わせて上体を起こし、太もも前(大腿直筋)と脚の付け根を強く伸ばします。
+- [フロッグ(カエル足)](https://work-outhingway.github.io/st-frog-stretch.html): 膝を左右に大きく開き、内もも(内転筋群)をまとめて伸ばすストレッチです。
+- [ディープスクワット(しゃがみこみ)](https://work-outhingway.github.io/st-deep-squat.html): かかとをつけたまま深くしゃがみ、ふくらはぎの奥(ヒラメ筋)・お尻・内ももを伸ばします。
+- [寝てもも裏(右・タオル)](https://work-outhingway.github.io/st-lying-hamstring.html): あお向けで脚を引き上げる、もも裏(ハムストリングス)のストレッチ。腰を丸めずに伸ばせます。
+- [ドアで胸を伸ばす](https://work-outhingway.github.io/st-doorway-chest.html): ドア枠に腕をつけて胸を前へ出し、胸(大胸筋・小胸筋)を伸ばします。巻き肩・猫背の人に。
+- [前もも(右)](https://work-outhingway.github.io/st-quad-stretch.html): 立ったまま足首を持ち、太もも前(大腿四頭筋)を伸ばす定番のストレッチです。
+- [腸腰筋(右脚を後ろ)](https://work-outhingway.github.io/st-hip-flexor.html): 片膝立ちで骨盤を前へ押し出し、脚の付け根の奥(腸腰筋)を伸ばします。座りすぎの人に。
+- [ふくらはぎ(右・膝を伸ばす)](https://work-outhingway.github.io/st-calf-stretch.html): 壁に手をついて脚を後ろへ引き、ふくらはぎ(腓腹筋・ヒラメ筋)を伸ばします。
+- [4の字(右のお尻)](https://work-outhingway.github.io/st-figure-four.html): あお向けで足を4の字に組み、お尻の奥(梨状筋)と大殿筋を伸ばします。
+- [腕を胸の前で引く(右)](https://work-outhingway.github.io/st-cross-body-shoulder.html): 腕を胸の前で引き寄せ、肩の後ろ(三角筋後部)と肩甲骨まわりを伸ばします。
+- [頭の後ろで肘を引く(右)](https://work-outhingway.github.io/st-overhead-triceps.html): 頭の後ろでひじを引き、二の腕の裏(上腕三頭筋)と脇(広背筋)を伸ばします。
+- [体の横を伸ばす(右)](https://work-outhingway.github.io/st-side-bend.html): 腕を上げて上体を横に倒し、わき腹(腹斜筋)から脇(広背筋)・腰を伸ばします。
+- [上体を反らす(コブラ)](https://work-outhingway.github.io/st-cobra.html): うつ伏せから上体を起こし、おなか(腹直筋)と脚の付け根を伸ばします。
+- [首の横(左側)](https://work-outhingway.github.io/st-neck-side.html): 頭を横に倒し、首の横から肩(僧帽筋上部・斜角筋など)を伸ばします。肩こり・首こりに。
+
+## 体の不調解説(原因の筋肉と対策)
+
+- [体の不調解説](https://work-outhingway.github.io/conditions.html): 肩こり・腰痛・五十肩・O脚・扁平足・産後の骨盤など、体の不調31種の原因になる筋(弱い・こっている・縮んでいる)と対策(使う・ほぐす・ストレッチ)を、3Dモデルの図で短く解説。部位ごとに探せます。
+- [肩こり](https://work-outhingway.github.io/care-katakori.html): 首の付け根から肩・背中の上のあたりが張って、重く感じる状態。長い時間同じ姿勢でいることが代表的なきっかけです。
+- [首こり・スマホ首](https://work-outhingway.github.io/care-kubikori.html): うつむいた姿勢が続いて、首の後ろがこる・痛む状態。首の骨の自然なカーブ(前弯)が少なくなった状態を「ストレートネック」と呼ぶこともあります。
+- [頭痛(緊張型頭痛)](https://work-outhingway.github.io/care-zutsu.html): 頭の両側や後頭部が、締めつけられるように重く痛むタイプの頭痛。首や肩のこりと一緒に起こりやすいとされ、頭痛の中でいちばん多いタイプです。
+- [五十肩(肩関節周囲炎)](https://work-outhingway.github.io/care-gojukata.html): 肩の関節のまわりに炎症が起き、痛みと「腕が上がらない・後ろに回らない」動きの悪さが出る状態。40〜60代に多く、医学的には肩関節周囲炎などと呼ばれます。
+- [猫背・巻き肩](https://work-outhingway.github.io/care-nekoze.html): 背中が丸まり、肩が前に入りこんだ姿勢。見た目だけでなく、肩こり・首こり・呼吸の浅さにもつながりやすいとされます。
+- [腰痛](https://work-outhingway.github.io/care-yotsu.html): 腰まわりの痛み。骨や神経にはっきりした異常が見つからないものが多く(非特異的腰痛)、筋肉や筋膜、関節への負担が関わると考えられています。
+- [反り腰](https://work-outhingway.github.io/care-sorigoshi.html): 骨盤が前に傾き、腰の反りが強くなった姿勢。腰の後ろに負担が集中し、腰痛の原因の一つになります。
+- [お尻から脚のしびれ(梨状筋症候群)](https://work-outhingway.github.io/care-zakotsu.html): お尻の奥にある梨状筋が硬くなり、その下を通る坐骨神経を圧迫して、お尻から太ももの裏にかけて痛みやしびれが出る状態。坐骨神経痛の原因の一つです。
+- [膝の痛み(お皿のまわり)](https://work-outhingway.github.io/care-hiza.html): 階段の上り下り・しゃがむ・走るときに、膝のお皿(膝蓋骨)のまわりや前側が痛む状態。膝蓋大腿関節痛やジャンパー膝など、使いすぎで起こるものが多くあります。
+- [膝の痛み(中高年の膝)](https://work-outhingway.github.io/care-henkei.html): 年齢とともに膝の軟骨がすり減り、立ち上がり・歩き始め・階段で膝が痛む状態。変形性膝関節症と呼ばれ、中高年の膝の痛みでいちばん多い原因です。O脚の人に多い傾向があります。
+- [ランナー膝(腸脛靭帯炎)](https://work-outhingway.github.io/care-runnerknee.html): 走ったあとなどに、膝の外側が痛む状態。太ももの外側を通る腸脛靭帯が、膝の外側の骨の出っぱりとこすれて炎症を起こすと考えられています。長距離ランナーに多い不調です。
+- [シンスプリント](https://work-outhingway.github.io/care-shin.html): 走ったり跳んだりをくり返すことで、すねの内側(下の3分の1あたり)に痛みが出る状態。脛骨過労性骨膜炎とも呼ばれ、運動を始めたばかりの人や、部活動の学生に多く見られます。
+- [足の裏・かかとの痛み(足底筋膜炎)](https://work-outhingway.github.io/care-sokutei.html): 朝起きて最初の一歩や、座ったあとの歩き始めに、かかとの裏が痛む状態。足の裏の膜(足底腱膜)のかかとに付くところに、小さな傷や炎症が起こると考えられています。
+- [こむら返り(足がつる)](https://work-outhingway.github.io/care-komura.html): ふくらはぎの筋が急に強く縮んだままになり、激しく痛む状態。寝ている間や運動中に起こりやすく、医学的には有痛性筋けいれんと呼ばれます。
+- [テニス肘(肘の外側の痛み)](https://work-outhingway.github.io/care-tennis.html): 物をつかむ・持ち上げる・ひねるときに、肘の外側が痛む状態。上腕骨外側上顆炎と呼ばれ、テニスをする人に限らず、パソコン作業や家事などで手首をよく使う人に多く見られます。
+- [腱鞘炎(手首の親指側)](https://work-outhingway.github.io/care-kensho.html): 手首の親指側が痛み、親指を動かすと痛みが強くなる状態。ドケルバン病とも呼ばれ、スマホの操作や育児(抱っこ)、パソコン作業などで親指をよく使う人に多く見られます。
+- [背中のこり(肩甲骨の間)](https://work-outhingway.github.io/care-senaka.html): 肩甲骨と背骨の間が、重く張ったように感じる状態。デスクワークで腕を前に出し続ける人に多く見られます。
+- [寝違え](https://work-outhingway.github.io/care-nechigae.html): 朝起きたときに首から肩にかけて痛み、首を回したり傾けたりしにくくなる状態。急性の首の筋の痛みです。
+- [ぎっくり腰](https://work-outhingway.github.io/care-gikkuri.html): 物を持ち上げたり、体をひねったりした瞬間に、腰に強い痛みが走る状態。医学的には急性腰痛と呼ばれます。
+- [腰が曲がる(高齢者の円背)](https://work-outhingway.github.io/care-enpai.html): 年齢とともに背中や腰が丸まり、前かがみの姿勢になる状態。円背(えんぱい)とも呼ばれます。前に倒れそうな体を、膝を曲げて支えるようになります。
+- [O脚](https://work-outhingway.github.io/care-ojaku.html): 両足のかかとをそろえて立ったとき、両膝の間がすいてしまう状態。骨の形によるものと、姿勢や筋のバランスによるもの(機能的なO脚)があります。
+- [ガニ股](https://work-outhingway.github.io/care-ganimata.html): つま先と膝が外を向き、膝が少し曲がって脚が外に開いた立ち方・歩き方。骨盤が後ろに倒れた姿勢と一緒に見られることが多いです。
+- [内股(膝が内に入る)](https://work-outhingway.github.io/care-uchimata.html): 膝とつま先が内を向き、膝どうしが近づいた立ち方・歩き方。膝が内に入るため、膝の痛みや外反母趾につながることもあります。
+- [扁平足](https://work-outhingway.github.io/care-henpei.html): 足の裏の土踏まず(内側のアーチ)が低くなり、足の裏全体が床につく状態。疲れやすい、足の裏やすねが痛むなどの原因になります。
+- [外反母趾](https://work-outhingway.github.io/care-gaihan.html): 足の親指が、付け根から小指側へ「くの字」に曲がる状態。付け根の内側が出っぱり、靴に当たって痛みます。女性に多く見られます。
+- [開脚ができない](https://work-outhingway.github.io/care-kaikyaku.html): 床に座って脚を左右に開こうとしても大きく開けない、開くと上体が後ろに倒れてしまう状態。股関節まわりの筋の硬さが主な原因です。
+- [前屈で手が床につかない](https://work-outhingway.github.io/care-zenkutsu.html): 膝を伸ばしたまま前屈しても、手が床に届かない状態。もも裏やふくらはぎ、腰の筋の硬さが主な原因です。
+- [脚のむくみ・冷え](https://work-outhingway.github.io/care-mukumi.html): 夕方になると脚がむくむ、靴がきつくなる、足先が冷える状態。座りっぱなし・立ちっぱなしで、脚の血液や水分の流れが滞ることが主な原因です。
+- [野球肘](https://work-outhingway.github.io/care-yakyuhiji.html): ボールを投げる動作のくり返しで、肘の内側や外側が痛む状態。成長期の子どもに多く、放っておくと骨や軟骨が傷つくことがあります。
+- [産後の骨盤のゆるみ](https://work-outhingway.github.io/care-sango.html): 出産のあと、骨盤まわりが不安定になり、腰痛・恥骨や脚の付け根の痛み・尿もれ・お腹のたるみなどが起こりやすい状態。「骨盤矯正」と呼ばれるケアの多くは、骨盤を支える筋の働きを取り戻すことが中心です。
+- [尿もれ(骨盤底筋のゆるみ)](https://work-outhingway.github.io/care-nyomore.html): くしゃみや咳、重い物を持ったとき、走ったときなどに尿がもれてしまう状態(腹圧性尿失禁)。出産や加齢で骨盤底筋がゆるむことが大きな原因で、女性に多く見られます。
+
+## Optional
+
+- [この動きで使われる筋肉が一目瞭然。](https://work-outhingway.github.io/): 筋骨格アトラスは、骨と筋肉をタップで名前表示、層をはがし、関節を動かすと筋の伸び縮みが赤と青で見える3D解剖アトラスです。ブラウザだけで、無料でお試しできます(全機能は買い切り)。
+- [料金(筋骨格アトラス・トレーニング図鑑・ストレッチ図鑑・体の不調図鑑)](https://work-outhingway.github.io/pricing.html): 筋骨格アトラスの料金。どのアプリも約7割を無料で使えます。3D解剖アトラス ¥2,390、トレーニング図鑑 ¥1,000、ストレッチ図鑑 ¥1,000、体の不調図鑑 ¥1,000 の買い切り。
+- [このサイトについて](https://work-outhingway.github.io/about.html): 筋骨格アトラスの運営者情報と編集方針。3Dモデルの出典、トレーニング図鑑・ストレッチ図鑑で表示している「働く筋」「伸びる筋」の計算方法、参考にした文献、内容の更新と誤りの訂正について説明します。
+- [お問い合わせ](https://work-outhingway.github.io/contact.html): 筋骨格アトラスへのお問い合わせ先。内容の誤りのご指摘、使い方の質問、有料プランのお支払い・領収書、学校・団体でのご利用の相談はメールで受け付けています。
+- [プライバシーポリシー](https://work-outhingway.github.io/privacy.html): 
+- [利用規約](https://work-outhingway.github.io/terms.html): 
+- [特定商取引法に基づく表記](https://work-outhingway.github.io/tokushoho.html): 
