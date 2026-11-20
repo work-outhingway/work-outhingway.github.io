@@ -11442,6 +11442,18 @@ const DATA_URL = "models/data.f513af90d9.js", DATA_BYTES = 10395420;
       const wi = LIST.findIndex((t) => t.name === want);
       if (wi > 0) exBtns[wi].click();
       }
+    } else {
+      // 筋肉の解説ページからのリンク(atlas.html?m=pec、ref をカンマ区切り)はその筋と骨格だけを表示して選ぶ
+      const want = (new URLSearchParams(location.search).get('m') || '').split(',').filter(Boolean);
+      const list = want.length ? [...structs.values()].filter((s) => s.kind === 'muscle' && want.includes(s.ref)) : [];
+      if (list.length) {
+        setFocus(list);
+        const s = list[0];
+        select({ s, side: (s.meshes.find((m) => m.userData.side === 'r') || s.meshes[0]).userData.side });
+        // &v=back / side で、背中側の筋などは見やすい向きから
+        const v = new URLSearchParams(location.search).get('v');
+        if (v === 'back' || v === 'side') flyTo(Object.assign({}, VIEWS[v]));
+      }
     }
     poseDirty = true;
     buildLayerRows();

@@ -104,6 +104,67 @@
 - [産後の骨盤のゆるみ](https://work-outhingway.github.io/care-sango.html): 出産のあと、骨盤まわりが不安定になり、腰痛・恥骨や脚の付け根の痛み・尿もれ・お腹のたるみなどが起こりやすい状態。「骨盤矯正」と呼ばれるケアの多くは、骨盤を支える筋の働きを取り戻すことが中心です。
 - [尿もれ(骨盤底筋のゆるみ)](https://work-outhingway.github.io/care-nyomore.html): くしゃみや咳、重い物を持ったとき、走ったときなどに尿がもれてしまう状態(腹圧性尿失禁)。出産や加齢で骨盤底筋がゆるむことが大きな原因で、女性に多く見られます。
 
+## 筋肉図鑑(場所と働き・鍛え方・ストレッチ)
+
+- [筋肉一覧](https://work-outhingway.github.io/muscles.html): 大胸筋・広背筋・腸腰筋・大腿四頭筋・ハムストリングスなど主な筋肉の場所と働きを、3Dの骨格モデルの図で紹介。それぞれの筋肉を鍛える種目・伸ばすストレッチ・関係する不調もわかります。
+- [胸鎖乳突筋 きょうさにゅうとつきん](https://work-outhingway.github.io/mu-sternocleidomastoid.html): 胸鎖乳突筋(きょうさにゅうとつきん)は首の横から前にある筋肉です。伸ばすストレッチは首の横です。
+- [板状筋 ばんじょうきん](https://work-outhingway.github.io/mu-splenius.html): 板状筋(ばんじょうきん)は首の後ろにある筋肉です。伸ばすストレッチは首の横・キャット(背中を丸める)です。
+- [肩甲挙筋 けんこうきょきん](https://work-outhingway.github.io/mu-levator-scapulae.html): 肩甲挙筋(けんこうきょきん)は首の横から肩甲骨の上にある筋肉です。鍛える代表的な種目はシュラッグ、伸ばすストレッチは首の横です。
+- [僧帽筋 そうぼうきん](https://work-outhingway.github.io/mu-trapezius.html): 僧帽筋(そうぼうきん)は首の後ろから背中の上にある筋肉です。鍛える代表的な種目はシュラッグ・アップライトロウ、伸ばすストレッチは首の横です。
+- [広背筋 こうはいきん](https://work-outhingway.github.io/mu-latissimus-dorsi.html): 広背筋(こうはいきん)は背中の下から脇にある筋肉です。鍛える代表的な種目は懸垂・ラットプルダウン、伸ばすストレッチはチャイルドポーズです。
+- [菱形筋 りょうけいきん](https://work-outhingway.github.io/mu-rhomboid.html): 菱形筋(りょうけいきん)は左右の肩甲骨のあいだにある筋肉です。鍛える代表的な種目はベントオーバーロウ・シーテッドロー、伸ばすストレッチは肩甲骨はがし(背中を丸める)です。
+- [脊柱起立筋 せきちゅうきりつきん](https://work-outhingway.github.io/mu-erector-spinae.html): 脊柱起立筋(せきちゅうきりつきん)は背骨の両側にある筋肉です。鍛える代表的な種目はデッドリフト・バックエクステンション、伸ばすストレッチはキャット(背中を丸める)です。
+- [多裂筋 たれつきん](https://work-outhingway.github.io/mu-multifidus.html): 多裂筋(たれつきん)は背骨のすぐそばの奥にある筋肉です。鍛える代表的な種目はバックエクステンション・デッドリフト、伸ばすストレッチはキャット(背中を丸める)です。
+- [腰方形筋 ようほうけいきん](https://work-outhingway.github.io/mu-quadratus-lumborum.html): 腰方形筋(ようほうけいきん)は腰の奥にある筋肉です。伸ばすストレッチは体の横を伸ばすです。
+- [大胸筋 だいきょうきん](https://work-outhingway.github.io/mu-pectoralis-major.html): 大胸筋(だいきょうきん)は胸の前にある筋肉です。鍛える代表的な種目はベンチプレス・腕立て伏せ、伸ばすストレッチはドアで胸を伸ばすです。
+- [前鋸筋 ぜんきょきん](https://work-outhingway.github.io/mu-serratus-anterior.html): 前鋸筋(ぜんきょきん)はわきの下の肋骨の横にある筋肉です。鍛える代表的な種目は腕立て伏せ・ダンベルプルオーバーです。
+- [三角筋 さんかくきん](https://work-outhingway.github.io/mu-deltoid.html): 三角筋(さんかくきん)は肩を丸く覆う位置にある筋肉です。鍛える代表的な種目はショルダープレス・サイドレイズ、伸ばすストレッチは腕を胸の前で引くです。
+- [棘上筋 きょくじょうきん](https://work-outhingway.github.io/mu-supraspinatus.html): 棘上筋(きょくじょうきん)は肩甲骨の上にある筋肉です。鍛える代表的な種目はサイドレイズ・ショルダープレスです。
+- [棘下筋 きょくかきん](https://work-outhingway.github.io/mu-infraspinatus.html): 棘下筋(きょくかきん)は肩甲骨の後ろにある筋肉です。伸ばすストレッチは腕を胸の前で引くです。
+- [小円筋 しょうえんきん](https://work-outhingway.github.io/mu-teres-minor.html): 小円筋(しょうえんきん)は肩甲骨の外側のふちにある筋肉です。伸ばすストレッチは腕を胸の前で引くです。
+- [大円筋 だいえんきん](https://work-outhingway.github.io/mu-teres-major.html): 大円筋(だいえんきん)は肩甲骨の下の角から脇にある筋肉です。鍛える代表的な種目は懸垂・ラットプルダウン、伸ばすストレッチは頭の後ろで肘を引くです。
+- [上腕二頭筋 じょうわんにとうきん](https://work-outhingway.github.io/mu-biceps-brachii.html): 上腕二頭筋(じょうわんにとうきん)は二の腕の前(力こぶ)にある筋肉です。鍛える代表的な種目はアームカール・懸垂です。
+- [上腕筋 じょうわんきん](https://work-outhingway.github.io/mu-brachialis.html): 上腕筋(じょうわんきん)は二の腕の前の奥にある筋肉です。鍛える代表的な種目はアームカール・懸垂です。
+- [烏口腕筋 うこうわんきん](https://work-outhingway.github.io/mu-coracobrachialis.html): 烏口腕筋(うこうわんきん)は二の腕の内側の上にある筋肉です。鍛える代表的な種目はダンベルフライ・ペックフライ(マシン)、伸ばすストレッチはドアで胸を伸ばすです。
+- [上腕三頭筋 じょうわんさんとうきん](https://work-outhingway.github.io/mu-triceps-brachii.html): 上腕三頭筋(じょうわんさんとうきん)は二の腕の後ろにある筋肉です。鍛える代表的な種目はフレンチプレス・キックバック、伸ばすストレッチは頭の後ろで肘を引くです。
+- [腕橈骨筋 わんとうこつきん](https://work-outhingway.github.io/mu-brachioradialis.html): 腕橈骨筋(わんとうこつきん)は前腕の親指側にある筋肉です。鍛える代表的な種目はアームカール・懸垂です。
+- [橈側手根屈筋 とうそくしゅこんくっきん](https://work-outhingway.github.io/mu-flexor-carpi-radialis.html): 橈側手根屈筋(とうそくしゅこんくっきん)は前腕の手のひら側にある筋肉です。
+- [尺側手根屈筋 しゃくそくしゅこんくっきん](https://work-outhingway.github.io/mu-flexor-carpi-ulnaris.html): 尺側手根屈筋(しゃくそくしゅこんくっきん)は前腕の手のひら側の小指寄りにある筋肉です。
+- [橈側手根伸筋 とうそくしゅこんしんきん](https://work-outhingway.github.io/mu-extensor-carpi-radialis.html): 橈側手根伸筋(とうそくしゅこんしんきん)は前腕の手の甲側の親指寄りにある筋肉です。
+- [総指伸筋 そうししんきん](https://work-outhingway.github.io/mu-extensor-digitorum.html): 総指伸筋(そうししんきん)は前腕の手の甲側にある筋肉です。
+- [尺側手根伸筋 しゃくそくしゅこんしんきん](https://work-outhingway.github.io/mu-extensor-carpi-ulnaris.html): 尺側手根伸筋(しゃくそくしゅこんしんきん)は前腕の手の甲側の小指寄りにある筋肉です。
+- [腹直筋 ふくちょくきん](https://work-outhingway.github.io/mu-rectus-abdominis.html): 腹直筋(ふくちょくきん)はおなかの前にある筋肉です。鍛える代表的な種目はクランチ・レッグレイズ、伸ばすストレッチは上体を反らす(コブラ)です。
+- [外腹斜筋 がいふくしゃきん](https://work-outhingway.github.io/mu-external-oblique.html): 外腹斜筋(がいふくしゃきん)はわき腹の表面にある筋肉です。鍛える代表的な種目はクランチ・レッグレイズ、伸ばすストレッチは上体を反らす(コブラ)です。
+- [内腹斜筋 ないふくしゃきん](https://work-outhingway.github.io/mu-internal-oblique.html): 内腹斜筋(ないふくしゃきん)はわき腹(外腹斜筋の下)にある筋肉です。鍛える代表的な種目はクランチ・レッグレイズ、伸ばすストレッチは上体を反らす(コブラ)です。
+- [腹横筋 ふくおうきん](https://work-outhingway.github.io/mu-transversus-abdominis.html): 腹横筋(ふくおうきん)はおなかのいちばん奥にある筋肉です。
+- [腸腰筋 ちょうようきん](https://work-outhingway.github.io/mu-iliopsoas.html): 腸腰筋(ちょうようきん)はおなかの奥から太ももの付け根にある筋肉です。鍛える代表的な種目はレッグレイズ、伸ばすストレッチは腸腰筋(脚を後ろ)です。
+- [大殿筋 だいでんきん](https://work-outhingway.github.io/mu-gluteus-maximus.html): 大殿筋(だいでんきん)はお尻にある筋肉です。鍛える代表的な種目はスクワット・ヒップリフト、伸ばすストレッチは4の字(お尻)です。
+- [中殿筋 ちゅうでんきん](https://work-outhingway.github.io/mu-gluteus-medius.html): 中殿筋(ちゅうでんきん)はお尻の横の上にある筋肉です。鍛える代表的な種目はブルガリアンスクワット・ランジ、伸ばすストレッチは4の字(お尻)です。
+- [小殿筋 しょうでんきん](https://work-outhingway.github.io/mu-gluteus-minimus.html): 小殿筋(しょうでんきん)はお尻の横の奥にある筋肉です。鍛える代表的な種目はブルガリアンスクワット・ランジ、伸ばすストレッチは4の字(お尻)です。
+- [梨状筋 りじょうきん](https://work-outhingway.github.io/mu-piriformis.html): 梨状筋(りじょうきん)はお尻の奥にある筋肉です。伸ばすストレッチは4の字(お尻)です。
+- [大腿直筋 だいたいちょくきん](https://work-outhingway.github.io/mu-rectus-femoris.html): 大腿直筋(だいたいちょくきん)は太ももの前の中央にある筋肉です。鍛える代表的な種目はレッグエクステンション・スクワット、伸ばすストレッチは前ももです。
+- [外側広筋 がいそくこうきん](https://work-outhingway.github.io/mu-vastus-lateralis.html): 外側広筋(がいそくこうきん)は太ももの外側にある筋肉です。鍛える代表的な種目はスクワット・レッグエクステンション、伸ばすストレッチは前ももです。
+- [内側広筋 ないそくこうきん](https://work-outhingway.github.io/mu-vastus-medialis.html): 内側広筋(ないそくこうきん)は太ももの前の内側(膝の上)にある筋肉です。鍛える代表的な種目はスクワット・レッグエクステンション、伸ばすストレッチは前ももです。
+- [中間広筋 ちゅうかんこうきん](https://work-outhingway.github.io/mu-vastus-intermedius.html): 中間広筋(ちゅうかんこうきん)は太ももの前の奥にある筋肉です。鍛える代表的な種目はスクワット・レッグエクステンション、伸ばすストレッチは前ももです。
+- [大腿二頭筋 だいたいにとうきん](https://work-outhingway.github.io/mu-biceps-femoris.html): 大腿二頭筋(だいたいにとうきん)はもも裏の外側にある筋肉です。鍛える代表的な種目はレッグカール・ルーマニアンデッドリフト、伸ばすストレッチは寝てもも裏(タオル)です。
+- [半腱様筋 はんけんようきん](https://work-outhingway.github.io/mu-semitendinosus.html): 半腱様筋(はんけんようきん)はもも裏の内側にある筋肉です。鍛える代表的な種目はレッグカール・ルーマニアンデッドリフト、伸ばすストレッチは寝てもも裏(タオル)です。
+- [半膜様筋 はんまくようきん](https://work-outhingway.github.io/mu-semimembranosus.html): 半膜様筋(はんまくようきん)はもも裏の内側の奥にある筋肉です。鍛える代表的な種目はレッグカール・ルーマニアンデッドリフト、伸ばすストレッチは寝てもも裏(タオル)です。
+- [長内転筋 ちょうないてんきん](https://work-outhingway.github.io/mu-adductor-longus.html): 長内転筋(ちょうないてんきん)は内ももにある筋肉です。鍛える代表的な種目はスクワット・ランジ、伸ばすストレッチはフロッグ(カエル足)です。
+- [大内転筋 だいないてんきん](https://work-outhingway.github.io/mu-adductor-magnus.html): 大内転筋(だいないてんきん)は内ももの奥にある筋肉です。鍛える代表的な種目はスクワット・ルーマニアンデッドリフト、伸ばすストレッチはフロッグ(カエル足)です。
+- [薄筋 はっきん](https://work-outhingway.github.io/mu-gracilis.html): 薄筋(はっきん)は内もものいちばん内側にある筋肉です。伸ばすストレッチはフロッグ(カエル足)です。
+- [恥骨筋 ちこつきん](https://work-outhingway.github.io/mu-pectineus.html): 恥骨筋(ちこつきん)は太ももの付け根の内側にある筋肉です。伸ばすストレッチはフロッグ(カエル足)です。
+- [縫工筋 ほうこうきん](https://work-outhingway.github.io/mu-sartorius.html): 縫工筋(ほうこうきん)は太ももの前を斜めに横切る位置にある筋肉です。伸ばすストレッチは腸腰筋(脚を後ろ)です。
+- [腓腹筋 ひふくきん](https://work-outhingway.github.io/mu-gastrocnemius.html): 腓腹筋(ひふくきん)はふくらはぎにある筋肉です。鍛える代表的な種目はカーフレイズ、伸ばすストレッチはふくらはぎ(膝を伸ばす)です。
+- [ヒラメ筋 ひらめきん](https://work-outhingway.github.io/mu-soleus.html): ヒラメ筋(ひらめきん)はふくらはぎの奥にある筋肉です。鍛える代表的な種目はカーフレイズ、伸ばすストレッチはディープスクワット(しゃがみこみ)です。
+- [後脛骨筋 こうけいこつきん](https://work-outhingway.github.io/mu-tibialis-posterior.html): 後脛骨筋(こうけいこつきん)はふくらはぎのいちばん奥にある筋肉です。鍛える代表的な種目はカーフレイズです。
+- [前脛骨筋 ぜんけいこつきん](https://work-outhingway.github.io/mu-tibialis-anterior.html): 前脛骨筋(ぜんけいこつきん)はすねの外側にある筋肉です。
+- [長腓骨筋 ちょうひこつきん](https://work-outhingway.github.io/mu-peroneus-longus.html): 長腓骨筋(ちょうひこつきん)はすねの外側(ふくらはぎの横)にある筋肉です。鍛える代表的な種目はカーフレイズです。
+- [大腿四頭筋 だいたいしとうきん](https://work-outhingway.github.io/mu-quadriceps.html): 大腿四頭筋(だいたいしとうきん)は太ももの前にある4つの筋肉の総称で、膝を伸ばす働きをします。鍛える代表的な種目はスクワット・レッグエクステンション、伸ばすストレッチは前ももです。
+- [ハムストリングス はむすとりんぐす](https://work-outhingway.github.io/mu-hamstrings.html): ハムストリングス(はむすとりんぐす)はもも裏にある3つの筋肉の総称で、膝を曲げ、股関節を伸ばす働きをします。鍛える代表的な種目はレッグカール・ルーマニアンデッドリフト、伸ばすストレッチは寝てもも裏(タオル)です。
+- [下腿三頭筋 かたいさんとうきん](https://work-outhingway.github.io/mu-triceps-surae.html): 下腿三頭筋(かたいさんとうきん)はふくらはぎにある2つの筋肉の総称で、つま先立ちのように足首を伸ばす働きをします。鍛える代表的な種目はカーフレイズ、伸ばすストレッチはふくらはぎ(膝を伸ばす)です。
+- [内転筋群 ないてんきんぐん](https://work-outhingway.github.io/mu-adductors.html): 内転筋群(ないてんきんぐん)は内ももにある4つの筋肉の総称で、脚を内側に閉じる働きをします。鍛える代表的な種目はスクワット・ランジ、伸ばすストレッチはフロッグ(カエル足)です。
+- [回旋筋腱板(ローテーターカフ) かいせんきんけんばん](https://work-outhingway.github.io/mu-rotator-cuff.html): 回旋筋腱板(ローテーターカフ)(かいせんきんけんばん)は肩甲骨から肩の関節を包む位置にある3つの筋肉の総称で、肩の関節を安定させ、腕をひねる働きをします。伸ばすストレッチは腕を胸の前で引くです。
+
 ## Optional
 
 - [この動きで使われる筋肉が一目瞭然。](https://work-outhingway.github.io/): 筋骨格アトラスは、骨と筋肉をタップで名前表示、層をはがし、関節を動かすと筋の伸び縮みが赤と青で見える3D解剖アトラスです。ブラウザだけで、無料でお試しできます(全機能は買い切り)。

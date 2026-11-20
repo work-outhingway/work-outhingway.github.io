@@ -406,3 +406,11 @@ ul.ng li::before { content: "✕"; background: var(--contract); }
   .ex-card span { padding: 8px 10px 10px; } .ex-card b { font-size: 13.5px; } .ex-card small { font-size: 11.5px; }
   .tips { gap: 8px; } .tip { padding: 8px 12px; }
 }
+/* 筋肉の解説ページ */
+h1 .yomi { display: block; font-size: 14px; font-weight: 500; color: var(--ink-2); margin-top: 4px; letter-spacing: 0.04em; }
+.mu-facts { display: grid; grid-template-columns: 4.5em 1fr; gap: 8px 14px; margin: 0; max-width: 44em; }
+.mu-facts dt { font-weight: 700; color: var(--ink-2); font-size: 13.5px; padding-top: 1px; }
+.mu-facts dd { margin: 0; }
+.mu-links { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.mu-links a { border-radius: 999px; padding: 4px 12px; font-size: 13.5px; font-weight: 700; background: var(--chip); text-decoration: none; color: inherit; }
+.mu-links a:hover { background: color-mix(in srgb, var(--chip) 70%, var(--ink-2) 15%); }
